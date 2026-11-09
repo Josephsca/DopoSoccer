@@ -1,0 +1,11 @@
+# Archivos compilados (VS Code los vuelve a generar)
+bin/
+*.class
+
+# Log de errores del juego
+*.log
+
+# Archivos del sistema y del editor
+.vscode/
+.DS_Store
+Thumbs.db
