@@ -12,6 +12,7 @@ public class DopoSoccerException extends Exception {
     public static final String INVALID_STAT = "La estadística indicada no existe.";
     public static final String NOT_ENOUGH_POINTS = "El jugador no tiene puntos suficientes para esta mejora.";
     public static final String MAX_STAT_REACHED = "La estadística ya está en su valor máximo (10).";
+    public static final String POWER_CANNOT_BE_NULL = "El PowerShot no puede ser nulo.";
 
     /**
      * Constructs a new DopoSoccerException with the specified error message.

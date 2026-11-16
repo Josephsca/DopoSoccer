@@ -11,6 +11,8 @@ public class Ball extends Entity {
     private double radius;
     private double gravity;
     private Player powerShooter;
+    private double illusionRemaining;
+    private double illusionElapsed;
 
     /**
      * Constructs a new ball with its center positioned at (centerX, centerY).
@@ -31,6 +33,7 @@ public class Ball extends Entity {
      */
     @Override
     public void update() {
+        if (illusionRemaining > 0) { illusionRemaining = Math.max(0, illusionRemaining - Match.DT); illusionElapsed += Match.DT; }
         velY += gravity;
         velX *= AIR_FRICTION;
         posX += (int) Math.round(velX);
@@ -73,7 +76,13 @@ public class Ball extends Entity {
         velX = 0;
         velY = 0;
         powerShooter = null;
+        illusionRemaining = 0;
+        illusionElapsed = 0;
     }
+
+    public void activateIllusion(double seconds) { illusionRemaining = seconds; illusionElapsed = 0; }
+    public boolean hasIllusion() { return illusionRemaining > 0; }
+    public double getIllusionElapsed() { return illusionElapsed; }
 
     /**
      * Gets the radius of the ball.

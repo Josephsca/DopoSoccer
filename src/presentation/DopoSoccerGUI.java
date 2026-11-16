@@ -96,14 +96,14 @@ public class DopoSoccerGUI extends JFrame {
         c.insets = new Insets(8, 8, 8, 8);
         c.fill = GridBagConstraints.HORIZONTAL;
 
-        enterToPlay = new ArcadeButton("Enter to play");
-        soundButton = new ArcadeButton("Sonido: ON");
-        playerVsPlayer = new ArcadeButton("Jugador vs Jugador");
-        playerVsMachine = new ArcadeButton("Jugador vs Máquina");
-        backToMenu = new ArcadeButton("Back");
-        quickStart = new ArcadeButton("Start");
-        selectPlayers = new ArcadeButton("Select players");
-        backToMode = new ArcadeButton("Back");
+        enterToPlay = new Button("Entrar a jugar");
+        soundButton = new Button("Sonido: ON");
+        playerVsPlayer = new Button("Jugador vs Jugador");
+        playerVsMachine = new Button("Jugador vs Máquina");
+        backToMenu = new Button("Volver");
+        quickStart = new Button("Empezar");
+        selectPlayers = new Button("Seleccionar jugadores");
+        backToMode = new Button("Volver");
         panel.add(enterToPlay, c);
         panel.add(soundButton, c);
         panel.add(playerVsPlayer, c);
@@ -162,8 +162,8 @@ public class DopoSoccerGUI extends JFrame {
         options.add(resolution);
 
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 0));
-        back = new ArcadeButton("Back");
-        start = new ArcadeButton("Start");
+        back = new Button("Volver");
+        start = new Button("Empezar");
         buttons.add(back);
         buttons.add(start);
 
@@ -298,7 +298,7 @@ public class DopoSoccerGUI extends JFrame {
      */
     public void showPauseMenu() {
         game.pauseMatch();
-        String[] options = {"Return", "Save", "Finish"};
+        String[] options = {"Volver", "Guardar", "Finalizar"};
         int choice = JOptionPane.showOptionDialog(this, "Juego en pausa", "Pausa",
             JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
         if (choice == 1) {
@@ -320,13 +320,13 @@ public class DopoSoccerGUI extends JFrame {
         Player left = match.getLeftPlayer();
         Player right = match.getRightPlayer();
         Player winner = match.getWinner();
-        String title = winner == null ? "Empate" : "Winner: " + winner.getName();
+        String title = winner == null ? "Empate" : "Ganador: " + winner.getName();
         String message = title + "\n"
             + left.getName() + ": " + left.getScore() + "  -  " + right.getName() + ": " + right.getScore() + "\n\n"
             + "Puntos obtenidos:\n"
             + left.getName() + ": +" + left.getPoints() + "\n"
             + right.getName() + ": +" + right.getPoints();
-        String[] options = {"Play Again", "Main menu"};
+        String[] options = {"Jugar de nuevo", "Menú principal"};
         int choice = JOptionPane.showOptionDialog(this, message, "Fin del partido",
             JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
         if (choice == 0) {
