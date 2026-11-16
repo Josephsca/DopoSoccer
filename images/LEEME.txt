@@ -1,0 +1,26 @@
+IMÁGENES DEL JUEGO (todas en PNG)
+Si una imagen no existe, el juego usa la siguiente opción y al final dibuja una figura simple.
+
+ESTADIOS
+  images/stadiums/<Nombre>.png   cada archivo aparece en "Estadio" en la pantalla de configuración
+                                 (ej: images/stadiums/Nocturno.png -> opción "Nocturno")
+  images/stadium.png             fondo por defecto si no se elige ninguno
+  - Proporción 16:9 (ej: 1920 x 1080). Sirve para las tres resoluciones.
+  - El pasto (suelo) debe ocupar la franja de abajo: el 11 % inferior de la imagen.
+  - SIN arcos, SIN jugadores y SIN balón: eso lo dibuja el juego.
+
+PERSONAJES (una carpeta por país, con estos nombres exactos)
+  images/SouthKorea/   images/Cameroon/   images/Nigeria/   images/USA/
+  Dentro de cada carpeta:
+    idle.png     parado
+    walk1.png    caminando, paso 1
+    walk2.png    caminando, paso 2
+    jump.png     saltando
+    kick.png     pateando
+    stunned.png  aturdido / mareado
+  - Fondo transparente, de perfil MIRANDO A LA DERECHA (el jugador 2 se voltea solo).
+  - Todas las poses del mismo tamaño, proporción 5:8 (ej: 500 x 800), pies tocando el borde de abajo.
+  - Si solo tienen idle.png, se usa para todas las poses.
+
+BALÓN
+  images/ball.png   cuadrado, fondo transparente (ej: 256 x 256)
