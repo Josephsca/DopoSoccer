@@ -1,12 +1,6 @@
 package presentation;
 
-import domain.Ball;
-import domain.Goal;
-import domain.DopoSoccer;
-import domain.Match;
-import domain.Player;
-import domain.Stadium;
-import domain.TimeCondition;
+import domain.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -220,10 +214,21 @@ public class GamePanel extends JPanel {
 
         drawGoal(g2, match.getLeftGoal());
         drawGoal(g2, match.getRightGoal());
+        
         drawPlayer(g2, match.getLeftPlayer());
         drawPlayer(g2, match.getRightPlayer());
+
         drawBall(g2, match.getBall());
+
+        drawIllusionBalls(
+                g2,
+                match.getBall(),
+                match.getStadium()
+        );
+
+        // Draw the interface.
         drawHud(g2, match);
+
     }
 
     /**
@@ -280,6 +285,8 @@ public class GamePanel extends JPanel {
         String country = p.getCharacter().getCountry();
         Color[] colors = countryColors(country);
 
+
+
         if (p.hasAura()) {
             g.setColor(new Color(colors[0].getRed(), colors[0].getGreen(), colors[0].getBlue(), 110));
             g.fillOval(x - 8, y - 8, w + 8, h + 8);
@@ -301,7 +308,7 @@ public class GamePanel extends JPanel {
         int x = ball.getPosX();
         int y = ball.getPosY();
         int d = ball.getWidth();
-        if (ball.getPowerShooter() != null) {
+        if (ball.getPowerShooter() != null && !ball.hasIllusion()) {
             Color c = countryColors(ball.getPowerShooter().getCharacter().getCountry())[0];
             g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 140));
             g.fillOval(x - 8, y - 8, d + 16, d + 16);
@@ -317,6 +324,51 @@ public class GamePanel extends JPanel {
             g.fillOval(x + d / 3, y + d / 3, d / 3, d / 3);
         }
     }
+
+    /**
+     * Draws seven fake balls while the USA illusion is active.
+     * Fake balls are visual only and cannot score goals.
+     *
+     * @param g graphics context
+     * @param ball real ball
+     * @param stadium current stadium
+     */
+    private void drawIllusionBalls(
+            Graphics2D g,
+            Ball ball,
+            Stadium stadium) {
+
+        if (!ball.hasIllusion()) {
+            return;
+        }
+
+        int realX = ball.getPosX();
+        int diameter = ball.getWidth();
+
+        double time = ball.getIllusionElapsed();
+
+        BufferedImage image = getImage("ball");
+
+        for (int i = 0; i < 7; i++) {
+
+            int fakeX = realX + i * 25 + (int)(time * 20);
+
+            double rebote = Math.abs(Math.sin(time*6 + i));
+
+            int fakeY = stadium.getGroundY() - diameter - (int)(rebote * 40);
+
+            fakeX = Math.max(0, Math.min(fakeX, stadium.getWidth() - diameter));
+
+            if (image != null) {
+                g.drawImage(image, fakeX, fakeY,
+                            diameter, diameter, null);
+            } else {
+                g.setColor(Color.WHITE);
+            }
+    
+        }
+    }
+
 
     /**
      * Draws the score, match timer, player info bars, and pause overlay.
@@ -383,10 +435,10 @@ public class GamePanel extends JPanel {
         g.drawString(power, x + 12, 60);
 
         // estadísticas y puntos
-        g.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        g.setFont(new Font("SansSerif", Font.PLAIN, 8));
         try {
-            g.drawString("SPEED " + p.getStat("speed") + "  JUMP " + p.getStat("jump")
-                + "  KICK " + p.getStat("kick") + "  SURV " + p.getStat("survival"), x + 8, 78);
+            g.drawString("Velocidad: " + p.getStat("speed") + "  Salto: " + p.getStat("jump")
+                + "  Pase: " + p.getStat("kick") + "  Supervivencia: " + p.getStat("survival"), x + 8, 78);
         } catch (Exception e) {
         }
         g.drawString("Puntos: " + p.getPoints(), x + 8, 92);
@@ -431,7 +483,7 @@ public class GamePanel extends JPanel {
     private String effectName(String country) {
         switch (country) {
             case "SouthKorea": return "EMPUJADO";
-            case "Cameroon": return "ELECTROCUTADO";
+            case "Cameroon": return "ELECTROCUTADO";    
             case "Nigeria": return "INCONSCIENTE";
             case "USA": return "CONFUNDIDO";
             default: return "";

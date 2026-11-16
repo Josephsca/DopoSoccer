@@ -6,9 +6,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * Arcade-styled button. 
+ * Styled button. 
  */
-public class ArcadeButton extends JButton {
+public class Button extends JButton {
 
     private static final Color BACKGROUND = new Color(20, 20, 30);
     private static final Color HOVER = new Color(40, 50, 50);
@@ -20,7 +20,7 @@ public class ArcadeButton extends JButton {
      * Constructs a new arcade button with the specified text.
      * @param text the text displayed on the button
      */
-    public ArcadeButton(String text) {
+    public Button(String text) {
         super(text);
         mouseOver = false;
         setFont(new Font("Impact", Font.PLAIN, 22));        

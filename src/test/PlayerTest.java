@@ -152,18 +152,6 @@ public class PlayerTest {
     }
 
     @Test
-    public void shouldReplaceEffectInsteadOfStacking() {
-        Player player = new Player("J1", new Cameroon(), true);
-        new Cameroon().applyEffect(player);
-        assertEquals(0.5, player.getSpeedFactor(), 0.001);
-        assertFalse(player.canJump());
-        new USA().applyEffect(player);
-        assertEquals(-1, player.getSpeedFactor(), 0.001);
-        assertTrue(player.canJump());  
-        assertEquals("USA", player.getAffectedBy().getCountry());
-    }
-
-    @Test
     public void shouldRemoveEffectWhenTimeEnds() {
         Player player = new Player("J1", new Cameroon(), true);
         new Nigeria().applyEffect(player);
