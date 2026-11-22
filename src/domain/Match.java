@@ -1,10 +1,10 @@
 package domain;
-
+import java.io.Serializable;
 /**
  * Represents a match between two players. Contains the stadium, goals, and ball,
  * and uses a WinCondition to determine when the game ends.
  */
-public class Match {
+public class Match implements Serializable{
     public static final int FPS = 60;               
     public static final double DT = 1.0 / FPS;     
     public static final int WIN_POINTS = 100;
@@ -55,16 +55,30 @@ public class Match {
      */
     public void update() {
         if (isPaused || isFinished) return;
+
         timer++;
+
+        if (leftPlayer instanceof Machine) {
+            ((Machine) leftPlayer).decide(this);
+        }
+
+        if (rightPlayer instanceof Machine) {
+            ((Machine) rightPlayer).decide(this);
+        }
+
         leftPlayer.update();
         rightPlayer.update();
+
         ball.update();
-        separatePlayers();  
+
+        separatePlayers();
         stadium.keepInBounds(leftPlayer);
         stadium.keepInBounds(rightPlayer);
         stadium.keepInBounds(ball);
+
         checkCollisions();
         checkGoal();
+
         if (winCondition.isGameOver(this)) finish();
     }
 

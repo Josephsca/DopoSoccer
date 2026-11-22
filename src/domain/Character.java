@@ -1,7 +1,9 @@
 package domain;
 
+import java.io.Serializable;
+
 /** Country character: owns a replaceable special shot. */
-public abstract class Character {
+public abstract class Character implements Serializable {
     private final String country;
     private PowerShot powerShot;
 

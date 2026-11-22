@@ -13,6 +13,10 @@ public class DopoSoccerException extends Exception {
     public static final String NOT_ENOUGH_POINTS = "El jugador no tiene puntos suficientes para esta mejora.";
     public static final String MAX_STAT_REACHED = "La estadística ya está en su valor máximo (10).";
     public static final String POWER_CANNOT_BE_NULL = "El PowerShot no puede ser nulo.";
+    public static final String NO_ACTIVE_MATCH = "No existe una partida activa para guardar.";
+public static final String SAVE_ERROR = "Ocurrió un error al guardar la partida.";
+public static final String LOAD_ERROR = "Ocurrió un error al cargar la partida.";
+public static final String INVALID_SAVE_FILE = "El archivo seleccionado no contiene una partida válida.";
 
     /**
      * Constructs a new DopoSoccerException with the specified error message.
