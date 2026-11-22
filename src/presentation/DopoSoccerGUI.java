@@ -9,6 +9,9 @@ import domain.Stadium;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Main window of the game. It has three screens: menu, configuration, and match.
@@ -21,6 +24,7 @@ public class DopoSoccerGUI extends JFrame {
     private static final String GAME = "game";
     private static final String[] COUNTRY_NAMES = {"Corea del Sur", "Camerún", "Nigeria", "Estados Unidos"};
     private static final String[] RESOLUTIONS = {Stadium.SMALL, Stadium.MEDIUM, Stadium.LARGE};
+    private boolean againstMachine = false;
 
     private DopoSoccer game;
     private CardLayout cards;
@@ -36,17 +40,22 @@ public class DopoSoccerGUI extends JFrame {
     private JButton quickStart;
     private JButton backToMenu;
     private JButton backToMode;
+    private Button loadGameButton;
 
     // Configuration screen components
     private JTextField name1;
     private JTextField name2;
     private JComboBox<String> country1;
     private JComboBox<String> country2;
+    private JComboBox<String> machineSide;
+    private JComboBox<String> machineStrategy;
+    private JPanel machineOptions;
     private JComboBox<String> matchType;
     private JSpinner limit;
     private JComboBox<String> resolution;
     private JButton back;
     private JButton start;
+    
 
     /**
      * Constructs the main application window, initializes the game instance, and sets up UI elements and actions.
@@ -104,6 +113,7 @@ public class DopoSoccerGUI extends JFrame {
         quickStart = new Button("Empezar");
         selectPlayers = new Button("Seleccionar jugadores");
         backToMode = new Button("Volver");
+        loadGameButton = new Button("Cargar partida");
         panel.add(enterToPlay, c);
         panel.add(soundButton, c);
         panel.add(playerVsPlayer, c);
@@ -112,6 +122,7 @@ public class DopoSoccerGUI extends JFrame {
         panel.add(quickStart, c);
         panel.add(selectPlayers, c);
         panel.add(backToMode, c);
+        panel.add(loadGameButton, c);
         showMenuStep(0);
        return panel;
     }
@@ -129,6 +140,7 @@ public class DopoSoccerGUI extends JFrame {
         quickStart.setVisible(step == 2);
         selectPlayers.setVisible(step == 2);
         backToMode.setVisible(step == 2);
+        loadGameButton.setVisible(step == 0);
     }
 
     /**
@@ -151,6 +163,28 @@ public class DopoSoccerGUI extends JFrame {
 
         JPanel options = new JPanel(new GridLayout(3, 2, 10, 10));
         options.setBorder(BorderFactory.createTitledBorder("Partido"));
+
+        machineSide = new JComboBox<>(
+            new String[]{"Derecha", "Izquierda"}
+        );
+
+        machineStrategy = new JComboBox<>(
+            new String[]{"Torpe", "Ofensiva", "Defensiva", "Experta"}
+        );
+
+        machineOptions = new JPanel(new GridLayout(2, 2, 10, 10));
+        machineOptions.setBorder(
+            BorderFactory.createTitledBorder("Configuración de máquina")
+        );
+
+        machineOptions.add(new JLabel("Lado de la máquina:"));
+        machineOptions.add(machineSide);
+
+        machineOptions.add(new JLabel("Estrategia:"));
+        machineOptions.add(machineStrategy);
+
+        machineOptions.setVisible(false);
+
         matchType = new JComboBox<>(new String[]{"Por tiempo (minutos)", "Por goles"});
         limit = new JSpinner(new SpinnerNumberModel(2, 1, 20, 1));
         resolution = new JComboBox<>(RESOLUTIONS);
@@ -168,8 +202,11 @@ public class DopoSoccerGUI extends JFrame {
         buttons.add(start);
 
         panel.add(players, BorderLayout.NORTH);
-        JPanel optionsWrapper = new JPanel(new BorderLayout());
+        JPanel optionsWrapper = new JPanel(new BorderLayout(10, 10));
+
         optionsWrapper.add(options, BorderLayout.NORTH);
+        optionsWrapper.add(machineOptions, BorderLayout.CENTER);
+
         panel.add(optionsWrapper, BorderLayout.CENTER);
         panel.add(buttons, BorderLayout.SOUTH);
         return panel;
@@ -196,98 +233,154 @@ public class DopoSoccerGUI extends JFrame {
      * Registers all action listeners for menu buttons, configuration controls, and sound toggles.
      */
     private void prepareActions() {
-            enterToPlay.addActionListener(new java.awt.event.ActionListener() {
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    showMenuStep(1);
-                }
-            });
+        enterToPlay.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showMenuStep(1);
+            }
+        });
 
-            playerVsPlayer.addActionListener(new java.awt.event.ActionListener() {
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    showMenuStep(2);
-                }
-            });
+        playerVsPlayer.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                againstMachine = false;
+                machineOptions.setVisible(false);
+                showMenuStep(2);
+            }
+        });
 
-            playerVsMachine.addActionListener(new java.awt.event.ActionListener() {
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    JOptionPane.showMessageDialog(null,
-                        "Jugador vs Máquina está en construcción.",
-                        "En construcción", JOptionPane.INFORMATION_MESSAGE);
-                }
-            });
+        playerVsMachine.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                againstMachine = true;
+                machineOptions.setVisible(true);
+                showMenuStep(2);
+            }
+        });
 
-            quickStart.addActionListener(new java.awt.event.ActionListener() {
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    startMatch();
-                }
-            });
+        quickStart.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startMatch();
+            }
+        });
 
-            backToMenu.addActionListener(new java.awt.event.ActionListener() {
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    showMenuStep(0);
-                }
-            });
+        backToMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showMenuStep(0);
+            }
+        });
 
-            backToMode.addActionListener(new java.awt.event.ActionListener() {
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    showMenuStep(1);
-                }
-            });
+        backToMode.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showMenuStep(1);
+            }
+        });
 
-            selectPlayers.addActionListener(new java.awt.event.ActionListener() {
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    showScreen(CONFIG);
-                }
-            });
+        selectPlayers.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showScreen(CONFIG);
+            }
+        });
 
-            soundButton.addActionListener(new java.awt.event.ActionListener() {
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    game.toggleSound();
-                    if (game.isSound()) {
-                        soundButton.setText("Sonido: ON");
-                    } else {
-                        soundButton.setText("Sonido: OFF");
-                    }
+        soundButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                game.toggleSound();
+                if (game.isSound()) {
+                    soundButton.setText("Sonido: ON");
+                } else {
+                    soundButton.setText("Sonido: OFF");
                 }
-            });
+            }
+        });
 
-            back.addActionListener(new java.awt.event.ActionListener() {
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    showScreen(MENU);
-                }
-            });
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showScreen(MENU);
+            }
+        });
 
-            start.addActionListener(new java.awt.event.ActionListener() {
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    startMatch();
-                }
-            });
-        }
+        start.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startMatch();
+            }
+        });
+
+        loadGameButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadMatch();
+            }
+        });
+
+        
+    }
 
     /**
      * Creates the match with the chosen configuration and switches to the game screen view.
-     */
+     */    
     private void startMatch() {
         try {
-            String type = matchType.getSelectedIndex() == 0 ? DopoSoccer.TIME : DopoSoccer.GOALS;
-            game.startNewMatch(
-                name1.getText(), DopoSoccer.COUNTRIES[country1.getSelectedIndex()],
-                name2.getText(), DopoSoccer.COUNTRIES[country2.getSelectedIndex()],
-                type, (Integer) limit.getValue(), (String) resolution.getSelectedItem());
+            String type = matchType.getSelectedIndex() == 0
+                    ? DopoSoccer.TIME : DopoSoccer.GOALS;
+
+            String playerCountry =
+                    DopoSoccer.COUNTRIES[country1.getSelectedIndex()];
+
+            String rivalCountry =
+                    DopoSoccer.COUNTRIES[country2.getSelectedIndex()];
+
+            int matchLimit = (Integer) limit.getValue();
+
+            String stadiumSize = (String) resolution.getSelectedItem();
+
+            
+            if (againstMachine) {
+
+                boolean machineLeft =
+                    machineSide.getSelectedItem().equals("Izquierda");
+
+                String strategy =
+                    (String) machineStrategy.getSelectedItem();
+
+                game.startMachineMatch(
+                    name1.getText(),
+                    playerCountry,
+                    rivalCountry,
+                    type,
+                    matchLimit,
+                    stadiumSize,
+                    machineLeft,
+                    strategy
+                );
+
+            } else {
+                game.startNewMatch(
+                    name1.getText(),
+                    playerCountry,
+                    name2.getText(),
+                    rivalCountry,
+                    type,
+                    matchLimit,
+                    stadiumSize
+                );
+            }
+
             Stadium stadium = game.getCurrentMatch().getStadium();
-            gamePanel.setPreferredSize(new Dimension(stadium.getWidth(), stadium.getHeight()));
+
+            gamePanel.setPreferredSize(
+                new Dimension(stadium.getWidth(), stadium.getHeight())
+            );
+
             showScreen(GAME);
             gamePanel.start();
+
         } catch (DopoSoccerException e) {
             showError(e);
         }
@@ -296,20 +389,105 @@ public class DopoSoccerGUI extends JFrame {
     /**
      * Opens the pause menu allowing the user to return, save, or finish the match.
      */
+
     public void showPauseMenu() {
         game.pauseMatch();
+
         String[] options = {"Volver", "Guardar", "Finalizar"};
-        int choice = JOptionPane.showOptionDialog(this, "Juego en pausa", "Pausa",
-            JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+
+        int choice = JOptionPane.showOptionDialog(
+            this, "Juego en pausa", "Pausa",
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.PLAIN_MESSAGE,
+            null, options, options[0]
+        );
+
         if (choice == 1) {
-            JOptionPane.showMessageDialog(this, "Guardar partidas está en construcción.");
-            showPauseMenu();
+            JFileChooser chooser = new JFileChooser();
+            int result = chooser.showSaveDialog(this);
+
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File file = chooser.getSelectedFile();
+
+                if (!file.getName().toLowerCase().endsWith(".dat")) {
+                    file = new File(file.getAbsolutePath() + ".dat");
+                }
+
+                
+                boolean guardar = true;
+
+                if (file.exists()) {
+                    int confirm = JOptionPane.showConfirmDialog(
+                        this,
+                        "El archivo ya existe. ¿Deseas reemplazarlo?",
+                        "Confirmar guardado",
+                        JOptionPane.YES_NO_OPTION
+                    );
+
+                    if (confirm != JOptionPane.YES_OPTION) {
+                        guardar = false;
+                    }
+                }
+
+                if (guardar) {
+                    try {
+                        game.saveGame(file.getAbsolutePath());
+
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "Partida guardada correctamente."
+                        );
+
+                    } catch (DopoSoccerException e) {
+                        showError(e);
+                    }
+                }
+            }
+
         } else if (choice == 2) {
             game.finishMatch();
-        } else {
-            game.resumeMatch();
+            gamePanel.requestFocusInWindow();
+            return;
         }
+
+        game.resumeMatch();
         gamePanel.requestFocusInWindow();
+    }
+
+
+    
+    private void loadMatch() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Cargar partida");
+
+        int result = chooser.showOpenDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+
+            try {
+                game.loadGame(file.getAbsolutePath());
+
+                Stadium stadium = game.getCurrentMatch().getStadium();
+
+                gamePanel.setPreferredSize(
+                    new Dimension(
+                        stadium.getWidth(),
+                        stadium.getHeight()
+                    )
+                );
+
+                showScreen(GAME);
+
+                game.resumeMatch();
+
+                gamePanel.start();
+                gamePanel.requestFocusInWindow();
+
+            } catch (DopoSoccerException e) {
+                showError(e);
+            }
+        }
     }
 
     /**

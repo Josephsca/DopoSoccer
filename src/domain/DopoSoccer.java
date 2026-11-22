@@ -1,5 +1,11 @@
 package domain;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 /**
  * Clase principal del dominio. La interfaz gráfica solo habla con esta clase.
  * Los jugadores se identifican como 1 (izquierda) y 2 (derecha).
@@ -40,6 +46,73 @@ public class DopoSoccer {
     }
 
     /**
+     * Creates a Player versus Machine match.
+     *
+     * @param playerName human player's name
+     * @param playerCountry human player's country
+     * @param machineCountry machine's country
+     * @param matchType winning condition type
+     * @param limit time or goal limit
+     * @param resolution stadium size
+     * @throws DopoSoccerException if the configuration is invalid
+     */
+
+    public void startMachineMatch(String playerName, String playerCountry, String machineCountry, String matchType, int limit, String resolution, boolean machineLeft, String strategy) throws DopoSoccerException {
+
+        Stadium stadium = new Stadium(resolution);
+        WinCondition condition = createWinCondition(matchType, limit);
+
+        MachineStrategy machineStrategy;
+
+        switch (strategy) {
+            case "Torpe":
+                machineStrategy = new ClumsyStrategy();
+                break;
+
+            case "Ofensiva":
+                machineStrategy = new OffensiveStrategy();
+                break;
+
+            case "Defensiva":
+                machineStrategy = new DefensiveStrategy();
+                break;
+
+            case "Experta":
+                machineStrategy = new ExpertStrategy();
+                break;
+
+            default:
+                throw new IllegalArgumentException(
+                    "Estrategia no válida: " + strategy
+                );
+        }
+
+        Player human = new Player(
+            defaultName(playerName, "Jugador"),
+            createCharacter(playerCountry),
+            !machineLeft
+        );
+
+        Machine machine = new Machine(
+            "Máquina " + strategy,
+            createCharacter(machineCountry),
+            machineLeft,
+            machineStrategy
+        );
+
+        if (machineLeft) {
+            currentMatch = new Match(
+                machine, human, stadium, condition
+            );
+        } else {
+            currentMatch = new Match(
+                human, machine, stadium, condition
+            );
+        }
+    }
+
+
+    /**
      * Pauses the currently active match.
      */
     public void pauseMatch() {
@@ -60,21 +133,61 @@ public class DopoSoccer {
         if (currentMatch != null) currentMatch.finish();
     }
 
-    /**
-     * Saves the current game state to a file.
-     * @param filePath the path where the game file will be saved
-     * @return true if the game was successfully saved, false otherwise
-     */
-    public boolean saveGame(String filePath) {
-        return false;
+    public boolean saveGame(String filePath) throws DopoSoccerException {
+        if (currentMatch == null) {
+            throw new DopoSoccerException(DopoSoccerException.NO_ACTIVE_MATCH);
+        }
+
+        ObjectOutputStream output = null;
+
+        try {
+            output = new ObjectOutputStream(new FileOutputStream(filePath));
+            output.writeObject(currentMatch);
+            return true;
+
+        } catch (IOException e) {
+            throw new DopoSoccerException(DopoSoccerException.SAVE_ERROR);
+
+        } finally {
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException e) {
+                    System.err.println("Error al cerrar el archivo: " + e.getMessage());
+                }
+            }
+        }
     }
 
-    /**
-     * Loads a saved game state from a file.
-     * @param filePath the path of the saved game file to load
-     */
-    public void loadGame(String filePath) {
+    public void loadGame(String filePath) throws DopoSoccerException {
+        ObjectInputStream input = null;
+
+        try {
+            input = new ObjectInputStream(new FileInputStream(filePath));
+
+            Object data = input.readObject();
+
+            if (!(data instanceof Match)) {
+                throw new DopoSoccerException("El archivo no contiene una partida válida");
+            }
+
+            currentMatch = (Match) data;
+
+        } catch (IOException | ClassNotFoundException e) {
+            throw new DopoSoccerException("Error al cargar la partida: " + e.getMessage());
+
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    System.err.println("Error al cerrar el archivo: " + e.getMessage());
+                }
+            }
+        }
     }
+
+
 
     /**
      * Gets the currently active match. 
@@ -90,38 +203,53 @@ public class DopoSoccer {
     public void update() {
         if (currentMatch != null) currentMatch.update();
     }
-
+    
     /**
-     * Moves the specified player to the left.
-     * @param player the identifier of the player (1 for left, 2 for right)
+     * Moves the specified human player to the left.
+     * @param player the identifier of the player
      */
     public void moveLeft(int player) {
-        if (getPlayer(player) != null) getPlayer(player).moveLeft();
+        Player p = getPlayer(player);
+
+        if (p == null || p instanceof Machine) return;
+
+        p.moveLeft();
     }
 
     /**
-     * Moves the specified player to the right.
-     * @param player the identifier of the player (1 for left, 2 for right)
+     * Moves the specified human player to the right.
+     * @param player the identifier of the player
      */
     public void moveRight(int player) {
-        if (getPlayer(player) != null) getPlayer(player).moveRight();
+        Player p = getPlayer(player);
+
+        if (p == null || p instanceof Machine) return;
+
+        p.moveRight();
     }
 
     /**
-     * Makes the specified player jump.
-     * @param player the identifier of the player (1 for left, 2 for right)
+     * Makes the specified human player jump.
+     * @param player the identifier of the player
      */
     public void jump(int player) {
-        if (getPlayer(player) != null) getPlayer(player).jump();
+        Player p = getPlayer(player);
+
+        if (p == null || p instanceof Machine) return;
+
+        p.jump();
     }
 
     /**
-     * Makes the specified player kick the ball toward the rival.
-     * @param player the identifier of the player (1 for left, 2 for right)
+     * Makes the specified human player kick.
+     * @param player the identifier of the player
      */
     public void kick(int player) {
         Player p = getPlayer(player);
-        if (p != null) p.kick(currentMatch.getRival(p), currentMatch.getBall());
+
+        if (p == null || p instanceof Machine) return;
+
+        p.kick(currentMatch.getRival(p), currentMatch.getBall());
     }
 
     /**
@@ -129,7 +257,9 @@ public class DopoSoccer {
      * @param player the identifier of the player (1 for left, 2 for right)
      */
     public void activatePower(int player) {
-        if (getPlayer(player) != null) getPlayer(player).activatePower();
+        Player p = getPlayer(player);
+        if (p == null || p instanceof Machine) return;
+        p.activatePower();
     }
 
     /**

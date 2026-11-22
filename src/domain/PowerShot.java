@@ -1,9 +1,11 @@
 package domain;
 
+import java.io.Serializable;
+
 /**
  * Represents a special shot that can be used by a character.
  */
-public abstract class PowerShot {
+public abstract class PowerShot implements Serializable{
     private final String name;
     private final int damage;
     private final double duration;
