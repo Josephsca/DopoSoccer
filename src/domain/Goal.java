@@ -1,9 +1,11 @@
 package domain;
 
+import java.io.Serializable;
+
 /**
  * Represents a goal located on one side of the stadium.
  */
-public class Goal {
+public class Goal implements Serializable{
 
     private int posX;
     private int posY;

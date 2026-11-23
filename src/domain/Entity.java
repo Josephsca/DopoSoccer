@@ -1,10 +1,12 @@
 package domain;
+import java.io.Serializable;
+
 /**
  * Represents a game entity that occupies a rectangular area on the field and can move.
  * Player and Ball inherit from this class.
  * The Y axis grows downward (as on a screen).
  */
-public abstract class Entity {
+public abstract class Entity implements Serializable {
 
     protected int posX;
     protected int posY;

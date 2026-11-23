@@ -1,5 +1,6 @@
 package domain;
 
+/** South Korea: straight fast shot that pushes the rival towards his own goal. */
 public class BlueAura extends PowerShot {
     public static final int PUSH_DISTANCE = 150;
     public BlueAura() { 

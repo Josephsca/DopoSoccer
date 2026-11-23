@@ -1,177 +1,83 @@
 # DopoSoccer
 
-**Juego de fútbol 2D desarrollado en Java con interfaz gráfica Swing.**
+Juego de fútbol 2D hecho en Java (Swing), inspirado en Head Soccer.  
+Proyecto final de Desarrollo Orientado por Objetos (DOPO 2026-2) — Escuela Colombiana de Ingeniería.
 
-DopoSoccer es un juego inspirado en Head Soccer en el que dos jugadores controlan personajes de diferentes países. Cada personaje cuenta con estadísticas, una barra de energía y un tiro especial.
+**Autores:** Cañon – Paez
 
-El objetivo es marcar más goles que el rival antes de que termine el tiempo o alcanzar primero la cantidad de goles establecida.
+## Compilación y ejecución
 
-## 1. Tecnologías utilizadas
+Todos los comandos deben ejecutarse desde la carpeta raíz del proyecto (`DopoSoccer`) para que carguen las imágenes y los archivos de datos se guarden en la ruta correcta.
 
-- **Lenguaje:** Java.
-- **Interfaz gráfica:** Java Swing y Java AWT.
-- **Arquitectura:** separación entre presentación y dominio.
-- **Pruebas:** JUnit.
-- **Recursos gráficos:** imágenes PNG y JPG.
+```powershell
+# Limpiar compilación previa (en cmd: rmdir /s /q bin && mkdir bin)
+Remove-Item -Recurse -Force bin -ErrorAction SilentlyContinue
+mkdir bin
 
-## 2. Controles
+# Compilar dominio, presentación y pruebas
+javac -encoding UTF-8 -d bin -cp "lib/*" -sourcepath src src/domain/*.java src/presentation/*.java src/test/*.java
+
+# Correr pruebas unitarias (JUnit 5)
+java -cp "bin;lib/*" org.junit.platform.console.ConsoleLauncher execute --scan-class-path
+
+# Ejecutar el juego
+java -cp bin presentation.DopoSoccerGUI
+```
+
+> En Linux o macOS, usa `:` en lugar de `;` en el classpath.
+
+## Controles
 
 | Acción | Jugador 1 | Jugador 2 |
 |---|---|---|
-| Mover a la izquierda | A | ← |
-| Mover a la derecha | D | → |
-| Saltar | W | ↑ |
-| Patear | S | ↓ |
-| Activar poder | Q | Ctrl derecho |
-| Pausar | P / Esc | P / Esc |
+| Mover izquierda | `A` | `←` |
+| Mover derecha | `D` | `→` |
+| Saltar | `W` | `↑` |
+| Patear | `S` | `↓` |
+| Activar poder | `Q` | `Ctrl derecho` |
+| Pausar | `P` / `Esc` | `P` / `Esc` |
 
-Los poderes especiales requieren energía suficiente para activarse.
+## Qué incluye el juego
 
-## 3. Configuración de partidas
+- **Modos de partido:** 1 vs 1 local o contra la máquina (se escoge lado y perfil). Se puede jugar por tiempo (con muerte súbita si hay empate) o por límite de goles, en resolución `SMALL` (800×450), `MEDIUM` (1024×576) o `LARGE` (1280×720).
+- **Personajes y poderes:** La barra de poder se llena en 10 s y suma 25 % al recibir un gol. Con la barra completa se activa el aura y el siguiente toque al balón lanza el tiro de poder (el efecto nuevo reemplaza al anterior; si el tiro no impacta al rival, no hace daño):
+  - **Corea del Sur (`BlueAura`):** empuja al rival hacia su propio arco (1,5 s | 40 de daño).
+  - **Camerún (`LightningShot`):** impide saltar y reduce la velocidad al 50 % (3 s | 60 de daño).
+  - **Nigeria (`TornadoShot`):** eleva al rival sin dejarlo moverse, saltar ni patear (3 s | 40 de daño).
+  - **Estados Unidos (`IllusionShot`):** genera 8 balones en cancha donde solo uno es real (2,5 s | 30 de daño).
+- **Combate y estadísticas:** La patada normal tiene un cooldown de 0,3 s y solo daña si no golpea el balón (`10 × multiplicadorKick`). Al llegar a 0 de vida el jugador queda aturdido 3 s. Las estadísticas escalan con `vidaMax = 100(1 + 0,10(Survival - 1))` y `multiplicadorKick = 1 + 0,10(Kick - 1)`.
+- **Perfiles de máquina:**
+  - `ClumsyStrategy` (Torpe): elige movimientos al azar.
+  - `OffensiveStrategy` (Ofensiva): persigue el balón y patea hacia el arco rival.
+  - `DefensiveStrategy` (Defensiva): se mantiene cubriendo su arco.
+  - `ExpertStrategy` (Experta): ataca si el rival está aturdido, defiende su mitad si va ganando y protege cerca del arco si va empatando o perdiendo.
+- **Progreso y mejoras:** Al finalizar un partido el ganador recibe 100 puntos y el perdedor 25. Los perfiles se guardan por nombre en `progreso.dat` (ambos jugadores deben tener nombres distintos; las máquinas no guardan progreso). Desde **Mejoras** en el menú principal se suben `speed`, `jump`, `kick` y `survival` hasta nivel 10 (el primer nivel cuesta 500 puntos y el precio se duplica en cada mejora).
+- **Guardado de partidas:** Desde el menú de pausa se guarda el partido en un archivo `.dat` para reanudarlo luego desde el menú principal. Cargar una partida vieja no sobreescribe los puntos ni las mejoras acumuladas después.
 
-El juego permite configurar:
+## Estructura del proyecto
 
-- Nombre de ambos jugadores.
-- País y personaje de cada jugador.
-- Tipo de partida: por tiempo o por goles.
-- Duración de la partida o cantidad de goles necesarios para ganar.
-- Resolución de la cancha.
+```text
+DopoSoccer/
+├── src/
+│   ├── domain/        # Lógica del juego, física, IA, persistencia y excepciones
+│   ├── presentation/  # Interfaz en Swing (DopoSoccerGUI, GamePanel, Button)
+│   └── test/          # 73 pruebas unitarias en JUnit 5 (DopoSoccer, Match, Player, Stadium)
+├── images/            # Sprites y recursos gráficos
+├── lib/               # Librerías externas (JUnit 5)
+├── docs/              # Javadoc
+└── DopoSoccer5.06.asta # Diagrama de clases y diagramas de secuencia (Astah)
+```
 
-También cuenta con una opción de inicio rápido que utiliza la configuración disponible.
+### Notas de arquitectura
 
-## 4. Mecánicas del juego
+- `DopoSoccer` es el único punto de entrada entre la interfaz y el dominio. Siempre mantiene un `Match` instanciado (arranca en pausa) para evitar comprobaciones de `null`.
+- El desplazamiento valida colisiones con `Match.willCollide` antes de mover al jugador para evitar que se atraviesen; `separatePlayers` queda como respaldo para saltos o empujes por poder.
+- Para extender el juego basta con heredar o implementar `Character`, `PowerShot`, `MachineStrategy` o `WinCondition`.
+- Las excepciones de dominio se manejan con `DopoSoccerException` y se registran en `DopoSoccer.log`.
 
-### Movimiento y física
+## Archivos generados en ejecución
 
-Los jugadores pueden desplazarse horizontalmente, saltar y patear el balón.
+- `progreso.dat`: puntos y estadísticas guardadas por jugador.
+- `*.dat`: partidas guardadas por el usuario.
+- `DopoSoccer.log`: registro de errores y excepciones.
 
-El balón cuenta con movimiento, gravedad, rebotes y detección de goles.
-
-### Sistema de combate
-
-Cada jugador dispone de:
-
-- Vida.
-- Estado de aturdimiento.
-- Barra de energía.
-- Aura visual al activar determinados poderes.
-- Tiro especial asociado a su personaje.
-
-### Finalización del partido
-
-El partido puede terminar por tiempo o por alcanzar el límite de goles.
-
-El juego determina el ganador y muestra el marcador y los puntos obtenidos. También contempla la muerte súbita para resolver empates según las reglas del partido.
-
-**Los puntos se muestran al finalizar, pero su almacenamiento permanente todavía está pendiente.**
-
-## 5. Personajes y poderes especiales
-
-El juego incluye cuatro países:
-
-| País | Poder |
-|---|---|
-| Corea del Sur | `BlueAura` |
-| Camerún | `LightningShot` |
-| Nigeria | `TornadoShot` |
-| Estados Unidos | `IllusionShot` |
-
-Los poderes se implementan mediante clases que heredan de `PowerShot`.
-
-### Ilusión de Estados Unidos
-
-El poder de Estados Unidos genera una ilusión de ocho balones en pantalla:
-
-- Un balón es real.
-- Siete balones son copias visuales.
-- Las copias se desplazan y simulan rebotes.
-- Únicamente el balón real participa en las colisiones y puede marcar goles.
-- Las copias desaparecen cuando finaliza la duración del poder.
-
-La activación del efecto corresponde a `IllusionShot`, su estado se administra en `Ball` y su representación gráfica se realiza en `GamePanel`.
-
-## 6. Interfaz gráfica
-
-La aplicación contiene tres pantallas principales:
-
-**Menú principal:** permite navegar entre las opciones de juego, seleccionar el modo y controlar el sonido.
-
-**Configuración:** permite seleccionar jugadores, personajes y condiciones del partido.
-
-**Partido:** muestra el estadio, los personajes, el balón, el marcador, las barras de vida y energía y los efectos de los poderes.
-
-## 7. Organización del código
-
-### Dominio (`domain`)
-
-Contiene las clases responsables de las reglas y del estado del juego.
-
-Entre ellas:
-
-- `DopoSoccer`: acceso principal a las operaciones del juego.
-- `Match`: administración del partido.
-- `Player`: información y estado de los jugadores.
-- `Ball`: movimiento y estado del balón.
-- `Stadium`: dimensiones y características de la cancha.
-- `GameCharacter`: personajes y sus características.
-- `PowerShot`: clase base de los tiros especiales.
-- `DopoSoccerException`: manejo de errores del dominio.
-- `Log`: registro de errores.
-
-### Presentación (`presentation`)
-
-Contiene la interfaz gráfica.
-
-- `DopoSoccerGUI`: ventana principal, menú y configuración.
-- `GamePanel`: representación gráfica del partido, jugadores, balón y efectos especiales.
-
-El proyecto se encuentra en proceso de separación de responsabilidades para que los controladores gestionen las entradas y el flujo del juego sin concentrar toda la lógica en la interfaz.
-
-## 8. Pruebas
-
-El proyecto contempla pruebas unitarias con JUnit 5.
-
-La ubicación prevista es:
-
-`src/test/`
-
-Para ejecutarlas en Visual Studio Code se requiere la extensión de pruebas de Java y las dependencias de JUnit 5 correctamente configuradas.
-
-La disponibilidad y ejecución de las pruebas deben verificarse en la versión actual del proyecto.
-
-## 9. Funcionalidades pendientes
-
-### Persistencia
-
-- Guardar el estado de una partida.
-- Abrir una partida guardada y continuar desde ese punto.
-- Almacenar los puntos acumulados por jugador.
-- Conservar las mejoras de estadísticas entre partidas.
-
-### Jugador contra máquina
-
-Implementar el modo Jugador vs Máquina con diferentes comportamientos de inteligencia artificial:
-
-- Torpe.
-- Ofensiva.
-- Defensiva.
-- Experta.
-
-### Mejoras de personajes
-
-Agregar una pantalla para invertir puntos en estadísticas mediante la funcionalidad `upgradeStat` del dominio.
-
-### Arquitectura y mantenimiento
-
-- Completar la separación MVC.
-- Centralizar el manejo del teclado en controladores.
-- Separar la actualización de la física del dibujo de la interfaz.
-- Ampliar las pruebas unitarias.
-
-## 10. Estado del proyecto
-
-**Versión actual: desarrollo en progreso.**
-
-El juego cuenta con una base funcional para partidas entre dos jugadores, selección de personajes, sistema de goles, poderes especiales y representación gráfica.
-
-Las siguientes etapas se enfocarán implementar la persistencia y desarrollar el modo contra la máquina.

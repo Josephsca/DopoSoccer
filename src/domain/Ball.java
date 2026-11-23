@@ -63,6 +63,10 @@ public class Ball extends Entity {
     @Override
     public void hitBoundary(double normalX, double normalY) {
         bounce(normalX, normalY);
+        // si el tiro de poder llega a una pared lateral es porque no tocó al rival: el tiro se acaba
+        if (normalX != 0) {
+            powerShooter = null;
+        }
     }
 
     /**
@@ -80,8 +84,20 @@ public class Ball extends Entity {
         illusionElapsed = 0;
     }
 
+    /**
+     * Starts the illusion of the USA power: 8 balls are drawn for some seconds.
+     * @param seconds how long the illusion lasts
+     */
     public void activateIllusion(double seconds) { illusionRemaining = seconds; illusionElapsed = 0; }
+    /**
+     * Checks whether the illusion is active.
+     * @return true while the 8 balls are shown
+     */
     public boolean hasIllusion() { return illusionRemaining > 0; }
+    /**
+     * Gets how many seconds have passed since the illusion started (used to draw the fake balls).
+     * @return the elapsed seconds
+     */
     public double getIllusionElapsed() { return illusionElapsed; }
 
     /**

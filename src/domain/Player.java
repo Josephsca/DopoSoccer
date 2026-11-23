@@ -19,6 +19,8 @@ public class Player extends Entity {
     public static final double BASE_JUMP = 13;
     public static final double GRAVITY = 0.7;
     public static final int KICK_REACH = 25;
+    /** Segundos que dura una patada: se ve la pose de patear y no se puede volver a patear. */
+    public static final double KICK_TIME = 0.3;
     private String name;
     private int score;
     private boolean isJumping;
@@ -27,11 +29,13 @@ public class Player extends Entity {
     private boolean hasAura;
     private double stunTime;
     private double effectTime;
+    private double kickTime;
     private int speed;
     private int jumpStat;
     private int kickStat;
     private int survival;
     private int points;
+    private int matchPoints;
     private boolean leftSide; 
     private double speedFactor;     
     private boolean canMove;
@@ -63,9 +67,11 @@ public class Player extends Entity {
      */
     public void startMatch() {
         score = 0;
+        matchPoints = 0;
         powerBar = 0;
         hasAura = false;
         stunTime = 0;
+        kickTime = 0;
         life = getMaxLife();
         clearEffect();
     }
@@ -87,6 +93,9 @@ public class Player extends Entity {
             if (effectTime <= 0) clearEffect();
         }
         chargePowerBar(Match.DT);
+        if (kickTime > 0) {
+            kickTime = Math.max(0, kickTime - Match.DT);
+        }
 
         velY += GRAVITY;
         posX += (int) Math.round(velX);
@@ -137,7 +146,8 @@ public class Player extends Entity {
      * @param ball the match ball
      */
     public void kick(Player rival, Ball ball) {
-        if (!canAct()) return;
+        if (!canAct() || isKicking()) return;   // no se puede patear otra vez hasta que termine la patada
+        kickTime = KICK_TIME;
         if (inReach(ball) && (ball.getCenterX() - getCenterX()) * getAttackDirection() >= 0) {
             if (hasAura) {
                 firePower(ball);
@@ -293,6 +303,29 @@ public class Player extends Entity {
      */
     public void addPoints(int newPoints) {
         points += newPoints;
+        matchPoints += newPoints;
+    }
+
+    /**
+     * Copies the saved progress (points and stats) of another player into this one.
+     * It is used to keep the progress of a player between matches.
+     * @param saved the player with the saved progress
+     */
+    public void copyProgress(Player saved) {
+        points = saved.points;
+        speed = saved.speed;
+        jumpStat = saved.jumpStat;
+        kickStat = saved.kickStat;
+        survival = saved.survival;
+        life = getMaxLife();
+    }
+
+    /**
+     * Gets how many pixels the player moves in one frame (depends on speed and effects).
+     * @return the size of one step
+     */
+    public int getStep() {
+        return (int) Math.round(getMoveSpeed() * speedFactor);
     }
 
     /**
@@ -434,6 +467,12 @@ public class Player extends Entity {
     public int getPoints() { return points; }
 
     /**
+     * Gets the points earned in the current match only.
+     * @return the points earned in this match
+     */
+    public int getMatchPoints() { return matchPoints; }
+
+    /**
      * Checks whether the player is on the left side of the field.
      * @return true if on the left side, false otherwise
      */
@@ -473,7 +512,7 @@ public class Player extends Entity {
      * Checks whether the player is currently moving or kicking.
      * @return true if moving horizontally, false otherwise
      */
-    public boolean isKicking() { return velX != 0; }
+    public boolean isKicking() { return kickTime > 0; }
 
     /**
      * Sets whether movement is permitted.

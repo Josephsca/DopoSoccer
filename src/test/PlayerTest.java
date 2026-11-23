@@ -160,4 +160,145 @@ public class PlayerTest {
         assertTrue(player.canMove());
         assertNull(player.getAffectedBy());
     }
+
+    @Test
+    public void shouldCopyProgressFromSavedPlayer() throws DopoSoccerException {
+        Player saved = new Player("J1", new Cameroon(), true);
+        saved.addPoints(500);
+        saved.upgradeStat("survival");
+        saved.addPoints(300);
+        Player newPlayer = new Player("J1", new USA(), true);
+        newPlayer.copyProgress(saved);
+        assertEquals(300, newPlayer.getPoints());
+        assertEquals(2, newPlayer.getStat("survival"));
+        assertEquals(110, newPlayer.getMaxLife(), 0.001);
+    }
+
+    @Test
+    public void shouldCountOnlyPointsOfThisMatch() {
+        Player player = new Player("J1", new Cameroon(), true);
+        player.addPoints(100);
+        player.startMatch();
+        player.addPoints(25);
+        assertEquals(25, player.getMatchPoints());
+        assertEquals(125, player.getPoints());
+    }
+
+    // ---------- Casos extremos ----------
+
+    @Test
+    public void shouldIgnoreDamageWhileStunned() {
+        Player player = new Player("J1", new Cameroon(), true);
+        player.receiveDamage(100);
+        for (int i = 0; i < 2 * Match.FPS; i++) player.update();   // pasan 2 segundos aturdido
+        player.receiveDamage(50);                                   // un golpe más no alarga el aturdimiento
+        for (int i = 0; i < Match.FPS + 1; i++) player.update();   // completa los 3 segundos
+        assertFalse(player.isStunned());
+        assertEquals(100, player.getLife(), 0.001);
+    }
+
+    @Test
+    public void shouldBeStunnedWithManySmallHitsOnlyWhenLifeIsExactlyZero() {
+        Player player = new Player("J1", new Cameroon(), true);
+        for (int i = 0; i < 9; i++) player.receiveDamage(11);   // 99 de daño
+        assertFalse(player.isStunned());
+        assertEquals(1, player.getLife(), 0.001);
+        player.receiveDamage(11);
+        assertTrue(player.isStunned());
+        assertEquals(0, player.getLife(), 0.001);
+    }
+
+    @Test
+    public void shouldNotActivatePowerWhileStunned() {
+        Player player = new Player("J1", new Cameroon(), true);
+        player.chargePowerBar(10);
+        player.receiveDamage(100);
+        player.activatePower();
+        assertFalse(player.hasAura());
+        assertEquals(100, player.getPowerBar(), 0.001);   // no pierde la barra
+    }
+
+    @Test
+    public void shouldNotKickOrJumpWhileStunned() {
+        Player player = new Player("J1", new Cameroon(), true);
+        Player rival = new Player("J2", new USA(), false);
+        rival.setPosX(player.getPosX() + player.getWidth() + 5);
+        player.receiveDamage(100);
+        player.kick(rival, new Ball(2000, 2000, 14, 0.45));
+        player.jump();
+        assertEquals(100, rival.getLife(), 0.001);
+        assertFalse(player.isJumping());
+    }
+
+    @Test
+    public void shouldReplaceEffectInsteadOfStacking() {
+        Player player = new Player("J1", new SouthKorea(), true);
+        new Cameroon().applyEffect(player);           // electrocutado: no salta y va al 50 %
+        new USA().applyEffect(player);                // confusión reemplaza al rayo
+        assertTrue(player.canJump());
+        assertEquals(1, player.getSpeedFactor(), 0.001);
+        assertEquals("USA", player.getAffectedBy().getCountry());
+        assertEquals(2.5, player.getEffectTime(), 0.001);
+    }
+
+    @Test
+    public void shouldNotPassFullPowerBar() {
+        Player player = new Player("J1", new Cameroon(), true);
+        player.chargePowerBar(1000);
+        assertEquals(Player.POWER_FULL, player.getPowerBar(), 0.001);
+    }
+
+    @Test
+    public void shouldReachMaximumValuesOfTheStatement() throws DopoSoccerException {
+        Player player = new Player("J1", new Cameroon(), true);
+        player.addPoints(1_000_000);
+        for (int i = 1; i < Player.MAX_STAT; i++) {
+            player.upgradeStat("survival");
+            player.upgradeStat("kick");
+        }
+        assertEquals(190, player.getMaxLife(), 0.001);        // Anexo 2: Survival 10
+        assertEquals(1.9, player.getKickMultiplier(), 0.001); // Anexo 2: Kick 10
+    }
+
+    @Test
+    public void shouldChargeExactCostForLastUpgrade() throws DopoSoccerException {
+        Player player = new Player("J1", new Cameroon(), true);
+        player.addPoints(1_000_000);
+        for (int i = 1; i < Player.MAX_STAT - 1; i++) player.upgradeStat("speed");
+        assertEquals(128000, player.getUpgradeCost("speed"));   // 500 x 2^8
+        int before = player.getPoints();
+        player.upgradeStat("speed");
+        assertEquals(before - 128000, player.getPoints());
+    }
+
+    @Test
+    public void shouldNotLosePointsWhenUpgradeFails() throws DopoSoccerException {
+        Player player = new Player("J1", new Cameroon(), true);
+        player.addPoints(499);
+        try {
+            player.upgradeStat("kick");
+            fail("Debió lanzar excepción");
+        } catch (DopoSoccerException e) {
+            assertEquals(499, player.getPoints());
+            assertEquals(1, player.getStat("kick"));
+        }
+    }
+
+    @Test
+    public void shouldNotKickAgainUntilKickEnds() {
+        Player player = new Player("J1", new Cameroon(), true);
+        Player rival = new Player("J2", new USA(), false);
+        rival.setPosX(player.getPosX() + player.getWidth() + 5);
+        Ball far = new Ball(3000, 3000, 14, 0.45);
+        player.kick(rival, far);
+        assertTrue(player.isKicking());
+        for (int i = 0; i < 5; i++) player.kick(rival, far);   // patadas repetidas no cuentan
+        assertEquals(90, rival.getLife(), 0.001);
+        for (int i = 0; i < Player.KICK_TIME * Match.FPS + 1; i++) player.update();
+        assertFalse(player.isKicking());
+        rival.setPosX(player.getPosX() + player.getWidth() + 5);   // el jugador cayó por la gravedad:
+        rival.setPosY(player.getPosY());                            // ponemos al rival otra vez a su lado
+        player.kick(rival, far);
+        assertEquals(80, rival.getLife(), 0.001);
+    }
 }

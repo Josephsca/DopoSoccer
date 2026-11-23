@@ -6,6 +6,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.junit.jupiter.api.io.TempDir;
+
 import org.junit.jupiter.api.AfterEach;
 
 public class DopoSoccerTest {
@@ -113,6 +117,9 @@ public class DopoSoccerTest {
         assertFalse(game.isSound());
     }
 
+
+
+
         /**
      * Tears down the test fixture.
      *
@@ -121,5 +128,155 @@ public class DopoSoccerTest {
     @AfterEach
     public void tearDown()
     {
+    }
+
+    @Test
+    public void shouldNotMoveWhilePaused() throws DopoSoccerException {
+        DopoSoccer game = new DopoSoccer();
+        game.startNewMatch("J1", "Cameroon", "J2", "USA", DopoSoccer.GOALS, 3, Stadium.MEDIUM);
+        int x = game.getCurrentMatch().getLeftPlayer().getPosX();
+        game.pauseMatch();
+        game.moveRight(1);
+        game.resumeMatch();
+        game.update();
+        assertEquals(x, game.getCurrentMatch().getLeftPlayer().getPosX());
+    }
+
+    @Test
+    public void shouldNotGetProfileWithoutName() {
+        DopoSoccer game = new DopoSoccer();
+        try {
+            game.getProfile("  ");
+            fail("Debió lanzar excepción");
+        } catch (DopoSoccerException e) {
+            assertEquals(DopoSoccerException.INVALID_NAME, e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldNotUpgradeProfileWithoutPoints() {
+        DopoSoccer game = new DopoSoccer();
+        try {
+            game.upgradeStat("JugadorSinPuntosDePrueba", "kick");
+            fail("Debió lanzar excepción");
+        } catch (DopoSoccerException e) {
+            assertEquals(DopoSoccerException.NOT_ENOUGH_POINTS, e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldHaveAPausedMatchFromTheStart() {
+        DopoSoccer game = new DopoSoccer();
+        assertNotNull(game.getCurrentMatch());
+        assertTrue(game.getCurrentMatch().isPaused());
+        assertFalse(game.getCurrentMatch().isGameOver());
+    }
+
+    // ---------- Casos extremos ----------
+
+    @Test
+    public void shouldNotControlMachineFromKeyboard() throws DopoSoccerException {
+        DopoSoccer game = new DopoSoccer();
+        game.startMachineMatch("Ana", "Cameroon", "USA", DopoSoccer.GOALS, 3, Stadium.MEDIUM, false, "Torpe");
+        assertTrue(game.getCurrentMatch().getRightPlayer() instanceof Machine);
+        game.getCurrentMatch().getRightPlayer().chargePowerBar(10);   // barra llena
+        game.activatePower(2);                        // jugador 2 es la máquina
+        assertFalse(game.getCurrentMatch().getRightPlayer().hasAura());
+    }
+
+    @Test
+    public void shouldNotAcceptInvalidMachineStrategy() {
+        DopoSoccer game = new DopoSoccer();
+        try {
+            game.startMachineMatch("Ana", "Cameroon", "USA", DopoSoccer.GOALS, 3, Stadium.MEDIUM, false, "Imposible");
+            fail("Debió lanzar excepción");
+        } catch (DopoSoccerException e) {
+            assertEquals(DopoSoccerException.INVALID_STRATEGY + "Imposible", e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldIgnoreInvalidPlayerNumber() throws DopoSoccerException {
+        DopoSoccer game = new DopoSoccer();
+        game.startNewMatch("Ana", "Nigeria", "Luis", "USA", DopoSoccer.GOALS, 3, Stadium.MEDIUM);
+        game.moveLeft(3);
+        game.kick(0);
+        game.jump(-1);
+        game.update();
+        assertEquals(1, game.getCurrentMatch().getTimer());   // no falló: el partido siguió normal
+    }
+
+    @Test
+    public void shouldNotAcceptNegativeLimit() {
+        DopoSoccer game = new DopoSoccer();
+        try {
+            game.startNewMatch("Ana", "Nigeria", "Luis", "USA", DopoSoccer.GOALS, -3, Stadium.SMALL);
+            fail("Debió lanzar excepción");
+        } catch (DopoSoccerException e) {
+            assertEquals(DopoSoccerException.INVALID_MATCH_TYPE, e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldSaveAndLoadTheSameMatch(@TempDir Path folder) throws DopoSoccerException {
+        DopoSoccer game = new DopoSoccer();
+        game.startNewMatch("Ana", "Nigeria", "Luis", "USA", DopoSoccer.GOALS, 3, Stadium.MEDIUM);
+        game.getCurrentMatch().getLeftPlayer().addGoal();
+        for (int i = 0; i < 30; i++) game.update();
+        String file = folder.resolve("partida.dat").toString();
+        game.saveGame(file);
+
+        DopoSoccer other = new DopoSoccer();
+        other.loadGame(file);
+        assertEquals(1, other.getCurrentMatch().getLeftPlayer().getScore());
+        assertEquals(30, other.getCurrentMatch().getTimer());
+        assertEquals("Luis", other.getCurrentMatch().getRightPlayer().getName());
+    }
+
+    @Test
+    public void shouldFailLoadingAFileThatIsNotAMatch(@TempDir Path folder) throws Exception {
+        Path file = folder.resolve("basura.dat");
+        Files.writeString(file, "esto no es una partida");
+        DopoSoccer game = new DopoSoccer();
+        try {
+            game.loadGame(file.toString());
+            fail("Debió lanzar excepción");
+        } catch (DopoSoccerException e) {
+            assertTrue(e.getMessage().startsWith(DopoSoccerException.LOAD_ERROR_MESSAGE));
+        }
+        assertNotNull(game.getCurrentMatch());   // aunque falle, sigue teniendo su partido
+    }
+
+    @Test
+    public void shouldFailLoadingAFileThatDoesNotExist() {
+        DopoSoccer game = new DopoSoccer();
+        try {
+            game.loadGame("no/existe/partida.dat");
+            fail("Debió lanzar excepción");
+        } catch (DopoSoccerException e) {
+            assertTrue(e.getMessage().startsWith(DopoSoccerException.LOAD_ERROR_MESSAGE));
+        }
+    }
+
+    @Test
+    public void shouldNotAcceptSameNameForBothPlayers() {
+        DopoSoccer game = new DopoSoccer();
+        try {
+            game.startNewMatch("Ana", "Nigeria", " Ana ", "USA", DopoSoccer.GOALS, 3, Stadium.SMALL);
+            fail("Debió lanzar excepción");
+        } catch (DopoSoccerException e) {
+            assertEquals(DopoSoccerException.SAME_NAMES, e.getMessage());
+        }
+    }
+
+    @Test
+    public void shouldNotAcceptNullMachineStrategy() {
+        DopoSoccer game = new DopoSoccer();
+        try {
+            game.startMachineMatch("Ana", "Cameroon", "USA", DopoSoccer.GOALS, 3, Stadium.MEDIUM, false, null);
+            fail("Debió lanzar excepción");
+        } catch (DopoSoccerException e) {
+            assertTrue(e.getMessage().startsWith(DopoSoccerException.INVALID_STRATEGY));
+        }
     }
 }

@@ -1,9 +1,11 @@
 package domain;
 
+import java.io.Serializable;
+
 /**
  * Represents the stadium of the match with three possible screen resolutions.
  */
-public class Stadium {
+public class Stadium implements Serializable{
     public static final String SMALL = "SMALL";    
     public static final String MEDIUM = "MEDIUM";   
     public static final String LARGE = "LARGE";  

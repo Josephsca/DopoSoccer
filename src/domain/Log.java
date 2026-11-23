@@ -26,8 +26,7 @@ public class Log{
             logger.log(Level.SEVERE,e.toString(),e);
             file.close();
         }catch (Exception oe){
-            oe.printStackTrace();
-            System.exit(0);
+            System.err.println("No se pudo escribir el log: " + oe.getMessage());
         }
     }
 }

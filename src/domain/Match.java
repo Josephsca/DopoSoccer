@@ -1,14 +1,16 @@
 package domain;
-
+import java.io.Serializable;
 /**
  * Represents a match between two players. Contains the stadium, goals, and ball,
  * and uses a WinCondition to determine when the game ends.
  */
-public class Match {
+public class Match implements Serializable{
     public static final int FPS = 60;               
     public static final double DT = 1.0 / FPS;     
     public static final int WIN_POINTS = 100;
     public static final int LOSE_POINTS = 25;
+    /** Los dibujos de los personajes tienen bordes transparentes, por eso dejamos que se acerquen 22 px. */
+    public static final int ALLOWED_OVERLAP = 22;
     private int timer;          
     private boolean isPaused;
     private boolean isFinished;
@@ -55,16 +57,30 @@ public class Match {
      */
     public void update() {
         if (isPaused || isFinished) return;
+
         timer++;
+
+        if (leftPlayer instanceof Machine) {
+            ((Machine) leftPlayer).decide(this);
+        }
+
+        if (rightPlayer instanceof Machine) {
+            ((Machine) rightPlayer).decide(this);
+        }
+
         leftPlayer.update();
         rightPlayer.update();
+
         ball.update();
-        separatePlayers();  
+
+        separatePlayers();
         stadium.keepInBounds(leftPlayer);
         stadium.keepInBounds(rightPlayer);
         stadium.keepInBounds(ball);
+
         checkCollisions();
         checkGoal();
+
         if (winCondition.isGameOver(this)) finish();
     }
 
@@ -112,13 +128,61 @@ public class Match {
     }
 
     /**
+     * Moves the player to the left, but first checks that it will not collide with the rival.
+     * @param player the player that wants to move
+     */
+    public void moveLeft(Player player) {
+        if (!willCollide(player, -1)) {
+            player.moveLeft();
+        }
+    }
+
+    /**
+     * Moves the player to the right, but first checks that it will not collide with the rival.
+     * @param player the player that wants to move
+     */
+    public void moveRight(Player player) {
+        if (!willCollide(player, 1)) {
+            player.moveRight();
+        }
+    }
+
+    /**
+     * Checks if the player would collide with the rival after taking one step.
+     * Only counts as a collision if the player is walking towards the rival,
+     * so a player can always walk away from the other one.
+     * @param player the player that wants to move
+     * @param direction -1 to the left, 1 to the right
+     * @return true if the step would make the player crash into the rival
+     */
+    public boolean willCollide(Player player, int direction) {
+        Player rival = getRival(player);
+
+        boolean goingTowardsRival = (rival.getCenterX() - player.getCenterX()) * direction > 0;
+        if (!goingTowardsRival) {
+            return false;
+        }
+
+        int nextX = player.getPosX() + direction * player.getStep();
+
+        int overlapX = Math.min(nextX + player.getWidth(), rival.getPosX() + rival.getWidth())
+                     - Math.max(nextX, rival.getPosX());
+        int overlapY = Math.min(player.getPosY() + player.getHeight(), rival.getPosY() + rival.getHeight())
+                     - Math.max(player.getPosY(), rival.getPosY());
+
+        return overlapX > ALLOWED_OVERLAP && overlapY > 0;
+    }
+
+    /**
+     * Safety check for the cases where moveLeft/moveRight cannot prevent the crash
+     * (for example when a player falls on top of the other after a jump, or a power pushes him).
      * Prevents players from passing through each other: if they overlap, 
      * each one moves outward to their respective side until they touch.
      */ 
     private void separatePlayers() {
         int overlapX = Math.min(leftPlayer.getPosX() + leftPlayer.getWidth(),
                                 rightPlayer.getPosX() + rightPlayer.getWidth())
-                    - Math.max(leftPlayer.getPosX(), rightPlayer.getPosX()) - 22;
+                    - Math.max(leftPlayer.getPosX(), rightPlayer.getPosX()) - ALLOWED_OVERLAP;
         int overlapY = Math.min(leftPlayer.getPosY() + leftPlayer.getHeight(),
                                 rightPlayer.getPosY() + rightPlayer.getHeight())
                     - Math.max(leftPlayer.getPosY(), rightPlayer.getPosY());
@@ -193,6 +257,11 @@ public class Match {
         resetPositions();
     }
 
+    /**
+     * Gets the rival player of the specified player.
+     * @param player the reference player
+     * @return the opposing Player instance
+     */
     public Player getRival(Player player) {
         if (player == leftPlayer) {
             return rightPlayer;
@@ -202,9 +271,8 @@ public class Match {
     }
 
     /**
-     * Gets the rival player of the specified player.
-     * @param player the reference player
-     * @return the opposing Player instance
+     * Gets the elapsed time of the match in seconds.
+     * @return the elapsed seconds
      */
     public int getSeconds() { return timer / FPS; }
 

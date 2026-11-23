@@ -1,5 +1,6 @@
 package domain;
 
+/** USA: the ball splits into 8 identical balls; only one is real. */
 public class IllusionShot extends PowerShot {
     public IllusionShot() { 
         super("Ilusión", 30, 2.5);
