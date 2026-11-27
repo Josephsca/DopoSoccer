@@ -27,16 +27,26 @@ import java.util.Set;
  */
 public class GamePanel extends JPanel {
 
+    // Ruta base de la carpeta de imágenes del juego.
     private static final String IMAGES = "images" + File.separator;
+    // Cantidad de cuadros entre cada cambio de paso al caminar.
     private static final int WALK_FRAME_TICKS = 8;   
 
+    // Ventana principal que controla el cambio de pantallas y diálogos.
     private DopoSoccerGUI gui;
+    // Controlador del dominio que gestiona el partido y las acciones del juego.
     private DopoSoccer game;
+    // Temporizador que ejecuta cada cuadro del bucle de juego.
     private Timer timer;
+    // Conjunto de códigos de teclas que están presionadas en este momento.
     private Set<Integer> pressed;
+    // Caché de imágenes ya cargadas desde disco para evitar leerlas repetidas veces.
     private Map<String, BufferedImage> images;
+    // Última posición horizontal registrada de cada jugador para detectar si camina.
     private Map<Player, Integer> lastX;
+    // Nombre del estadio seleccionado para dibujar, o null para el campo por defecto.
     private String stadiumName;
+    // Contador total de cuadros transcurridos en el panel.
     private int frames;
 
     /**
@@ -45,6 +55,7 @@ public class GamePanel extends JPanel {
      * @param gui  the main game window
      * @param game the game domain controller
      */
+    // Inicializa el panel, sus estructuras de datos, los controles y el temporizador del juego.
     public GamePanel(DopoSoccerGUI gui, DopoSoccer game) {
         this.gui = gui;
         this.game = game;
@@ -64,6 +75,7 @@ public class GamePanel extends JPanel {
      *
      * @return an array of available stadium names without file extensions
      */
+    // Busca y ordena los nombres de los estadios disponibles en la carpeta de imágenes.
     public static String[] availableStadiums() {
         File folder = new File(IMAGES + "stadiums");
         String[] files = folder.list((dir, name) -> name.toLowerCase().endsWith(".png"));
@@ -78,6 +90,7 @@ public class GamePanel extends JPanel {
      *
      * @param stadiumName the stadium name, or null for the default field
      */
+    // Asigna el nombre del estadio que se debe renderizar en el partido.
     public void setStadium(String stadiumName) {
         this.stadiumName = stadiumName;
     }
@@ -85,6 +98,7 @@ public class GamePanel extends JPanel {
     /**
      * Clears pressed keys, resets frame movement tracking, and starts the match timer.
      */
+    // Reinicia el estado de entrada y arranca el temporizador para comenzar el partido.
     public void start() {
         pressed.clear();
         lastX.clear();
@@ -96,6 +110,7 @@ public class GamePanel extends JPanel {
      * Runs one match frame by handling held movement keys, updating the game,
      * repainting, and checking if the match ended.
      */
+    // Procesa un cuadro del juego: mueve jugadores, actualiza el partido, redibuja y revisa el fin.
     private void tick() {
         if (pressed.contains(KeyEvent.VK_A)) game.moveLeft(1);
         if (pressed.contains(KeyEvent.VK_D)) game.moveRight(1);
@@ -121,6 +136,7 @@ public class GamePanel extends JPanel {
      * Registers keyboard listeners for player jumps, kicks, power shots, and
      * pause shortcuts.
      */
+    // Configura los eventos de teclado para saltar, patear, activar poder y pausar.
     private void prepareKeys() {
         addKeyListener(new KeyAdapter() {
             @Override
@@ -160,6 +176,7 @@ public class GamePanel extends JPanel {
      * @param options image paths under images/ without the ".png" extension
      * @return the loaded image, or null if no image is found
      */
+    // Carga y guarda en caché la primera imagen existente entre las rutas candidatas.
     private BufferedImage getImage(String... options) {
         for (String option : options) {
             if (option == null) continue;
@@ -186,6 +203,7 @@ public class GamePanel extends JPanel {
      * @param p the player to check
      * @return the pose name ("stunned", "kick", "jump", "walk1", "walk2", or "idle")
      */
+    // Selecciona la pose visual del jugador según su estado actual o movimiento.
     private String pose(Player p) {
         boolean moving = lastX.containsKey(p) && lastX.get(p) != p.getPosX();
         if (p.isStunned()) return "stunned";
@@ -200,6 +218,7 @@ public class GamePanel extends JPanel {
      *
      * @param g the graphics context used for painting
      */
+    // Dibuja en orden todos los elementos visuales del partido sobre el panel.
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -244,6 +263,7 @@ public class GamePanel extends JPanel {
      * @param g       the graphics context
      * @param stadium the stadium to draw
      */
+    // Dibuja el fondo del estadio o un campo básico con cielo y césped si falta la imagen.
     private void drawStadium(Graphics2D g, Stadium stadium) {
         int w = stadium.getWidth();
         int h = stadium.getHeight();
@@ -267,6 +287,7 @@ public class GamePanel extends JPanel {
      * @param g    the graphics context
      * @param goal the goal to draw
      */
+    // Dibuja la malla, el travesaño y el poste de una portería.
     private void drawGoal(Graphics2D g, Goal goal) {
         int x = goal.getPosX();
         int y = goal.getPosY();
@@ -287,6 +308,7 @@ public class GamePanel extends JPanel {
      * @param g the graphics context
      * @param p the player to draw
      */
+    // Dibuja el aura de poder si está activa y el sprite del jugador orientado según su lado.
     private void drawPlayer(Graphics2D g, Player p) {
         int x = p.getPosX();
         int y = p.getPosY();
@@ -315,6 +337,7 @@ public class GamePanel extends JPanel {
      * @param g    the graphics context
      * @param ball the ball to draw
      */
+    // Dibuja el balón, su resplandor de tiro especial y una figura de respaldo si no hay imagen.
     private void drawBall(Graphics2D g, Ball ball) {
         int x = ball.getPosX();
         int y = ball.getPosY();
@@ -344,6 +367,7 @@ public class GamePanel extends JPanel {
      * @param ball    the real match ball
      * @param stadium the current stadium
      */
+    // Dibuja siete balones falsos rebotando mientras está activo el efecto de ilusión de EE. UU.
     private void drawIllusionBalls(
             Graphics2D g,
             Ball ball,
@@ -387,6 +411,7 @@ public class GamePanel extends JPanel {
      * @param g     the graphics context
      * @param match the current match
      */
+    // Dibuja el marcador, el cronómetro, las tarjetas de jugadores y la capa de pausa.
     private void drawHud(Graphics2D g, Match match) {
         int w = match.getStadium().getWidth();
         Player left = match.getLeftPlayer();
@@ -420,6 +445,7 @@ public class GamePanel extends JPanel {
      * @param p the player whose info is drawn
      * @param x the horizontal X coordinate of the card
      */
+    // Dibuja la tarjeta de estado de un jugador con vida, poder, estadísticas y puntos.
     private void drawPlayerInfo(Graphics2D g, Player p, int x) {
         g.setColor(Color.black);
         g.fillRoundRect(x, 8, 200, 94, 10, 10);
@@ -463,6 +489,7 @@ public class GamePanel extends JPanel {
      * @param match the current match
      * @return the formatted time string or sudden death label
      */
+    // Formatea el texto del tiempo restante, transcurrido o de muerte súbita según la regla.
     private String timeText(Match match) {
         if (match.getWinCondition() instanceof TimeCondition) {
             TimeCondition condition = (TimeCondition) match.getWinCondition();
@@ -480,6 +507,7 @@ public class GamePanel extends JPanel {
      * @param country the country name
      * @return an array with the primary color and hair color
      */
+    // Devuelve los colores temáticos principal y de cabello asociados a cada país.
     private Color[] countryColors(String country) {
         switch (country) {
             case "SouthKorea": return new Color[]{new Color(220, 30, 50), new Color(30, 30, 30)};
@@ -496,6 +524,7 @@ public class GamePanel extends JPanel {
      * @param country the country name
      * @return the effect label in Spanish, or an empty string if unknown
      */
+    // Devuelve el nombre en español del efecto especial que aplica cada país.
     private String effectName(String country) {
         switch (country) {
             case "SouthKorea": return "EMPUJADO";

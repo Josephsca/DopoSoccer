@@ -6,7 +6,9 @@ package domain;
  */
 public class TimeCondition implements WinCondition {
 
+    // Duración total del partido en segundos.
     private int duration;       
+    // Indica si el partido entró en modo muerte súbita tras agotarse el tiempo con empate.
     private boolean suddenDeath;
 
     /**
@@ -14,6 +16,7 @@ public class TimeCondition implements WinCondition {
      *
      * @param minutes the match duration in minutes
      */
+    // Convierte los minutos indicados a segundos e inicia el modo muerte súbita en falso.
     public TimeCondition(int minutes) {
         this.duration = minutes * 60;
         this.suddenDeath = false;
@@ -26,6 +29,7 @@ public class TimeCondition implements WinCondition {
      * @param match the current match
      * @return true if the game is over, false otherwise
      */
+    // Verifica si se cumplió el tiempo y hay un ganador; si hay empate al agotarse el tiempo, activa muerte súbita.
     @Override
     public boolean isGameOver(Match match) {
         if (match.getSeconds() < duration) return false;
@@ -40,6 +44,7 @@ public class TimeCondition implements WinCondition {
      * @param match the current match
      * @return the remaining seconds, or 0 if time has run out
      */
+    // Calcula los segundos restantes antes de que termine la duración reglamentaria, sin bajar de cero.
     public int getRemainingSeconds(Match match) {
         return Math.max(0, duration - match.getSeconds());
     }
@@ -49,6 +54,7 @@ public class TimeCondition implements WinCondition {
      *
      * @return the duration in seconds
      */
+    // Devuelve la duración total configurada en segundos.
     public int getDuration() { return duration; }
 
     /**
@@ -56,5 +62,6 @@ public class TimeCondition implements WinCondition {
      *
      * @return true if sudden death is active, false otherwise
      */
+    // Indica si el partido se encuentra actualmente en muerte súbita.
     public boolean isSuddenDeath() { return suddenDeath; }
 }

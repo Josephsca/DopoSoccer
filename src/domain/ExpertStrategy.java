@@ -6,13 +6,16 @@ package domain;
  */
 public class ExpertStrategy implements MachineStrategy {
 
+    // Identificador de versión para la serialización de la estrategia.
     private static final long serialVersionUID = 1L;
 
+    // Contador cíclico de cuadros para ritmar saltos y remates.
     private int frame = 0;
 
     /**
      * Creates a new ExpertStrategy with default initial values.
      */
+    // Crea una instancia de estrategia experta con su contador de cuadros inicializado en cero.
     public ExpertStrategy() {
     }
 
@@ -23,6 +26,7 @@ public class ExpertStrategy implements MachineStrategy {
      * @param machine the machine player controlled by this strategy
      * @param match   the current match state
      */
+    // Evalúa marcador, estado del rival y posición del balón para alternar entre defensa y ataque, saltar, patear y activar el poder.
     @Override
     public void decide(Machine machine, Match match) {
 

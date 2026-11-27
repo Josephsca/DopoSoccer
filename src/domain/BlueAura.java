@@ -9,11 +9,13 @@ public class BlueAura extends PowerShot {
     /**
      * Distance in pixels that the rival is pushed back on hit.
      */
+    // Distancia en píxeles que retrocede el rival al recibir el impacto.
     public static final int PUSH_DISTANCE = 150;
 
     /**
      * Creates a new BlueAura power shot with its default name, power, and duration.
      */
+    // Inicializa el tiro especial Aura Azul con su nombre, potencia y duración por defecto.
     public BlueAura() { 
         super("Aura Azul", 40, 1.5);
     }
@@ -23,6 +25,7 @@ public class BlueAura extends PowerShot {
      *
      * @param ball the match ball to launch
      */
+    // Dispara el balón a alta velocidad horizontal y con un leve impulso hacia arriba.
     @Override 
     public void launch(Ball ball) {
         ball.setVelX(22 * direction(ball)); 
@@ -35,6 +38,7 @@ public class BlueAura extends PowerShot {
      * @param rival  the opposing player hit by the power shot
      * @param source the character that used the power shot
      */
+    // Aplica el efecto del personaje, bloquea el movimiento del rival y lo empuja hacia su arco.
     @Override 
     public void onHit(Player rival, Character source) {
         rival.setEffect(source);

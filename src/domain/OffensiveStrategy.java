@@ -6,13 +6,16 @@ package domain;
  */
 public class OffensiveStrategy implements MachineStrategy {
 
+    // Identificador de versión para la serialización de la estrategia.
     private static final long serialVersionUID = 1L;
 
+    // Contador cíclico de cuadros para controlar la frecuencia de los disparos.
     private int frame = 0;
 
     /**
      * Creates a new OffensiveStrategy with default initial values.
      */
+    // Crea una instancia de estrategia ofensiva con su contador de cuadros en cero.
     public OffensiveStrategy() {
     }
 
@@ -23,6 +26,7 @@ public class OffensiveStrategy implements MachineStrategy {
      * @param machine the machine player controlled by this strategy
      * @param match   the current match state
      */
+    // Persigue el balón en el eje X, activa el tiro especial al llenarse la barra y patea si está cerca.
     @Override
     public void decide(Machine machine, Match match) {
 

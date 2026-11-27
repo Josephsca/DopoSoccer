@@ -16,20 +16,29 @@ import java.util.HashMap;
  */
 public class DopoSoccer {
 
+    // Códigos de países disponibles para crear personajes jugables.
     public static final String[] COUNTRIES = {"SouthKorea", "Cameroon", "Nigeria", "USA"};
+    // Identificador del modo de partido por tiempo límite.
     public static final String TIME = "TIME";
+    // Identificador del modo de partido por cantidad de goles.
     public static final String GOALS = "GOALS";
+    // Ruta del archivo donde se persiste el progreso de los jugadores.
     public static final String PROGRESS_FILE = "progreso.dat";
+    // Indica si el sonido del juego está activado.
     private boolean sound;
+    // Instancia del partido activo o en pausa.
     private Match currentMatch;
+    // Evita guardar dos veces los puntos al terminar el mismo partido.
     private boolean progressSaved;
     /** Saved progress (points and stats) of each human player, indexed by name. */
+    // Mapa de perfiles guardados por nombre con los puntos y estadísticas de cada jugador.
     private HashMap<String, Player> profiles;
 
     /**
      * Creates a new DopoSoccer game instance with default settings, loads saved
      * player progress, and starts a default paused match.
      */
+    // Inicializa la configuración base, carga los perfiles guardados y prepara un partido por defecto pausado.
     public DopoSoccer() {
         sound = true;
         progressSaved = false;
@@ -42,6 +51,7 @@ public class DopoSoccer {
      * Creates the initial match when the game starts (J1 vs J2, by goals) and
      * pauses it until the players begin a real match.
      */
+    // Crea el partido inicial de ejemplo y lo deja en pausa hasta que inicie uno real.
     private void createDefaultMatch() {
         try {
             startNewMatch("J1", COUNTRIES[0], "J2", COUNTRIES[1], GOALS, 3, Stadium.MEDIUM);
@@ -63,6 +73,7 @@ public class DopoSoccer {
      * @param resolution the stadium size, such as SMALL, MEDIUM, or LARGE
      * @throws DopoSoccerException if any parameter is invalid or both players have the same name
      */
+    // Valida los datos de dos jugadores humanos, aplica su progreso y crea un nuevo partido.
     public void startNewMatch(String name1, String country1, String name2, String country2, String matchType, int limit, String resolution) throws DopoSoccerException {
         if (defaultName(name1, "J1").equals(defaultName(name2, "J2"))) {
             // el progreso se guarda por nombre: si se llamaran igual, uno borraría el del otro
@@ -91,6 +102,7 @@ public class DopoSoccer {
      * @param strategy       the machine strategy name: "Torpe", "Ofensiva", "Defensiva", or "Experta"
      * @throws DopoSoccerException if any configuration parameter or strategy is invalid
      */
+    // Configura un partido contra la máquina según la estrategia elegida y ubica a cada jugador en su lado.
     public void startMachineMatch(String playerName, String playerCountry, String machineCountry, String matchType, int limit, String resolution, boolean machineLeft, String strategy) throws DopoSoccerException {
 
         Stadium stadium = new Stadium(resolution);
@@ -154,6 +166,7 @@ public class DopoSoccer {
     /**
      * Pauses the current match.
      */
+    // Pone en pausa el partido en curso.
     public void pauseMatch() {
         currentMatch.pause();
     }
@@ -161,6 +174,7 @@ public class DopoSoccer {
     /**
      * Resumes the paused match.
      */
+    // Reanuda el partido que estaba en pausa.
     public void resumeMatch() {
         currentMatch.resume();
     }
@@ -168,6 +182,7 @@ public class DopoSoccer {
     /**
      * Finishes the current match and saves player progress if not already saved.
      */
+    // Finaliza el partido actual y guarda los puntos obtenidos por los jugadores.
     public void finishMatch() {
         currentMatch.finish();
         saveProgressIfFinished();
@@ -180,6 +195,7 @@ public class DopoSoccer {
      * @return true if the match was saved successfully
      * @throws DopoSoccerException if an error occurs while writing the file
      */
+    // Serializa y guarda el estado del partido actual en la ruta de archivo indicada.
     public boolean saveGame(String filePath) throws DopoSoccerException {
         FileOutputStream fileOutput = null;
         ObjectOutputStream output = null;
@@ -209,6 +225,7 @@ public class DopoSoccer {
      * @param filePath the path of the saved match file
      * @throws DopoSoccerException if the file cannot be read or does not contain a valid match
      */
+    // Lee un partido guardado desde disco y lo establece como el partido actual.
     public void loadGame(String filePath) throws DopoSoccerException {
         FileInputStream fileInput = null;
         ObjectInputStream input = null;
@@ -246,6 +263,7 @@ public class DopoSoccer {
      *
      * @return the current match instance
      */
+    // Devuelve la instancia del partido actual.
     public Match getCurrentMatch() {
         return currentMatch;
     }
@@ -253,6 +271,7 @@ public class DopoSoccer {
     /**
      * Advances the simulation by one frame and saves progress if the match ends.
      */
+    // Avanza un cuadro de simulación del partido y guarda el progreso si terminó.
     public void update() {
         currentMatch.update();
         saveProgressIfFinished();
@@ -263,6 +282,7 @@ public class DopoSoccer {
      *
      * @param player the player number (1 for left, 2 for right)
      */
+    // Mueve hacia la izquierda al jugador humano indicado si puede actuar.
     public void moveLeft(int player) {
         Player p = getPlayer(player);
 
@@ -276,6 +296,7 @@ public class DopoSoccer {
      *
      * @param player the player number (1 for left, 2 for right)
      */
+    // Mueve hacia la derecha al jugador humano indicado si puede actuar.
     public void moveRight(int player) {
         Player p = getPlayer(player);
 
@@ -289,6 +310,7 @@ public class DopoSoccer {
      *
      * @param player the player number (1 for left, 2 for right)
      */
+    // Ordena saltar al jugador humano indicado si está habilitado para jugar.
     public void jump(int player) {
         Player p = getPlayer(player);
 
@@ -302,6 +324,7 @@ public class DopoSoccer {
      *
      * @param player the player number (1 for left, 2 for right)
      */
+    // Ejecuta la patada del jugador humano indicado contra el balón o el rival.
     public void kick(int player) {
         Player p = getPlayer(player);
 
@@ -315,6 +338,7 @@ public class DopoSoccer {
      *
      * @param player the player number (1 for left, 2 for right)
      */
+    // Activa el tiro especial del jugador humano indicado si el partido está activo.
     public void activatePower(int player) {
         Player p = getPlayer(player);
         if (p != null && !(p instanceof Machine) && canPlay()) {
@@ -330,6 +354,7 @@ public class DopoSoccer {
      * @return the player profile with saved points and stats
      * @throws DopoSoccerException if the name is null or empty
      */
+    // Obtiene el perfil guardado de un jugador o crea uno nuevo si aún no existe.
     public Player getProfile(String name) throws DopoSoccerException {
         if (name == null || name.trim().isEmpty()) {
             throw new DopoSoccerException(DopoSoccerException.INVALID_NAME);
@@ -347,6 +372,7 @@ public class DopoSoccer {
      *
      * @return an array of saved player names
      */
+    // Devuelve ordenados alfabéticamente los nombres de jugadores con progreso guardado.
     public String[] getSavedPlayers() {
         String[] names = profiles.keySet().toArray(new String[0]);
         Arrays.sort(names);
@@ -361,6 +387,7 @@ public class DopoSoccer {
      * @param stat the stat name ("speed", "jump", "kick", or "survival")
      * @throws DopoSoccerException if the name or stat is invalid, or if the player lacks points
      */
+    // Mejora una estadística del perfil del jugador y persiste los cambios en disco.
     public void upgradeStat(String name, String stat) throws DopoSoccerException {
         Player profile = getProfile(name);
         profile.upgradeStat(stat);
@@ -372,6 +399,7 @@ public class DopoSoccer {
      *
      * @throws DopoSoccerException if an error occurs while writing the progress file
      */
+    // Guarda en disco el mapa completo de perfiles de jugadores.
     public void saveProgress() throws DopoSoccerException {
         FileOutputStream fileOutput = null;
         ObjectOutputStream output = null;
@@ -394,6 +422,7 @@ public class DopoSoccer {
     /**
      * Loads saved player profiles from the progress file if it exists.
      */
+    // Carga los perfiles guardados desde el archivo de progreso si existe y es válido.
     @SuppressWarnings("unchecked")
     private void loadProgress() {
         File file = new File(PROGRESS_FILE);
@@ -409,7 +438,7 @@ public class DopoSoccer {
             Log.record(e);
             profiles = new HashMap<>();
         } finally {
-            // si el ObjectInputStream no se alcanzó a crear, igual hay que cerrar el archivo
+            // si el ObjectOutputStream no se alcanzó a crear, igual hay que cerrar el archivo
             if (input != null) {
                 close(input);
             } else {
@@ -423,6 +452,7 @@ public class DopoSoccer {
      *
      * @param stream the stream to close, or null if not opened
      */
+    // Cierra un flujo de entrada o salida de forma segura capturando posibles errores de E/S.
     private void close(Closeable stream) {
         if (stream == null) return;
         try {
@@ -437,6 +467,7 @@ public class DopoSoccer {
      *
      * @param player the player who is about to play
      */
+    // Copia los puntos y estadísticas guardados al jugador que va a disputar el partido.
     private void applyProgress(Player player) {
         if (profiles.containsKey(player.getName())) {
             player.copyProgress(profiles.get(player.getName()));
@@ -446,6 +477,7 @@ public class DopoSoccer {
     /**
      * Saves the match points of human players once when the current match ends.
      */
+    // Actualiza y guarda los puntos de los jugadores humanos una sola vez al finalizar el partido.
     private void saveProgressIfFinished() {
         if (!currentMatch.isGameOver() || progressSaved) return;
         progressSaved = true;
@@ -465,6 +497,7 @@ public class DopoSoccer {
      *
      * @param player the player who just finished the match
      */
+    // Suma los puntos ganados en el partido al perfil del jugador humano o lo registra si es nuevo.
     private void updateProfile(Player player) {
         if (player instanceof Machine) return;
         if (profiles.containsKey(player.getName())) {
@@ -479,6 +512,7 @@ public class DopoSoccer {
      *
      * @return true if the match is neither paused nor finished, false otherwise
      */
+    // Indica si el partido está en curso y no está pausado ni terminado.
     private boolean canPlay() {
         return !currentMatch.isPaused() && !currentMatch.isGameOver();
     }
@@ -486,6 +520,7 @@ public class DopoSoccer {
     /**
      * Switches the game sound between enabled and disabled.
      */
+    // Alterna el estado del sonido entre activado y desactivado.
     public void toggleSound() {
         sound = !sound;
     }
@@ -495,6 +530,7 @@ public class DopoSoccer {
      *
      * @return true if sound is enabled, false otherwise
      */
+    // Indica si el sonido está actualmente activado.
     public boolean isSound() {
         return sound;
     }
@@ -506,6 +542,7 @@ public class DopoSoccer {
      * @return the corresponding character instance
      * @throws DopoSoccerException if the country name is null or unknown
      */
+    // Instancia el personaje correspondiente al país solicitado.
     private Character createCharacter(String country) throws DopoSoccerException {
         if (country == null){
             throw new DopoSoccerException(DopoSoccerException.INVALID_CHARACTER);
@@ -527,6 +564,7 @@ public class DopoSoccer {
      * @return the corresponding winning condition instance
      * @throws DopoSoccerException if the match type is invalid or the limit is not positive
      */
+    // Crea la condición de victoria por tiempo o por goles validando el tipo y el límite.
     private WinCondition createWinCondition(String matchType, int limit) throws DopoSoccerException {
         if (matchType == null || limit <= 0){ 
             throw new DopoSoccerException(DopoSoccerException.INVALID_MATCH_TYPE);
@@ -542,6 +580,7 @@ public class DopoSoccer {
      * @param player the player number (1 for left, 2 for right)
      * @return the matching player, or null if the number is not 1 or 2
      */
+    // Devuelve el jugador 1 (izquierda) o 2 (derecha) del partido actual.
     private Player getPlayer(int player) {
         if (player == 1) return currentMatch.getLeftPlayer();
         if (player == 2) return currentMatch.getRightPlayer();
@@ -555,6 +594,7 @@ public class DopoSoccer {
      * @param defaultValue the fallback name to use when input is empty
      * @return the trimmed name or the default value
      */
+    // Devuelve el nombre recortado sin espacios extremos o un valor por defecto si viene vacío.
     private String defaultName(String name, String defaultValue) {
         if (name == null || name.trim().isEmpty()) {
             return defaultValue;

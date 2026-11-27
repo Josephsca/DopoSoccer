@@ -7,10 +7,15 @@ import java.io.Serializable;
  */
 public class Goal implements Serializable{
 
+    // Coordenada horizontal de la esquina superior izquierda de la portería.
     private int posX;
+    // Coordenada vertical de la esquina superior izquierda de la portería.
     private int posY;
+    // Ancho de la portería en píxeles.
     private int width;
+    // Alto de la portería en píxeles.
     private int height;
+    // Indica si la portería pertenece al lado izquierdo (true) o al derecho (false).
     private boolean isLeftGoal;
 
     /**
@@ -22,6 +27,7 @@ public class Goal implements Serializable{
      * @param height     the height of the goal
      * @param isLeftGoal true if this is the left goal, false for the right goal
      */
+    // Inicializa la posición, dimensiones y lado de la portería.
     public Goal(int posX, int posY, int width, int height, boolean isLeftGoal) {
         this.posX = posX;
         this.posY = posY;
@@ -36,6 +42,7 @@ public class Goal implements Serializable{
      * @param ball the match ball to check
      * @return true if the ball is fully inside the goal, false otherwise
      */
+    // Comprueba si el balón ha entrado por completo dentro de la portería por debajo del travesaño.
     public boolean containsBall(Ball ball) {
         boolean belowCrossbar = ball.getPosY() >= posY;
         if (isLeftGoal) {
@@ -49,6 +56,7 @@ public class Goal implements Serializable{
      *
      * @param ball the match ball to check for crossbar collision
      */
+    // Detecta si el balón cae sobre el travesaño, ajusta su altura y lo hace rebotar hacia arriba.
     public void checkCrossbar(Ball ball) {
         boolean overGoal = ball.getPosX() + ball.getWidth() > posX && ball.getPosX() < posX + width;
         boolean touchingTop = ball.getPosY() + ball.getHeight() >= posY && ball.getCenterY() < posY;
@@ -68,6 +76,7 @@ public class Goal implements Serializable{
      *
      * @return the X position
      */
+    // Devuelve la coordenada X de la portería.
     public int getPosX() { return posX; }
 
     /**
@@ -75,6 +84,7 @@ public class Goal implements Serializable{
      *
      * @return the Y position
      */
+    // Devuelve la coordenada Y de la portería.
     public int getPosY() { return posY; }
     
     /**
@@ -82,6 +92,7 @@ public class Goal implements Serializable{
      *
      * @return the width value
      */
+    // Devuelve el ancho de la portería.
     public int getWidth() { return width; }
     
     /**
@@ -89,6 +100,7 @@ public class Goal implements Serializable{
      *
      * @return the height value
      */
+    // Devuelve el alto de la portería.
     public int getHeight() { return height; }
     
     /**
@@ -96,5 +108,6 @@ public class Goal implements Serializable{
      *
      * @return true if this is the left goal, false otherwise
      */
+    // Indica si esta portería está ubicada en el lado izquierdo de la cancha.
     public boolean isLeftGoal() { return isLeftGoal; }
 }
