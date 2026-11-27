@@ -3,7 +3,7 @@ package domain;
 import java.io.Serializable;
 
 /**
- * Represents the stadium of the match with three possible screen resolutions.
+ * Represents the match stadium with three possible screen resolutions.
  */
 public class Stadium implements Serializable{
     public static final String SMALL = "SMALL";    
@@ -14,8 +14,9 @@ public class Stadium implements Serializable{
     private String resolution;
 
     /**
-     * Constructs a new Stadium with the specified resolution size.
-     * @param resolution the resolution option, either SMALL, MEDIUM, or LARGE
+     * Creates a new Stadium with the given resolution size.
+     *
+     * @param resolution the resolution option (SMALL, MEDIUM, or LARGE)
      * @throws DopoSoccerException if the resolution is invalid or null
      */
     public Stadium(String resolution) throws DopoSoccerException {
@@ -30,16 +31,19 @@ public class Stadium implements Serializable{
     }
 
     /**
-     * Gets the vertical ground level position (Y coordinate) of the stadium. 
-     * @return the ground Y coordinate value
+     * Returns the vertical Y coordinate of the stadium ground level.
+     *
+     * @return the ground Y coordinate
      */
     public int getGroundY() {
         return height - height / 9;
     }
 
     /**
-     * Keeps an entity within the boundaries of the stadium and triggers a reaction if a boundary is hit.
-     * @param entity the entity object, such as a player or the ball
+     * Keeps an entity inside the stadium walls and ground, notifying it when a
+     * boundary is hit.
+     *
+     * @param entity the entity to keep inside the stadium
      */
     public void keepInBounds(Entity entity) {
         if (entity.getPosX() < 0) {
@@ -61,19 +65,22 @@ public class Stadium implements Serializable{
     }
 
     /**
-     * Gets the total width of the stadium.
-     * @return the stadium width in pixels
+     * Returns the total width of the stadium in pixels.
+     *
+     * @return the stadium width
      */
     public int getWidth() { return width; }
 
     /**
-     * Gets the total height of the stadium.
-     * @return the stadium height in pixels
+     * Returns the total height of the stadium in pixels.
+     *
+     * @return the stadium height
      */
     public int getHeight() { return height; }
 
     /**
-     * Gets the current resolution name of the stadium.
+     * Returns the selected resolution name of the stadium.
+     *
      * @return the resolution string
      */
     public String getResolution() { return resolution; }

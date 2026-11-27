@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Goal.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura intermedia 2</a> &gt; <a href="index.source.html" class="el_package">domain</a> &gt; <span class="el_source">Goal.java</span></div><h1>Goal.java</h1><pre class="source lang-java linenums">package domain;
+
+import java.io.Serializable;
+
+/**
+ * Represents a goal located on one side of the stadium.
+ */
+public class Goal implements Serializable{
+
+    private int posX;
+    private int posY;
+    private int width;
+    private int height;
+    private boolean isLeftGoal;
+
+    /**
+     * Constructs a new Goal with the specified position, dimensions, and side orientation.
+     * @param posX the X coordinate of the goal
+     * @param posY the Y coordinate of the goal
+     * @param width the width of the goal
+     * @param height the height of the goal
+     * @param isLeftGoal true if this is the left goal, false if it is the right goal
+     */
+<span class="fc" id="L24">    public Goal(int posX, int posY, int width, int height, boolean isLeftGoal) {</span>
+<span class="fc" id="L25">        this.posX = posX;</span>
+<span class="fc" id="L26">        this.posY = posY;</span>
+<span class="fc" id="L27">        this.width = width;</span>
+<span class="fc" id="L28">        this.height = height;</span>
+<span class="fc" id="L29">        this.isLeftGoal = isLeftGoal;</span>
+<span class="fc" id="L30">    }</span>
+
+    /**
+     * Checks whether a goal has been scored because the ball has completely entered the goal below the crossbar.
+     * @param ball the ball object to check
+     * @return true if the ball is completely inside the goal, false otherwise
+     */
+    public boolean containsBall(Ball ball) {
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        boolean belowCrossbar = ball.getPosY() &gt;= posY;</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (isLeftGoal) {</span>
+<span class="fc bfc" id="L40" title="All 4 branches covered.">            return belowCrossbar &amp;&amp; ball.getPosX() + ball.getWidth() &lt;= posX + width;</span>
+        }
+<span class="fc bfc" id="L42" title="All 4 branches covered.">        return belowCrossbar &amp;&amp; ball.getPosX() &gt;= posX;</span>
+    }
+
+    /**
+     * Checks if the ball hits the crossbar and bounces upward if it lands on top of it.
+     * @param ball the ball object to check for crossbar collision
+     */
+    public void checkCrossbar(Ball ball) {
+<span class="fc bfc" id="L50" title="All 4 branches covered.">        boolean overGoal = ball.getPosX() + ball.getWidth() &gt; posX &amp;&amp; ball.getPosX() &lt; posX + width;</span>
+<span class="fc bfc" id="L51" title="All 4 branches covered.">        boolean touchingTop = ball.getPosY() + ball.getHeight() &gt;= posY &amp;&amp; ball.getCenterY() &lt; posY;</span>
+<span class="fc bfc" id="L52" title="All 4 branches covered.">        if (overGoal &amp;&amp; touchingTop) {</span>
+<span class="fc" id="L53">            ball.setPosY(posY - ball.getHeight());</span>
+<span class="fc" id="L54">            ball.bounce(0, -1);</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            if (isLeftGoal) {</span>
+<span class="fc" id="L56">                        ball.setVelX(ball.getVelX() + 1);</span>
+            } else {
+<span class="nc" id="L58">                ball.setVelX(ball.getVelX() - 1);</span>
+            }
+        }
+<span class="fc" id="L61">    }</span>
+
+    /**
+     * Gets the X coordinate of the goal.
+     * @return the X position value
+     */
+<span class="fc" id="L67">    public int getPosX() { return posX; }</span>
+
+    /**
+     * Gets the Y coordinate of the goal.
+     * @return the Y position value
+     */
+<span class="fc" id="L73">    public int getPosY() { return posY; }</span>
+    
+    /**
+     * Gets the width of the goal.
+     * @return the width value
+     */
+<span class="fc" id="L79">    public int getWidth() { return width; }</span>
+    
+    /**
+     * Gets the height of the goal.
+     * @return the height value
+     */
+<span class="fc" id="L85">    public int getHeight() { return height; }</span>
+    
+    /**
+     * Checks if the goal is the left goal.
+     * @return true if the goal is the left goal, false otherwise
+     */
+<span class="nc" id="L91">    public boolean isLeftGoal() { return isLeftGoal; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

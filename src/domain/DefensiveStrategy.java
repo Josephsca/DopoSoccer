@@ -1,15 +1,28 @@
-
 package domain;
 
+/**
+ * Represents a defensive strategy for a machine player that stays near its own
+ * goal and clears the ball when it gets close.
+ */
 public class DefensiveStrategy implements MachineStrategy {
 
     private static final long serialVersionUID = 1L;
 
     private int frame = 0;
 
+    /**
+     * Creates a new DefensiveStrategy with default initial values.
+     */
     public DefensiveStrategy() {
     }
     
+    /**
+     * Moves the machine player near its goal, jumps or kicks when the ball is
+     * close, and activates its power shot when the ball enters the danger zone.
+     *
+     * @param machine the machine player controlled by this strategy
+     * @param match   the current match state
+     */
     @Override
     public void decide(Machine machine, Match match) {
 

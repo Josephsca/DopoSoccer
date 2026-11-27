@@ -1,22 +1,25 @@
 package domain;
 
 /**
- * Represents a goal-based match condition where the first player to reach a specific score wins.
+ * Represents a goal-based winning condition where the first player to reach a
+ * target number of goals wins the match.
  */
 public class GoalCondition implements WinCondition {
 
     private int goalsToWin;
 
     /**
-     * Constructs a new GoalCondition with the specified goal target.
-     * @param goalsToWin the number of goals required to win the match
+     * Creates a new GoalCondition with the given target number of goals.
+     *
+     * @param goalsToWin the number of goals needed to win the match
      */
     public GoalCondition(int goalsToWin) {
         this.goalsToWin = goalsToWin;
     }
 
     /**
-     * Checks if the game is over based on the goal condition.
+     * Checks whether either player has reached the target number of goals.
+     *
      * @param match the current match
      * @return true if the game is over, false otherwise
      */
@@ -27,8 +30,9 @@ public class GoalCondition implements WinCondition {
     }
 
     /**
-     * Gets the number of goals required to win the match.
-     * @return the goal target value
+     * Returns the number of goals needed to win the match.
+     *
+     * @return the target number of goals
      */
     public int getGoalsToWin() { return goalsToWin; }
 }

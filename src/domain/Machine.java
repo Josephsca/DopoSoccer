@@ -1,9 +1,8 @@
-
 package domain;
 
 /**
- * Represents a player controlled by artificial intelligence.
- * Its behavior is defined by a MachineStrategy.
+ * Represents a player controlled by artificial intelligence whose actions are
+ * defined by a MachineStrategy.
  */
 public class Machine extends Player {
 
@@ -12,12 +11,12 @@ public class Machine extends Player {
     private MachineStrategy strategy;
 
     /**
-     * Creates a machine player with a specific strategy.
+     * Creates a new machine player with the given name, character, side, and strategy.
      *
-     * @param name machine name
-     * @param character selected country character
-     * @param leftSide whether the machine plays on the left
-     * @param strategy behavior used by the machine
+     * @param name      the name of the machine player
+     * @param character the selected country character
+     * @param leftSide  true if the machine plays on the left side, false for the right side
+     * @param strategy  the strategy that controls the machine behavior
      */
     public Machine(String name, Character character, boolean leftSide, MachineStrategy strategy) {
 
@@ -26,22 +25,27 @@ public class Machine extends Player {
     }
 
     /**
-     * Executes the decisions of the current strategy.
+     * Executes the next decision of the current strategy for this machine player.
+     *
+     * @param match the current match state
      */
     public void decide(Match match) {
         strategy.decide(this, match);
     }
 
     /**
-     * Changes the machine behavior.
+     * Sets a new strategy to control the machine behavior.
+     *
+     * @param strategy the new machine strategy
      */
     public void setStrategy(MachineStrategy strategy) {
         this.strategy = strategy;
     }
 
     /**
-     * Gets the strategy that controls the machine.
-     * @return the machine strategy
+     * Returns the strategy that currently controls the machine.
+     *
+     * @return the current machine strategy
      */
     public MachineStrategy getStrategy() {
         return strategy;

@@ -1,0 +1,718 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DopoSoccerGUI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura intermedia 4</a> &gt; <a href="index.source.html" class="el_package">presentation</a> &gt; <span class="el_source">DopoSoccerGUI.java</span></div><h1>DopoSoccerGUI.java</h1><pre class="source lang-java linenums">package presentation;
+
+import domain.DopoSoccer;
+import domain.DopoSoccerException;
+import domain.Log;
+import domain.Match;
+import domain.Player;
+import domain.Stadium;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+/**
+ * Main window of the game. It has three screens: menu, configuration, and match.
+ * It only communicates with the domain through the DopoSoccer class.
+ */
+public class DopoSoccerGUI extends JFrame {
+
+    private static final String MENU = &quot;menu&quot;;
+    private static final String CONFIG = &quot;config&quot;;
+    private static final String GAME = &quot;game&quot;;
+<span class="fc" id="L25">    private static final String[] COUNTRY_NAMES = {&quot;Corea del Sur&quot;, &quot;Camerún&quot;, &quot;Nigeria&quot;, &quot;Estados Unidos&quot;};</span>
+<span class="fc" id="L26">    private static final String[] RESOLUTIONS = {Stadium.SMALL, Stadium.MEDIUM, Stadium.LARGE};</span>
+<span class="fc" id="L27">    private boolean againstMachine = false;</span>
+
+    private DopoSoccer game;
+    private CardLayout cards;
+    private JPanel container;
+    private GamePanel gamePanel;
+
+    // Menu screen buttons
+    private JButton enterToPlay;
+    private JButton selectPlayers;
+    private JButton soundButton;
+    private JButton playerVsPlayer;
+    private JButton playerVsMachine;
+    private JButton quickStart;
+    private JButton backToMenu;
+    private JButton backToMode;
+    private Button loadGameButton;
+    private Button upgradeButton;
+
+    // Configuration screen components
+    private JTextField name1;
+    private JTextField name2;
+    private JComboBox&lt;String&gt; country1;
+    private JComboBox&lt;String&gt; country2;
+    private JComboBox&lt;String&gt; machineSide;
+    private JComboBox&lt;String&gt; machineStrategy;
+    private JPanel machineOptions;
+    private JComboBox&lt;String&gt; matchType;
+    private JSpinner limit;
+    private JComboBox&lt;String&gt; resolution;
+    private JButton back;
+    private JButton start;
+    private JPanel playerBox1;
+    private JPanel playerBox2;
+    
+
+    /**
+     * Constructs the main application window, initializes the game instance, and sets up UI elements and actions.
+     */
+<span class="fc" id="L66">    public DopoSoccerGUI() {</span>
+<span class="fc" id="L67">        game = new DopoSoccer();</span>
+<span class="fc" id="L68">        prepareElements();</span>
+<span class="fc" id="L69">        prepareActions();</span>
+<span class="fc" id="L70">    }</span>
+
+    /**
+     * Initializes the main frame settings, layout container, and adds all game screens.
+     */
+    private void prepareElements() {
+<span class="fc" id="L76">        setTitle(&quot;DopoSoccer&quot;);</span>
+<span class="fc" id="L77">        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);</span>
+<span class="fc" id="L78">        setResizable(false);</span>
+<span class="fc" id="L79">        cards = new CardLayout();</span>
+<span class="fc" id="L80">        container = new JPanel(cards);</span>
+<span class="fc" id="L81">        container.add(createMenuPanel(), MENU);</span>
+<span class="fc" id="L82">        container.add(createConfigPanel(), CONFIG);</span>
+<span class="fc" id="L83">        gamePanel = new GamePanel(this, game);</span>
+<span class="fc" id="L84">        container.add(gamePanel, GAME);</span>
+<span class="fc" id="L85">        add(container);</span>
+<span class="fc" id="L86">        showScreen(MENU);</span>
+<span class="fc" id="L87">    }</span>
+
+    /**
+     * Creates and configures the main menu panel with background image and options.
+     * @return the configured menu JPanel
+     */
+    private JPanel createMenuPanel() {
+<span class="fc" id="L94">        final Image background = new ImageIcon(&quot;images/menu_bg.jpg&quot;).getImage();   </span>
+<span class="fc" id="L95">        JPanel panel = new JPanel(new GridBagLayout()) {                          </span>
+            @Override
+            protected void paintComponent(Graphics g) {
+<span class="fc" id="L98">                super.paintComponent(g);</span>
+<span class="fc" id="L99">                g.drawImage(background, 0, 0, getWidth(), getHeight(), this);</span>
+<span class="fc" id="L100">            }</span>
+        };
+<span class="fc" id="L102">        panel.setPreferredSize(new Dimension(800, 450));</span>
+<span class="fc" id="L103">        panel.setBorder(BorderFactory.createEmptyBorder(250, 0, 0, 0));   // deja ver el logo</span>
+<span class="fc" id="L104">        panel.setBackground(new Color(20, 20, 20));</span>
+
+<span class="fc" id="L106">        GridBagConstraints c = new GridBagConstraints();</span>
+<span class="fc" id="L107">        c.insets = new Insets(6, 8, 6, 8);</span>
+<span class="fc" id="L108">        c.fill = GridBagConstraints.HORIZONTAL;</span>
+
+<span class="fc" id="L110">        enterToPlay = new Button(&quot;Entrar a jugar&quot;);</span>
+<span class="fc" id="L111">        soundButton = new Button(&quot;Sonido: ON&quot;);</span>
+<span class="fc" id="L112">        playerVsPlayer = new Button(&quot;Jugador vs Jugador&quot;);</span>
+<span class="fc" id="L113">        playerVsMachine = new Button(&quot;Jugador vs Máquina&quot;);</span>
+<span class="fc" id="L114">        backToMenu = new Button(&quot;Volver&quot;);</span>
+<span class="fc" id="L115">        quickStart = new Button(&quot;Empezar&quot;);</span>
+<span class="fc" id="L116">        selectPlayers = new Button(&quot;Seleccionar jugadores&quot;);</span>
+<span class="fc" id="L117">        backToMode = new Button(&quot;Volver&quot;);</span>
+<span class="fc" id="L118">        loadGameButton = new Button(&quot;Cargar partida&quot;);</span>
+<span class="fc" id="L119">        upgradeButton = new Button(&quot;Mejoras&quot;);</span>
+        // Menú principal: dos columnas de dos botones
+<span class="fc" id="L121">        addButton(panel, c, enterToPlay, 0, 0, 1);</span>
+<span class="fc" id="L122">        addButton(panel, c, loadGameButton, 1, 0, 1);</span>
+<span class="fc" id="L123">        addButton(panel, c, upgradeButton, 0, 1, 1);</span>
+<span class="fc" id="L124">        addButton(panel, c, soundButton, 1, 1, 1);</span>
+        // Los otros pasos del menú: un botón debajo del otro, más anchos para que quepa el texto
+<span class="fc" id="L126">        JButton[] wideButtons = {playerVsPlayer, playerVsMachine, backToMenu, quickStart, selectPlayers, backToMode};</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        for (JButton b : wideButtons) {</span>
+<span class="fc" id="L128">            b.setPreferredSize(new Dimension(330, 48));</span>
+        }
+<span class="fc" id="L130">        addButton(panel, c, playerVsPlayer, 0, 2, 2);</span>
+<span class="fc" id="L131">        addButton(panel, c, playerVsMachine, 0, 3, 2);</span>
+<span class="fc" id="L132">        addButton(panel, c, backToMenu, 0, 4, 2);</span>
+<span class="fc" id="L133">        addButton(panel, c, quickStart, 0, 5, 2);</span>
+<span class="fc" id="L134">        addButton(panel, c, selectPlayers, 0, 6, 2);</span>
+<span class="fc" id="L135">        addButton(panel, c, backToMode, 0, 7, 2);</span>
+<span class="fc" id="L136">        showMenuStep(0);</span>
+<span class="fc" id="L137">       return panel;</span>
+    }
+
+    /**
+     * Adds a button to the menu panel in the given row and column.
+     * @param panel the menu panel
+     * @param c the constraints used by the layout
+     * @param button the button to add
+     * @param column the column (0 or 1)
+     * @param row the row
+     * @param width how many columns the button uses
+     */
+    private void addButton(JPanel panel, GridBagConstraints c, JButton button, int column, int row, int width) {
+<span class="fc" id="L150">        c.gridx = column;</span>
+<span class="fc" id="L151">        c.gridy = row;</span>
+<span class="fc" id="L152">        c.gridwidth = width;</span>
+<span class="fc" id="L153">        panel.add(button, c);</span>
+<span class="fc" id="L154">    }</span>
+
+    /**
+     * Updates visibility of menu buttons based on the current menu navigation step.
+     * @param step the active menu step index
+     */
+    private void showMenuStep(int step) {
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        enterToPlay.setVisible(step == 0);</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        soundButton.setVisible(step == 0);</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        playerVsPlayer.setVisible(step == 1);</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        playerVsMachine.setVisible(step == 1);</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        backToMenu.setVisible(step == 1);</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        quickStart.setVisible(step == 2);</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        selectPlayers.setVisible(step == 2);</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        backToMode.setVisible(step == 2);</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">        loadGameButton.setVisible(step == 0);</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">        upgradeButton.setVisible(step == 0);</span>
+<span class="fc" id="L171">    }</span>
+
+    /**
+     * Creates and configures the match configuration panel.
+     * @return the configured configuration JPanel
+     */
+    private JPanel createConfigPanel() {
+<span class="fc" id="L178">        JPanel panel = new JPanel(new BorderLayout(10, 10));</span>
+<span class="fc" id="L179">        panel.setPreferredSize(new Dimension(800, 450));</span>
+<span class="fc" id="L180">        panel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));</span>
+
+<span class="fc" id="L182">        JPanel players = new JPanel(new GridLayout(1, 2, 30, 0));</span>
+<span class="fc" id="L183">        name1 = new JTextField(&quot;J1&quot;);</span>
+<span class="fc" id="L184">        name2 = new JTextField(&quot;J2&quot;);</span>
+<span class="fc" id="L185">        country1 = new JComboBox&lt;&gt;(COUNTRY_NAMES);</span>
+<span class="fc" id="L186">        country2 = new JComboBox&lt;&gt;(COUNTRY_NAMES);</span>
+<span class="fc" id="L187">        country2.setSelectedIndex(1);</span>
+<span class="fc" id="L188">        playerBox1 = createPlayerBox(&quot;J1 (A D W S Q)&quot;, name1, country1);</span>
+<span class="fc" id="L189">        playerBox2 = createPlayerBox(&quot;J2 (Flechas + Ctrl derecho)&quot;, name2, country2);</span>
+
+<span class="fc" id="L191">        players.add(playerBox1);</span>
+<span class="fc" id="L192">        players.add(playerBox2);</span>
+
+<span class="fc" id="L194">        JPanel options = new JPanel(new GridLayout(3, 2, 10, 10));</span>
+<span class="fc" id="L195">        options.setBorder(BorderFactory.createTitledBorder(&quot;Partido&quot;));</span>
+
+<span class="fc" id="L197">        machineSide = new JComboBox&lt;&gt;(</span>
+            new String[]{&quot;Derecha&quot;, &quot;Izquierda&quot;}
+        );
+
+<span class="fc" id="L201">        machineStrategy = new JComboBox&lt;&gt;(</span>
+            new String[]{&quot;Torpe&quot;, &quot;Ofensiva&quot;, &quot;Defensiva&quot;, &quot;Experta&quot;}
+        );
+
+<span class="fc" id="L205">        machineOptions = new JPanel(new GridLayout(2, 2, 10, 10));</span>
+<span class="fc" id="L206">        machineOptions.setBorder(</span>
+<span class="fc" id="L207">            BorderFactory.createTitledBorder(&quot;Configuración de máquina&quot;)</span>
+        );
+
+<span class="fc" id="L210">        machineOptions.add(new JLabel(&quot;Lado de la máquina:&quot;));</span>
+<span class="fc" id="L211">        machineOptions.add(machineSide);</span>
+
+<span class="fc" id="L213">        machineOptions.add(new JLabel(&quot;Estrategia:&quot;));</span>
+<span class="fc" id="L214">        machineOptions.add(machineStrategy);</span>
+
+<span class="fc" id="L216">        machineOptions.setVisible(false);</span>
+
+<span class="fc" id="L218">        matchType = new JComboBox&lt;&gt;(new String[]{&quot;Por tiempo (minutos)&quot;, &quot;Por goles&quot;});</span>
+<span class="fc" id="L219">        limit = new JSpinner(new SpinnerNumberModel(2, 1, 20, 1));</span>
+<span class="fc" id="L220">        resolution = new JComboBox&lt;&gt;(RESOLUTIONS);</span>
+<span class="fc" id="L221">        options.add(new JLabel(&quot;Tipo de partido:&quot;));</span>
+<span class="fc" id="L222">        options.add(matchType);</span>
+<span class="fc" id="L223">        options.add(new JLabel(&quot;Minutos / goles para ganar:&quot;));</span>
+<span class="fc" id="L224">        options.add(limit);</span>
+<span class="fc" id="L225">        options.add(new JLabel(&quot;Resolución de la cancha:&quot;));</span>
+<span class="fc" id="L226">        options.add(resolution);</span>
+
+<span class="fc" id="L228">        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 0));</span>
+<span class="fc" id="L229">        back = new Button(&quot;Volver&quot;);</span>
+<span class="fc" id="L230">        start = new Button(&quot;Empezar&quot;);</span>
+<span class="fc" id="L231">        buttons.add(back);</span>
+<span class="fc" id="L232">        buttons.add(start);</span>
+
+<span class="fc" id="L234">        panel.add(players, BorderLayout.NORTH);</span>
+<span class="fc" id="L235">        JPanel optionsWrapper = new JPanel(new BorderLayout(10, 10));</span>
+
+<span class="fc" id="L237">        optionsWrapper.add(options, BorderLayout.NORTH);</span>
+<span class="fc" id="L238">        optionsWrapper.add(machineOptions, BorderLayout.CENTER);</span>
+
+<span class="fc" id="L240">        panel.add(optionsWrapper, BorderLayout.CENTER);</span>
+<span class="fc" id="L241">        panel.add(buttons, BorderLayout.SOUTH);</span>
+<span class="fc" id="L242">        return panel;</span>
+    }
+
+    /**
+     * Helper method to create a titled sub-panel for player configuration fields.
+     * @param title the section title
+     * @param name text field for the player's name
+     * @param country dropdown for selecting the player's character country
+     * @return a JPanel containing player setup fields
+     */
+    private JPanel createPlayerBox(String title, JTextField name, JComboBox&lt;String&gt; country) {
+<span class="fc" id="L253">        JPanel box = new JPanel(new GridLayout(4, 1, 5, 5));</span>
+<span class="fc" id="L254">        box.setBorder(BorderFactory.createTitledBorder(title));</span>
+<span class="fc" id="L255">        box.add(new JLabel(&quot;Nombre:&quot;));</span>
+<span class="fc" id="L256">        box.add(name);</span>
+<span class="fc" id="L257">        box.add(new JLabel(&quot;Personaje:&quot;));</span>
+<span class="fc" id="L258">        box.add(country);</span>
+<span class="fc" id="L259">        return box;</span>
+    }
+
+    /**
+     * Registers all action listeners for menu buttons, configuration controls, and sound toggles.
+     */
+    private void prepareActions() {
+<span class="fc" id="L266">        enterToPlay.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="fc" id="L269">                showMenuStep(1);</span>
+<span class="fc" id="L270">            }</span>
+        });
+
+<span class="fc" id="L273">        playerVsPlayer.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="fc" id="L276">                againstMachine = false;</span>
+<span class="fc" id="L277">                machineOptions.setVisible(false);</span>
+<span class="fc" id="L278">                updatePlayerLabels();</span>
+<span class="fc" id="L279">                showMenuStep(2);</span>
+<span class="fc" id="L280">            }</span>
+        });
+
+<span class="fc" id="L283">        playerVsMachine.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="fc" id="L286">                againstMachine = true;</span>
+<span class="fc" id="L287">                machineOptions.setVisible(true);</span>
+<span class="fc" id="L288">                updatePlayerLabels();</span>
+<span class="fc" id="L289">                showMenuStep(2);</span>
+<span class="fc" id="L290">            }</span>
+        });
+
+<span class="fc" id="L293">        machineSide.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="fc" id="L296">                updatePlayerLabels();</span>
+<span class="fc" id="L297">            }</span>
+        });
+
+        
+<span class="fc" id="L301">        quickStart.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="fc" id="L304">                startMatch();</span>
+<span class="fc" id="L305">            }</span>
+        });
+
+<span class="fc" id="L308">        backToMenu.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="fc" id="L311">                showMenuStep(0);</span>
+<span class="fc" id="L312">            }</span>
+        });
+
+<span class="fc" id="L315">        backToMode.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="fc" id="L318">                showMenuStep(1);</span>
+<span class="fc" id="L319">            }</span>
+        });
+
+<span class="fc" id="L322">        selectPlayers.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="fc" id="L325">                showScreen(CONFIG);</span>
+<span class="fc" id="L326">            }</span>
+        });
+
+<span class="fc" id="L329">        soundButton.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="fc" id="L332">                game.toggleSound();</span>
+<span class="fc bfc" id="L333" title="All 2 branches covered.">                if (game.isSound()) {</span>
+<span class="fc" id="L334">                    soundButton.setText(&quot;Sonido: ON&quot;);</span>
+                } else {
+<span class="fc" id="L336">                    soundButton.setText(&quot;Sonido: OFF&quot;);</span>
+                }
+<span class="fc" id="L338">            }</span>
+        });
+
+<span class="fc" id="L341">        back.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="fc" id="L344">                showScreen(MENU);</span>
+<span class="fc" id="L345">            }</span>
+        });
+
+<span class="fc" id="L348">        start.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="fc" id="L351">                startMatch();</span>
+<span class="fc" id="L352">            }</span>
+        });
+
+<span class="fc" id="L355">        loadGameButton.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L358">                loadMatch();</span>
+<span class="nc" id="L359">            }</span>
+        });
+
+<span class="fc" id="L362">        upgradeButton.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L365">                showUpgradeMenu();</span>
+<span class="nc" id="L366">            }</span>
+        });
+
+        
+<span class="fc" id="L370">    }</span>
+
+    /**
+     * Creates the match with the chosen configuration and switches to the game screen view.
+     */            
+    private void startMatch() {
+        try {
+<span class="fc bfc" id="L377" title="All 2 branches covered.">            String type = matchType.getSelectedIndex() == 0</span>
+<span class="fc" id="L378">                    ? DopoSoccer.TIME</span>
+<span class="fc" id="L379">                    : DopoSoccer.GOALS;</span>
+
+<span class="fc" id="L381">            String countryLeft =</span>
+<span class="fc" id="L382">                    DopoSoccer.COUNTRIES[country1.getSelectedIndex()];</span>
+
+<span class="fc" id="L384">            String countryRight =</span>
+<span class="fc" id="L385">                    DopoSoccer.COUNTRIES[country2.getSelectedIndex()];</span>
+
+<span class="fc" id="L387">            int matchLimit = (Integer) limit.getValue();</span>
+
+<span class="fc" id="L389">            String stadiumSize =</span>
+<span class="fc" id="L390">                    (String) resolution.getSelectedItem();</span>
+
+<span class="fc bfc" id="L392" title="All 2 branches covered.">            if (againstMachine) {</span>
+
+<span class="fc" id="L394">                boolean machineLeft =</span>
+<span class="fc" id="L395">                        machineSide.getSelectedItem().equals(&quot;Izquierda&quot;);</span>
+
+<span class="fc" id="L397">                String strategy =</span>
+<span class="fc" id="L398">                        (String) machineStrategy.getSelectedItem();</span>
+
+                // Identificar el personaje del humano
+<span class="fc bfc" id="L401" title="All 2 branches covered.">                String humanCountry = machineLeft</span>
+<span class="fc" id="L402">                        ? countryRight</span>
+<span class="fc" id="L403">                        : countryLeft;</span>
+
+                // Identificar el personaje de la máquina
+<span class="fc bfc" id="L406" title="All 2 branches covered.">                String machineCountry = machineLeft</span>
+<span class="fc" id="L407">                        ? countryLeft</span>
+<span class="fc" id="L408">                        : countryRight;</span>
+
+                // El nombre del humano depende de su lado
+<span class="fc bfc" id="L411" title="All 2 branches covered.">                String humanName = machineLeft</span>
+<span class="fc" id="L412">                        ? name2.getText()</span>
+<span class="fc" id="L413">                        : name1.getText();</span>
+
+<span class="fc" id="L415">                game.startMachineMatch(</span>
+                        humanName,
+                        humanCountry,
+                        machineCountry,
+                        type,
+                        matchLimit,
+                        stadiumSize,
+                        machineLeft,
+                        strategy
+                );
+
+<span class="fc" id="L426">            } else {</span>
+
+<span class="fc" id="L428">                game.startNewMatch(</span>
+<span class="fc" id="L429">                        name1.getText(),</span>
+                        countryLeft,
+<span class="fc" id="L431">                        name2.getText(),</span>
+                        countryRight,
+                        type,
+                        matchLimit,
+                        stadiumSize
+                );
+            }
+
+<span class="fc" id="L439">            Stadium stadium = game.getCurrentMatch().getStadium();</span>
+
+<span class="fc" id="L441">            gamePanel.setPreferredSize(</span>
+                    new Dimension(
+<span class="fc" id="L443">                            stadium.getWidth(),</span>
+<span class="fc" id="L444">                            stadium.getHeight()</span>
+                    )
+            );
+
+<span class="fc" id="L448">            showScreen(GAME);</span>
+<span class="fc" id="L449">            gamePanel.start();</span>
+
+<span class="nc" id="L451">        } catch (DopoSoccerException e) {</span>
+<span class="nc" id="L452">            showError(e);</span>
+<span class="fc" id="L453">        }</span>
+<span class="fc" id="L454">    }</span>
+
+
+    private void updatePlayerLabels() {
+
+<span class="fc bfc" id="L459" title="All 2 branches covered.">        if (!againstMachine) {</span>
+<span class="fc" id="L460">            playerBox1.setBorder(</span>
+<span class="fc" id="L461">                BorderFactory.createTitledBorder(&quot;J1 (A D W S Q)&quot;)</span>
+            );
+
+<span class="fc" id="L464">            playerBox2.setBorder(</span>
+<span class="fc" id="L465">                BorderFactory.createTitledBorder(&quot;J2 (Flechas + Ctrl derecho)&quot;)</span>
+            );
+
+<span class="fc" id="L468">            name1.setEnabled(true);</span>
+<span class="fc" id="L469">            name2.setEnabled(true);</span>
+
+        } else {
+
+<span class="fc" id="L473">            boolean machineLeft =</span>
+<span class="fc" id="L474">                    machineSide.getSelectedItem().equals(&quot;Izquierda&quot;);</span>
+
+<span class="fc" id="L476">            playerBox1.setBorder(</span>
+<span class="fc" id="L477">                BorderFactory.createTitledBorder(</span>
+<span class="fc bfc" id="L478" title="All 2 branches covered.">                    machineLeft ? &quot;J1 - Máquina&quot; : &quot;J1 - Humano (A D W S Q)&quot;</span>
+                )
+            );
+
+<span class="fc" id="L482">            playerBox2.setBorder(</span>
+<span class="fc" id="L483">                BorderFactory.createTitledBorder(</span>
+<span class="fc bfc" id="L484" title="All 2 branches covered.">                    machineLeft ? &quot;J2 - Humano (Flechas + Ctrl derecho)&quot;</span>
+<span class="fc" id="L485">                                : &quot;J2 - Máquina&quot;</span>
+                )
+            );
+
+<span class="fc bfc" id="L489" title="All 2 branches covered.">            name1.setEnabled(!machineLeft);</span>
+<span class="fc" id="L490">            name2.setEnabled(machineLeft);</span>
+        }
+
+<span class="fc" id="L493">        playerBox1.revalidate();</span>
+<span class="fc" id="L494">        playerBox2.revalidate();</span>
+<span class="fc" id="L495">        playerBox1.repaint();</span>
+<span class="fc" id="L496">        playerBox2.repaint();</span>
+<span class="fc" id="L497">    }</span>
+
+
+    /**
+     * Opens the pause menu allowing the user to return, save, or finish the match.
+     */
+
+    public void showPauseMenu() {
+<span class="nc" id="L505">        game.pauseMatch();</span>
+
+<span class="nc" id="L507">        String[] options = {&quot;Volver&quot;, &quot;Guardar&quot;, &quot;Finalizar&quot;};</span>
+
+<span class="nc" id="L509">        int choice = JOptionPane.showOptionDialog(</span>
+            this, &quot;Juego en pausa&quot;, &quot;Pausa&quot;,
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.PLAIN_MESSAGE,
+            null, options, options[0]
+        );
+
+<span class="nc bnc" id="L516" title="All 2 branches missed.">        if (choice == 1) {</span>
+<span class="nc" id="L517">            JFileChooser chooser = new JFileChooser();</span>
+<span class="nc" id="L518">            int result = chooser.showSaveDialog(this);</span>
+
+<span class="nc bnc" id="L520" title="All 2 branches missed.">            if (result == JFileChooser.APPROVE_OPTION) {</span>
+<span class="nc" id="L521">                File file = chooser.getSelectedFile();</span>
+
+<span class="nc bnc" id="L523" title="All 2 branches missed.">                if (!file.getName().toLowerCase().endsWith(&quot;.dat&quot;)) {</span>
+<span class="nc" id="L524">                    file = new File(file.getAbsolutePath() + &quot;.dat&quot;);</span>
+                }
+
+                
+<span class="nc" id="L528">                boolean guardar = true;</span>
+
+<span class="nc bnc" id="L530" title="All 2 branches missed.">                if (file.exists()) {</span>
+<span class="nc" id="L531">                    int confirm = JOptionPane.showConfirmDialog(</span>
+                        this,
+                        &quot;El archivo ya existe. ¿Deseas reemplazarlo?&quot;,
+                        &quot;Confirmar guardado&quot;,
+                        JOptionPane.YES_NO_OPTION
+                    );
+
+<span class="nc bnc" id="L538" title="All 2 branches missed.">                    if (confirm != JOptionPane.YES_OPTION) {</span>
+<span class="nc" id="L539">                        guardar = false;</span>
+                    }
+                }
+
+<span class="nc bnc" id="L543" title="All 2 branches missed.">                if (guardar) {</span>
+                    try {
+<span class="nc" id="L545">                        game.saveGame(file.getAbsolutePath());</span>
+
+<span class="nc" id="L547">                        JOptionPane.showMessageDialog(</span>
+                            this,
+                            &quot;Partida guardada correctamente.&quot;
+                        );
+
+<span class="nc" id="L552">                    } catch (DopoSoccerException e) {</span>
+<span class="nc" id="L553">                        showError(e);</span>
+<span class="nc" id="L554">                    }</span>
+                }
+            }
+
+<span class="nc bnc" id="L558" title="All 2 branches missed.">        } else if (choice == 2) {</span>
+<span class="nc" id="L559">            game.finishMatch();</span>
+<span class="nc" id="L560">            gamePanel.requestFocusInWindow();</span>
+<span class="nc" id="L561">            return;</span>
+        }
+
+<span class="nc" id="L564">        game.resumeMatch();</span>
+<span class="nc" id="L565">        gamePanel.requestFocusInWindow();</span>
+<span class="nc" id="L566">    }</span>
+
+
+    
+    private void loadMatch() {
+<span class="nc" id="L571">        JFileChooser chooser = new JFileChooser();</span>
+<span class="nc" id="L572">        chooser.setDialogTitle(&quot;Cargar partida&quot;);</span>
+
+<span class="nc" id="L574">        int result = chooser.showOpenDialog(this);</span>
+
+<span class="nc bnc" id="L576" title="All 2 branches missed.">        if (result == JFileChooser.APPROVE_OPTION) {</span>
+<span class="nc" id="L577">            File file = chooser.getSelectedFile();</span>
+
+            try {
+<span class="nc" id="L580">                game.loadGame(file.getAbsolutePath());</span>
+
+<span class="nc" id="L582">                Stadium stadium = game.getCurrentMatch().getStadium();</span>
+
+<span class="nc" id="L584">                gamePanel.setPreferredSize(</span>
+                    new Dimension(
+<span class="nc" id="L586">                        stadium.getWidth(),</span>
+<span class="nc" id="L587">                        stadium.getHeight()</span>
+                    )
+                );
+
+<span class="nc" id="L591">                showScreen(GAME);</span>
+
+<span class="nc" id="L593">                game.resumeMatch();</span>
+
+<span class="nc" id="L595">                gamePanel.start();</span>
+<span class="nc" id="L596">                gamePanel.requestFocusInWindow();</span>
+
+<span class="nc" id="L598">            } catch (DopoSoccerException e) {</span>
+<span class="nc" id="L599">                showError(e);</span>
+<span class="nc" id="L600">            }</span>
+        }
+<span class="nc" id="L602">    }</span>
+
+    /**
+     * Displays the winner, final score, and earned points summary dialog.
+     */
+    public void showWinner() {
+<span class="nc" id="L608">        Match match = game.getCurrentMatch();</span>
+<span class="nc" id="L609">        Player left = match.getLeftPlayer();</span>
+<span class="nc" id="L610">        Player right = match.getRightPlayer();</span>
+<span class="nc" id="L611">        Player winner = match.getWinner();</span>
+<span class="nc bnc" id="L612" title="All 2 branches missed.">        String title = winner == null ? &quot;Empate&quot; : &quot;Ganador: &quot; + winner.getName();</span>
+<span class="nc" id="L613">        String message = title + &quot;\n&quot;</span>
+<span class="nc" id="L614">            + left.getName() + &quot;: &quot; + left.getScore() + &quot;  -  &quot; + right.getName() + &quot;: &quot; + right.getScore() + &quot;\n\n&quot;</span>
+            + &quot;Puntos obtenidos:\n&quot;
+<span class="nc" id="L616">            + left.getName() + &quot;: +&quot; + left.getMatchPoints() + &quot;  (total: &quot; + left.getPoints() + &quot;)\n&quot;</span>
+<span class="nc" id="L617">            + right.getName() + &quot;: +&quot; + right.getMatchPoints() + &quot;  (total: &quot; + right.getPoints() + &quot;)&quot;;</span>
+<span class="nc" id="L618">        String[] options = {&quot;Jugar de nuevo&quot;, &quot;Menú principal&quot;};</span>
+<span class="nc" id="L619">        int choice = JOptionPane.showOptionDialog(this, message, &quot;Fin del partido&quot;,</span>
+            JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+<span class="nc bnc" id="L621" title="All 2 branches missed.">        if (choice == 0) {</span>
+<span class="nc" id="L622">            startMatch();</span>
+        } else {
+<span class="nc" id="L624">            showMenuStep(0);</span>
+<span class="nc" id="L625">            showScreen(MENU);</span>
+        }
+<span class="nc" id="L627">    }</span>
+
+    /**
+     * Shows the menu to upgrade the stats of a player with his saved points.
+     * The player writes his name and then chooses which stat to upgrade.
+     */
+    private void showUpgradeMenu() {
+<span class="nc" id="L634">        String[] savedPlayers = game.getSavedPlayers();</span>
+<span class="nc bnc" id="L635" title="All 2 branches missed.">        if (savedPlayers.length == 0) {</span>
+<span class="nc" id="L636">            JOptionPane.showMessageDialog(this,</span>
+                &quot;Todavía no hay jugadores con progreso guardado.\n&quot;
+                + &quot;Juega un partido: al terminar, los puntos se guardan con el nombre de cada jugador\n&quot;
+                + &quot;(100 al ganador y 25 al perdedor). La primera mejora cuesta 500 puntos.&quot;,
+                &quot;Mejorar estadísticas&quot;, JOptionPane.INFORMATION_MESSAGE);
+<span class="nc" id="L641">            return;</span>
+        }
+<span class="nc" id="L643">        String name = (String) JOptionPane.showInputDialog(this, &quot;Escoge el jugador:&quot;, &quot;Mejorar estadísticas&quot;,</span>
+            JOptionPane.QUESTION_MESSAGE, null, savedPlayers, savedPlayers[0]);
+<span class="nc bnc" id="L645" title="All 2 branches missed.">        if (name == null) return;   // el usuario cerró la ventana</span>
+
+<span class="nc" id="L647">        String[] stats = {&quot;speed&quot;, &quot;jump&quot;, &quot;kick&quot;, &quot;survival&quot;};</span>
+<span class="nc" id="L648">        String[] options = {&quot;Speed&quot;, &quot;Jump&quot;, &quot;Kick&quot;, &quot;Survival&quot;, &quot;Salir&quot;};</span>
+
+        try {
+<span class="nc" id="L651">            Player profile = game.getProfile(name);</span>
+<span class="nc" id="L652">            boolean keepGoing = true;</span>
+
+<span class="nc bnc" id="L654" title="All 2 branches missed.">            while (keepGoing) {</span>
+<span class="nc" id="L655">                String info = &quot;Jugador: &quot; + profile.getName() + &quot;\n&quot;</span>
+<span class="nc" id="L656">                    + &quot;Puntos: &quot; + profile.getPoints() + &quot;\n\n&quot;;</span>
+<span class="nc bnc" id="L657" title="All 2 branches missed.">                for (String stat : stats) {</span>
+<span class="nc" id="L658">                    info += stat + &quot;: &quot; + profile.getStat(stat);</span>
+<span class="nc bnc" id="L659" title="All 2 branches missed.">                    if (profile.getStat(stat) &lt; Player.MAX_STAT) {</span>
+<span class="nc" id="L660">                        info += &quot;   (siguiente punto: &quot; + profile.getUpgradeCost(stat) + &quot; pts)&quot;;</span>
+                    } else {
+<span class="nc" id="L662">                        info += &quot;   (máximo)&quot;;</span>
+                    }
+<span class="nc" id="L664">                    info += &quot;\n&quot;;</span>
+                }
+<span class="nc" id="L666">                info += &quot;\n¿Qué estadística quieres mejorar?&quot;;</span>
+
+<span class="nc" id="L668">                int choice = JOptionPane.showOptionDialog(this, info, &quot;Mejorar estadísticas&quot;,</span>
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[4]);
+
+<span class="nc bnc" id="L671" title="All 4 branches missed.">                if (choice &lt; 0 || choice == 4) {</span>
+<span class="nc" id="L672">                    keepGoing = false;</span>
+                } else {
+                    try {
+<span class="nc" id="L675">                        game.upgradeStat(name, stats[choice]);</span>
+<span class="nc" id="L676">                    } catch (DopoSoccerException e) {</span>
+<span class="nc" id="L677">                        showError(e);   // por ejemplo: no tiene puntos suficientes</span>
+<span class="nc" id="L678">                    }</span>
+                }
+<span class="nc" id="L680">            }</span>
+<span class="nc" id="L681">        } catch (DopoSoccerException e) {</span>
+<span class="nc" id="L682">            showError(e);</span>
+<span class="nc" id="L683">        }</span>
+<span class="nc" id="L684">    }</span>
+
+    /**
+     * Switches the active card layout screen and resizes the window container.
+     * @param screen the name of the screen to display
+     */
+    private void showScreen(String screen) {
+<span class="fc" id="L691">        cards.show(container, screen);</span>
+<span class="fc bfc" id="L692" title="All 2 branches covered.">        if (!screen.equals(GAME)) {</span>
+<span class="fc bfc" id="L693" title="All 2 branches covered.">            Component current = screen.equals(MENU) ? container.getComponent(0) : container.getComponent(1);</span>
+<span class="fc" id="L694">            gamePanel.setPreferredSize(current.getPreferredSize());</span>
+        }
+<span class="fc" id="L696">        pack();</span>
+<span class="fc" id="L697">        setLocationRelativeTo(null);</span>
+<span class="fc" id="L698">    }</span>
+
+    /**
+     * Displays a clear error message dialog to the user and records the exception in the log file.
+     * @param e the DopSoccerException error to handle
+     */
+    private void showError(DopoSoccerException e) {
+<span class="nc" id="L705">        JOptionPane.showMessageDialog(this, e.getMessage(), &quot;Error&quot;, JOptionPane.ERROR_MESSAGE);</span>
+<span class="nc" id="L706">        Log.record(e);</span>
+<span class="nc" id="L707">    }</span>
+
+    /**
+     * Main entry point of the application.
+     * @param args command-line arguments
+     */
+    public static void main(String[] args) {
+<span class="nc" id="L714">        DopoSoccerGUI gui=new DopoSoccerGUI();</span>
+<span class="nc" id="L715">        gui.setVisible(true);</span>
+<span class="nc" id="L716">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

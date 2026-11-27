@@ -1,8 +1,8 @@
 package domain;
 
 /**
- * Class exception for the DopoSoccer game.
- * Possible error messages are defined as constant strings.
+ * Custom exception class for the DopoSoccer game. Possible error messages are
+ * defined as constant strings.
  */
 public class DopoSoccerException extends Exception {
 
@@ -22,9 +22,11 @@ public class DopoSoccerException extends Exception {
     public static final String INVALID_NAME = "Debe escribir el nombre del jugador.";
     public static final String SAME_NAMES = "Los dos jugadores deben tener nombres distintos.";
     public static final String PROGRESS_ERROR = "Ocurrió un error al guardar el progreso de los jugadores.";
+
     /**
-     * Constructs a new DopoSoccerException with the specified error message.
-     * @param message one of the predefined error messages in this class
+     * Creates a new DopoSoccerException with the given error message.
+     *
+     * @param message the error message describing the problem
      */
     public DopoSoccerException(String message) {
         super(message);

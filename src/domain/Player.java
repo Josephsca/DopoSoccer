@@ -1,8 +1,9 @@
 package domain;
 
 /**
- * Represents a match player. Controls a character (country), has health, a power bar,
- * and attributes (speed, jump, kick, survival) ranging from 1 to 10.
+ * Represents a match player. It controls a country character, tracks health
+ * and power bar levels, and manages upgradeable attributes (speed, jump,
+ * kick, and survival) from 1 to 10.
  */
 public class Player extends Entity {
 
@@ -19,7 +20,7 @@ public class Player extends Entity {
     public static final double BASE_JUMP = 13;
     public static final double GRAVITY = 0.7;
     public static final int KICK_REACH = 25;
-    /** Segundos que dura una patada: se ve la pose de patear y no se puede volver a patear. */
+    /** Duration of a kick animation in seconds before the player can kick again. */
     public static final double KICK_TIME = 0.3;
     private String name;
     private int score;
@@ -44,10 +45,11 @@ public class Player extends Entity {
     private Character affectedBy;   
 
     /**
-     * Constructs a new player with all attributes set to 1 and maximum health.
-     * @param name the name of the player
-     * @param character the chosen character (country)
-     * @param leftSide true if the player plays on the left side
+     * Creates a new player with all attributes set to level 1 and full health.
+     *
+     * @param name      the name of the player
+     * @param character the selected country character
+     * @param leftSide  true if the player plays on the left side, false for the right side
      */
     public Player(String name, Character character, boolean leftSide) {
         super(0, 0, WIDTH, HEIGHT);
@@ -63,7 +65,8 @@ public class Player extends Entity {
     }
 
     /**
-     * Prepares the player to start a match with a zero score, empty power bar, maximum health, and no active effects.
+     * Resets the player's match state with zero goals, an empty power bar,
+     * maximum health, and no active effects.
      */
     public void startMatch() {
         score = 0;
@@ -77,7 +80,8 @@ public class Player extends Entity {
     }
 
     /**
-     * Advances the player simulation by one frame, handling stun and effect timers, power bar charging, and movement.
+     * Advances the player simulation by one frame, updating stun and effect
+     * timers, charging the power bar, and applying movement and gravity.
      */
     @Override
     public void update() {
@@ -104,9 +108,10 @@ public class Player extends Entity {
     }
 
     /**
-     * Stops jumping when the player touches the ground boundary.
-     * @param normalX the X component of the boundary normal direction (-1, 0, or 1)
-     * @param normalY the Y component of the boundary normal direction (-1, 0, or 1)
+     * Stops jumping when the player lands on the ground boundary.
+     *
+     * @param normalX the X direction of the boundary (-1, 0, or 1)
+     * @param normalY the Y direction of the boundary (-1, 0, or 1)
      */
     @Override
     public void hitBoundary(double normalX, double normalY) {
@@ -115,7 +120,7 @@ public class Player extends Entity {
     }
 
     /**
-     * Moves the player to the left if action is permitted.
+     * Moves the player to the left if they are allowed to act.
      */
     public void moveLeft() {
         if (!canAct()) return;
@@ -123,7 +128,7 @@ public class Player extends Entity {
     }
 
     /**
-     * Moves the player to the right if action is permitted.
+     * Moves the player to the right if they are allowed to act.
      */
     public void moveRight() {
         if (!canAct()) return;
@@ -131,7 +136,8 @@ public class Player extends Entity {
     }
 
     /**
-     * Makes the player jump if action is permitted and they are not already jumping.
+     * Makes the player jump if they can act, are allowed to jump, and are on
+     * the ground.
      */
     public void jump() {
         if (!canAct() || !canJump || isJumping) return;
@@ -140,10 +146,11 @@ public class Player extends Entity {
     }
 
     /**
-     * Performs a kick action. If the ball is within reach, it propels the ball;
-     * otherwise, if the rival is within reach, it deals damage to the rival.
+     * Kicks the ball if it is in front and within reach, or damages the rival
+     * if the rival is within reach instead.
+     *
      * @param rival the opposing player
-     * @param ball the match ball
+     * @param ball  the match ball
      */
     public void kick(Player rival, Ball ball) {
         if (!canAct() || isKicking()) return;   // no se puede patear otra vez hasta que termine la patada
@@ -162,8 +169,9 @@ public class Player extends Entity {
 
 
     /**
-     * Handles the player touching the ball with their body or head.
-     * If the aura is active, the power shot is executed.
+     * Handles contact between the player's body or head and the ball, firing
+     * the power shot if the aura is active.
+     *
      * @param ball the match ball
      */
     public void touchBall(Ball ball) {
@@ -192,14 +200,16 @@ public class Player extends Entity {
     }
 
     /**
-     * Increments the player's score by one goal.
+     * Increases the player's goal score by one.
      */
     public void addGoal() {
         score++;
     }
 
     /**
-     * Receives damage. Health never drops below 0; if it reaches 0, the player becomes stunned.
+     * Reduces the player's health by the given damage and stuns them if health
+     * reaches zero.
+     *
      * @param damage the amount of damage received
      */
     public void receiveDamage(double damage) {
@@ -209,7 +219,8 @@ public class Player extends Entity {
     }
 
     /**
-     * Activates the special power if the power bar is full and the player has no active aura or stun.
+     * Activates the power aura when the power bar is full and the player is not
+     * stunned.
      */
     public void activatePower() {
         if (powerBar >= POWER_FULL && !hasAura && !isStunned()) {
@@ -219,8 +230,9 @@ public class Player extends Entity {
     }
 
     /**
-     * Charges the power bar based on elapsed seconds.
-     * @param seconds the seconds of charge time
+     * Charges the power bar according to the given number of seconds.
+     *
+     * @param seconds the elapsed charge time in seconds
      */
     public void chargePowerBar(double seconds) {
         powerBar = Math.min(POWER_FULL, powerBar + POWER_FULL * seconds / POWER_CHARGE_TIME);
@@ -228,34 +240,36 @@ public class Player extends Entity {
 
     /**
      * Checks whether the player is currently stunned.
-     * @return true if stunned, false otherwise
+     *
+     * @return true if the player is stunned, false otherwise
      */
     public boolean isStunned() {
         return stunTime > 0;
     }
 
     /**
-     * Gets the maximum health limit based on the survival stat.
-     * @return the maximum life value
+     * Returns the maximum health of the player based on their survival level.
+     *
+     * @return the maximum health value
      */
-    /** vidaMax = 100 * (1 + 0.10 * (Survival - 1)) */
     public double getMaxLife() {
         return BASE_LIFE * (1 + 0.10 * (survival - 1));
     }
 
     /**
-     * Gets the kick damage multiplier based on the kick stat.
-     * @return the kick multiplier value
+     * Returns the kick damage multiplier based on the player's kick level.
+     *
+     * @return the kick damage multiplier
      */
-    /** multiplicadorKick = 1 + 0.10 * (Kick - 1) */
     public double getKickMultiplier() {
         return 1 + 0.10 * (kickStat - 1);
     }
 
     /**
-     * Upgrades a specified attribute by 1 point using the player's points.
-     * @param stat the name of the attribute to upgrade ("speed", "jump", "kick", or "survival")
-     * @throws DopoSoccerException if the stat does not exist, has reached the maximum level of 10, or points are insufficient
+     * Increases the given attribute by one level using the player's saved points.
+     *
+     * @param stat the attribute name ("speed", "jump", "kick", or "survival")
+     * @throws DopoSoccerException if the attribute name is invalid, already at max level, or points are insufficient
      */
     public void upgradeStat(String stat) throws DopoSoccerException {
         int cost = getUpgradeCost(stat);
@@ -271,20 +285,22 @@ public class Player extends Entity {
     }
 
     /**
-     * Calculates the cost for the next upgrade of a specified attribute.
-     * @param stat the name of the attribute
-     * @return the upgrade cost value
-     * @throws DopoSoccerException if the stat is invalid
+     * Calculates the point cost needed to upgrade the given attribute.
+     *
+     * @param stat the attribute name ("speed", "jump", "kick", or "survival")
+     * @return the required number of points
+     * @throws DopoSoccerException if the attribute name is invalid or null
      */
     public int getUpgradeCost(String stat) throws DopoSoccerException {
         return BASE_UPGRADE_COST * (int) Math.pow(2, getStat(stat) - 1);
     }
 
     /**
-     * Gets the current value of a specified attribute.
-     * @param stat the name of the attribute
+     * Returns the current level of the given attribute.
+     *
+     * @param stat the attribute name ("speed", "jump", "kick", or "survival")
      * @return the current attribute level
-     * @throws DopoSoccerException if the stat is invalid or null
+     * @throws DopoSoccerException if the attribute name is invalid or null
      */
     public int getStat(String stat) throws DopoSoccerException {
         if (stat == null) throw new DopoSoccerException(DopoSoccerException.INVALID_STAT);
@@ -298,7 +314,8 @@ public class Player extends Entity {
     }
 
     /**
-     * Adds points to the player's currency balance.
+     * Adds points to both the player's total balance and current match points.
+     *
      * @param newPoints the number of points to add
      */
     public void addPoints(int newPoints) {
@@ -307,9 +324,10 @@ public class Player extends Entity {
     }
 
     /**
-     * Copies the saved progress (points and stats) of another player into this one.
-     * It is used to keep the progress of a player between matches.
-     * @param saved the player with the saved progress
+     * Copies saved points and attribute levels from a stored profile into this
+     * player.
+     *
+     * @param saved the player profile containing saved progress
      */
     public void copyProgress(Player saved) {
         points = saved.points;
@@ -321,16 +339,19 @@ public class Player extends Entity {
     }
 
     /**
-     * Gets how many pixels the player moves in one frame (depends on speed and effects).
-     * @return the size of one step
+     * Returns the horizontal distance in pixels the player moves per frame.
+     *
+     * @return the step size in pixels
      */
     public int getStep() {
         return (int) Math.round(getMoveSpeed() * speedFactor);
     }
 
     /**
-     * Applies a new effect to the player. Effects do not stack; the new one replaces the previous one.
-     * @param source the character whose power shot caused the effect
+     * Applies a special power effect from a rival character, replacing any
+     * previous active effect.
+     *
+     * @param source the character whose power shot hit this player
      */
     public void setEffect(Character source) {
         clearEffect();
@@ -339,7 +360,7 @@ public class Player extends Entity {
     }
 
     /**
-     * Removes any active effect and restores the player to normal status.
+     * Clears any active power effect and restores normal movement and jumping.
      */
     public void clearEffect() {
         affectedBy = null;
@@ -350,7 +371,9 @@ public class Player extends Entity {
     }
 
     /**
-     * Resets the player to a stationary state at a specific position.
+     * Moves the player to the given coordinates and resets their velocity and
+     * jump state.
+     *
      * @param x the new X coordinate
      * @param y the new Y coordinate
      */
@@ -363,7 +386,8 @@ public class Player extends Entity {
     }
 
     /**
-     * Gets the direction of the player's attack.
+     * Returns the horizontal direction in which the player attacks.
+     *
      * @return 1 if the player is on the left side, -1 if on the right side
      */
     public int getAttackDirection() {
@@ -375,25 +399,28 @@ public class Player extends Entity {
     }
 
     /**
-     * Checks if the player can perform an action.
-     * @return true if the player can act, false otherwise
+     * Checks whether the player is able to move, jump, or kick.
+     *
+     * @return true if the player is not stunned and can move, false otherwise
      */
     private boolean canAct() {
         return !isStunned() && canMove;
     }
 
     /**
-     * Calculates the movement speed based on the speed stat.
-     * @return the calculated movement speed
+     * Calculates the base movement speed from the player's speed level.
+     *
+     * @return the movement speed in pixels per frame
      */
     private double getMoveSpeed() {
         return BASE_SPEED * (1 + 0.10 * (speed - 1));
     }
 
     /**
-     * Checks whether another entity is within the player's reach.
+     * Checks whether another entity is within the player's kick reach.
+     *
      * @param e the target entity
-     * @return true if within reach, false otherwise
+     * @return true if the entity is within reach, false otherwise
      */
     private boolean inReach(Entity e) {
         return e.getPosX() < posX + width + KICK_REACH
@@ -403,7 +430,8 @@ public class Player extends Entity {
     }
 
     /**
-     * Triggers the power shot on the ball and resets the aura.
+     * Launches the character's power shot on the ball and consumes the active aura.
+     *
      * @param ball the match ball
      */
     private void firePower(Ball ball) {
@@ -412,123 +440,143 @@ public class Player extends Entity {
         character.powerShot(ball);
     }
 
-   /**
-     * Gets the player's name.
-     * @return the name string
+    /**
+     * Returns the player's name.
+     *
+     * @return the player name
      */
     public String getName() { return name; }
 
     /**
-     * Gets the player's current goal score.
-     * @return the score value
+     * Returns the number of goals scored by the player in the current match.
+     *
+     * @return the current goal score
      */
     public int getScore() { return score; }
 
     /**
-     * Checks whether the player is currently jumping.
+     * Checks whether the player is currently in the air from a jump.
+     *
      * @return true if jumping, false otherwise
      */
     public boolean isJumping() { return isJumping; }
 
     /**
-     * Gets the player's current health.
-     * @return the life value
+     * Returns the player's current health.
+     *
+     * @return the current health value
      */
     public double getLife() { return life; }
 
     /**
-     * Gets the player's power bar progress value.
+     * Returns the current charge level of the player's power bar.
+     *
      * @return the power bar value
      */
     public double getPowerBar() { return powerBar; }
 
     /**
-     * Checks whether the player has an active power aura.
+     * Checks whether the player has an active power aura ready to fire.
+     *
      * @return true if the aura is active, false otherwise
      */
     public boolean hasAura() { return hasAura; }
 
     /**
-     * Gets the remaining stun time in seconds.
-     * @return the stun time value
+     * Returns the remaining stun duration in seconds.
+     *
+     * @return the remaining stun time
      */
     public double getStunTime() { return stunTime; }
 
     /**
-     * Gets the remaining effect time in seconds.
-     * @return the effect time value
+     * Returns the remaining duration of the active power effect in seconds.
+     *
+     * @return the remaining effect time
      */
     public double getEffectTime() { return effectTime; }
 
     /**
-     * Gets the player's accumulated points currency.
-     * @return the points value
+     * Returns the player's total saved points.
+     *
+     * @return the total points balance
      */
     public int getPoints() { return points; }
 
     /**
-     * Gets the points earned in the current match only.
-     * @return the points earned in this match
+     * Returns the points earned by the player in the current match.
+     *
+     * @return the match points earned
      */
     public int getMatchPoints() { return matchPoints; }
 
     /**
-     * Checks whether the player is on the left side of the field.
-     * @return true if on the left side, false otherwise
+     * Checks whether the player plays on the left side of the stadium.
+     *
+     * @return true if on the left side, false if on the right side
      */
     public boolean isLeftSide() { return leftSide; }
 
     /**
-     * Gets the current speed factor multiplier affecting the player.
-     * @return the speed factor value
+     * Returns the current movement speed multiplier affecting the player.
+     *
+     * @return the speed factor
      */
     public double getSpeedFactor() { return speedFactor; }
 
     /**
-     * Checks whether movement is allowed.
+     * Checks whether the player is allowed to move horizontally.
+     *
      * @return true if movement is allowed, false otherwise
      */
     public boolean canMove() { return canMove; }
 
     /**
-     * Checks whether jumping is allowed.
+     * Checks whether the player is allowed to jump.
+     *
      * @return true if jumping is allowed, false otherwise
      */
     public boolean canJump() { return canJump; }
 
     /**
-     * Gets the character associated with this player.
-     * @return the Character object
+     * Returns the country character controlled by the player.
+     *
+     * @return the player's character
      */
     public Character getCharacter() { return character; }
 
     /**
-     * Gets the character that caused the active effect on this player.
-     * @return the Character source object, or null if unaffected
+     * Returns the character that applied the current effect to this player.
+     *
+     * @return the source character, or null if no effect is active
      */
     public Character getAffectedBy() { return affectedBy; }
 
     /**
-     * Checks whether the player is currently moving or kicking.
-     * @return true if moving horizontally, false otherwise
+     * Checks whether the player is currently performing a kick.
+     *
+     * @return true if kicking, false otherwise
      */
     public boolean isKicking() { return kickTime > 0; }
 
     /**
-     * Sets whether movement is permitted.
-     * @param canMove true to allow movement, false to restrict it
+     * Sets whether the player is allowed to move horizontally.
+     *
+     * @param canMove true to allow movement, false to block it
      */
     public void setCanMove(boolean canMove) { this.canMove = canMove; }
 
     /**
-     * Sets whether jumping is permitted.
-     * @param canJump true to allow jumping, false to restrict it
+     * Sets whether the player is allowed to jump.
+     *
+     * @param canJump true to allow jumping, false to block it
      */
     public void setCanJump(boolean canJump) { this.canJump = canJump; }
 
     /**
-     * Sets the speed factor multiplier for the player.
-     * @param speedFactor the new speed factor value
+     * Sets the movement speed multiplier affecting the player.
+     *
+     * @param speedFactor the new speed factor
      */
     public void setSpeedFactor(double speedFactor) { this.speedFactor = speedFactor; }
 }

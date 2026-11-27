@@ -117,19 +117,6 @@ public class DopoSoccerTest {
         assertFalse(game.isSound());
     }
 
-
-
-
-        /**
-     * Tears down the test fixture.
-     *
-     * Called after every test case method.
-     */
-    @AfterEach
-    public void tearDown()
-    {
-    }
-
     @Test
     public void shouldNotMoveWhilePaused() throws DopoSoccerException {
         DopoSoccer game = new DopoSoccer();
@@ -172,15 +159,15 @@ public class DopoSoccerTest {
         assertFalse(game.getCurrentMatch().isGameOver());
     }
 
-    // ---------- Casos extremos ----------
+    //  Casos extremos
 
     @Test
     public void shouldNotControlMachineFromKeyboard() throws DopoSoccerException {
         DopoSoccer game = new DopoSoccer();
         game.startMachineMatch("Ana", "Cameroon", "USA", DopoSoccer.GOALS, 3, Stadium.MEDIUM, false, "Torpe");
         assertTrue(game.getCurrentMatch().getRightPlayer() instanceof Machine);
-        game.getCurrentMatch().getRightPlayer().chargePowerBar(10);   // barra llena
-        game.activatePower(2);                        // jugador 2 es la máquina
+        game.getCurrentMatch().getRightPlayer().chargePowerBar(10); 
+        game.activatePower(2);                       
         assertFalse(game.getCurrentMatch().getRightPlayer().hasAura());
     }
 
@@ -203,7 +190,7 @@ public class DopoSoccerTest {
         game.kick(0);
         game.jump(-1);
         game.update();
-        assertEquals(1, game.getCurrentMatch().getTimer());   // no falló: el partido siguió normal
+        assertEquals(1, game.getCurrentMatch().getTimer());  
     }
 
     @Test
@@ -244,7 +231,7 @@ public class DopoSoccerTest {
         } catch (DopoSoccerException e) {
             assertTrue(e.getMessage().startsWith(DopoSoccerException.LOAD_ERROR_MESSAGE));
         }
-        assertNotNull(game.getCurrentMatch());   // aunque falle, sigue teniendo su partido
+        assertNotNull(game.getCurrentMatch());   
     }
 
     @Test
@@ -278,5 +265,15 @@ public class DopoSoccerTest {
         } catch (DopoSoccerException e) {
             assertTrue(e.getMessage().startsWith(DopoSoccerException.INVALID_STRATEGY));
         }
+    }
+
+    /**
+     * Tears down the test fixture.
+     *
+     * Called after every test case method.
+     */
+    @AfterEach
+    public void tearDown()
+    {
     }
 }

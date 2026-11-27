@@ -1,15 +1,17 @@
 package domain;
 import java.io.Serializable;
+
 /**
- * Defines the rule that determines when a match ends.
- * To create a new match type, simply implement this interface.
+ * Defines the rule that decides when a match ends. Implement this interface to
+ * add a new match type.
  */
 public interface WinCondition extends Serializable{
 
     /**
-     * Checks whether the current match has ended based on the winning condition.
-     * @param match the match instance to inspect
-     * @return true if the match is over, false otherwise
+     * Checks whether the match is over according to this winning condition.
+     *
+     * @param match the current match
+     * @return true if the match has ended, false otherwise
      */
     public abstract boolean isGameOver(Match match);
 }

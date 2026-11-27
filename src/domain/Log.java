@@ -6,15 +6,20 @@ import java.util.logging.SimpleFormatter;
 import java.util.logging.Level;
 
 /**
- * Handles error logging for developers.
- * Each error is recorded in the DopoSoccer.log file inside the project folder.
+ * Handles error logging for developers by saving exception details into the
+ * DopoSoccer.log file inside the project folder.
  */
 public class Log{
+
+    /**
+     * Base name used for the logger and the log file.
+     */
     public static final String NAME ="DopoSoccer";
 
     /**
-     * Records the details of an error into the log file.
-     * @param e the exception error to be logged
+     * Records the details of an exception into the log file.
+     *
+     * @param e the exception to log
      */
     public static void record(Exception e){
         try{

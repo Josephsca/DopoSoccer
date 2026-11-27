@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.AfterEach;
+
 public class PlayerTest {
 
 
@@ -184,15 +186,15 @@ public class PlayerTest {
         assertEquals(125, player.getPoints());
     }
 
-    // ---------- Casos extremos ----------
+    // Casos extremos 
 
     @Test
     public void shouldIgnoreDamageWhileStunned() {
         Player player = new Player("J1", new Cameroon(), true);
         player.receiveDamage(100);
-        for (int i = 0; i < 2 * Match.FPS; i++) player.update();   // pasan 2 segundos aturdido
-        player.receiveDamage(50);                                   // un golpe más no alarga el aturdimiento
-        for (int i = 0; i < Match.FPS + 1; i++) player.update();   // completa los 3 segundos
+        for (int i = 0; i < 2 * Match.FPS; i++) player.update();  
+        player.receiveDamage(50);                             
+        for (int i = 0; i < Match.FPS + 1; i++) player.update();   
         assertFalse(player.isStunned());
         assertEquals(100, player.getLife(), 0.001);
     }
@@ -200,7 +202,7 @@ public class PlayerTest {
     @Test
     public void shouldBeStunnedWithManySmallHitsOnlyWhenLifeIsExactlyZero() {
         Player player = new Player("J1", new Cameroon(), true);
-        for (int i = 0; i < 9; i++) player.receiveDamage(11);   // 99 de daño
+        for (int i = 0; i < 9; i++) player.receiveDamage(11);   
         assertFalse(player.isStunned());
         assertEquals(1, player.getLife(), 0.001);
         player.receiveDamage(11);
@@ -215,7 +217,7 @@ public class PlayerTest {
         player.receiveDamage(100);
         player.activatePower();
         assertFalse(player.hasAura());
-        assertEquals(100, player.getPowerBar(), 0.001);   // no pierde la barra
+        assertEquals(100, player.getPowerBar(), 0.001); 
     }
 
     @Test
@@ -233,8 +235,8 @@ public class PlayerTest {
     @Test
     public void shouldReplaceEffectInsteadOfStacking() {
         Player player = new Player("J1", new SouthKorea(), true);
-        new Cameroon().applyEffect(player);           // electrocutado: no salta y va al 50 %
-        new USA().applyEffect(player);                // confusión reemplaza al rayo
+        new Cameroon().applyEffect(player);          
+        new USA().applyEffect(player);                
         assertTrue(player.canJump());
         assertEquals(1, player.getSpeedFactor(), 0.001);
         assertEquals("USA", player.getAffectedBy().getCountry());
@@ -256,8 +258,8 @@ public class PlayerTest {
             player.upgradeStat("survival");
             player.upgradeStat("kick");
         }
-        assertEquals(190, player.getMaxLife(), 0.001);        // Anexo 2: Survival 10
-        assertEquals(1.9, player.getKickMultiplier(), 0.001); // Anexo 2: Kick 10
+        assertEquals(190, player.getMaxLife(), 0.001);     
+        assertEquals(1.9, player.getKickMultiplier(), 0.001); 
     }
 
     @Test
@@ -265,7 +267,7 @@ public class PlayerTest {
         Player player = new Player("J1", new Cameroon(), true);
         player.addPoints(1_000_000);
         for (int i = 1; i < Player.MAX_STAT - 1; i++) player.upgradeStat("speed");
-        assertEquals(128000, player.getUpgradeCost("speed"));   // 500 x 2^8
+        assertEquals(128000, player.getUpgradeCost("speed"));   
         int before = player.getPoints();
         player.upgradeStat("speed");
         assertEquals(before - 128000, player.getPoints());
@@ -292,13 +294,22 @@ public class PlayerTest {
         Ball far = new Ball(3000, 3000, 14, 0.45);
         player.kick(rival, far);
         assertTrue(player.isKicking());
-        for (int i = 0; i < 5; i++) player.kick(rival, far);   // patadas repetidas no cuentan
+        for (int i = 0; i < 5; i++) player.kick(rival, far);   
         assertEquals(90, rival.getLife(), 0.001);
         for (int i = 0; i < Player.KICK_TIME * Match.FPS + 1; i++) player.update();
         assertFalse(player.isKicking());
-        rival.setPosX(player.getPosX() + player.getWidth() + 5);   // el jugador cayó por la gravedad:
-        rival.setPosY(player.getPosY());                            // ponemos al rival otra vez a su lado
+        rival.setPosX(player.getPosX() + player.getWidth() + 5);  
+        rival.setPosY(player.getPosY());                           
         player.kick(rival, far);
         assertEquals(80, rival.getLife(), 0.001);
+    }
+    /**
+     * Tears down the test fixture.
+     *
+     * Called after every test case method.
+     */
+    @AfterEach
+    public void tearDown()
+    {
     }
 }

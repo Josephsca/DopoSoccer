@@ -1,15 +1,28 @@
-
 package domain;
 
+/**
+ * Represents an advanced strategy for a machine player that switches between
+ * defense and attack based on the score, rival state, and ball position.
+ */
 public class ExpertStrategy implements MachineStrategy {
 
     private static final long serialVersionUID = 1L;
 
     private int frame = 0;
 
+    /**
+     * Creates a new ExpertStrategy with default initial values.
+     */
     public ExpertStrategy() {
     }
 
+    /**
+     * Decides whether to defend or chase the ball, jumps or kicks when close to
+     * the ball, and activates the power shot at the best moment.
+     *
+     * @param machine the machine player controlled by this strategy
+     * @param match   the current match state
+     */
     @Override
     public void decide(Machine machine, Match match) {
 

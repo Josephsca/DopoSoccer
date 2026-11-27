@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TimeCondition.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura intermedia 4</a> &gt; <a href="index.source.html" class="el_package">domain</a> &gt; <span class="el_source">TimeCondition.java</span></div><h1>TimeCondition.java</h1><pre class="source lang-java linenums">package domain;
+
+/**
+ * Represents a time-based match condition that lasts for a specific duration.
+ * Enters sudden death if there is a tie when time runs out.
+ */
+public class TimeCondition implements WinCondition {
+
+    private int duration;       
+    private boolean suddenDeath;
+
+    /**
+     * Constructs a new TimeCondition with the specified duration in minutes.
+     * @param minutes the duration of the match in minutes
+     */
+<span class="fc" id="L16">    public TimeCondition(int minutes) {</span>
+<span class="fc" id="L17">        this.duration = minutes * 60;</span>
+<span class="fc" id="L18">        this.suddenDeath = false;</span>
+<span class="fc" id="L19">    }</span>
+
+    /**
+     * Checks whether the match has ended based on time and score conditions.
+     * @param match the match instance to inspect
+     * @return true if the match is over, false otherwise
+     */
+    @Override
+    public boolean isGameOver(Match match) {
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        if (match.getSeconds() &lt; duration) return false;</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        if (match.getLeftPlayer().getScore() != match.getRightPlayer().getScore()) return true;</span>
+<span class="fc" id="L30">        suddenDeath = true;  </span>
+<span class="fc" id="L31">        return false;</span>
+    }
+
+    /**
+     * Calculates the remaining seconds left in the match.
+     * @param match the match instance to check
+     * @return the remaining seconds, or 0 if time has expired
+     */
+    public int getRemainingSeconds(Match match) {
+<span class="fc" id="L40">        return Math.max(0, duration - match.getSeconds());</span>
+    }
+
+    /**
+     * Gets the total duration of the match in seconds.
+     * @return the match duration in seconds
+     */
+<span class="nc" id="L47">    public int getDuration() { return duration; }</span>
+
+    /**
+     * Checks whether the match is currently in sudden death mode.
+     * @return true if sudden death is active, false otherwise
+     */
+<span class="fc" id="L53">    public boolean isSuddenDeath() { return suddenDeath; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

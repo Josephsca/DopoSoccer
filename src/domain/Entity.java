@@ -2,9 +2,8 @@ package domain;
 import java.io.Serializable;
 
 /**
- * Represents a game entity that occupies a rectangular area on the field and can move.
- * Player and Ball inherit from this class.
- * The Y axis grows downward (as on a screen).
+ * Represents a game entity that occupies a rectangular area on the field and
+ * can move. The Y axis grows downward as on a screen.
  */
 public abstract class Entity implements Serializable {
 
@@ -16,9 +15,11 @@ public abstract class Entity implements Serializable {
     protected int height;
 
     /**
-     * Constructs a new entity with a specified position, width, and height.     * @param posX the initial X coordinate of the entity
-     * @param posY the initial Y coordinate of the entity
-     * @param width the width of the entity
+     * Creates a new entity with the given position and size.
+     *
+     * @param posX   the initial X coordinate of the entity
+     * @param posY   the initial Y coordinate of the entity
+     * @param width  the width of the entity
      * @param height the height of the entity
      */
     public Entity(int posX, int posY, int width, int height) {
@@ -31,15 +32,15 @@ public abstract class Entity implements Serializable {
     }
 
     /**
-     * Advances the entity by one unit of time (one game frame).
-     * Each type of entity moves in its own way.
+     * Advances the entity by one game frame according to its movement rules.
      */
     public abstract void update();
 
     /**
-     * Checks whether this entity intersects with another entity.
-     * @param other the other entity to check intersection against
-     * @return true if the bounding rectangles touch or overlap, false otherwise
+     * Checks whether this entity touches or overlaps with another entity.
+     *
+     * @param other the other entity to check intersection with
+     * @return true if the rectangular areas overlap, false otherwise
      */
     public boolean intersects(Entity other) {
         return posX < other.posX + other.width
@@ -49,10 +50,11 @@ public abstract class Entity implements Serializable {
     }
 
     /**
-     * Called when the entity collides with a boundary of the stadium.
-     * By default, it stops movement in that direction. Subclasses can override this behavior.
-     * @param normalX the X component of the boundary normal direction (-1, 0, or 1)
-     * @param normalY the Y component of the boundary normal direction (-1, 0, or 1)
+     * Handles a collision with a stadium boundary by stopping movement in that
+     * direction.
+     *
+     * @param normalX the X direction of the boundary (-1, 0, or 1)
+     * @param normalY the Y direction of the boundary (-1, 0, or 1)
      */
     public void hitBoundary(double normalX, double normalY) {
         if (normalX != 0) velX = 0;
@@ -60,74 +62,86 @@ public abstract class Entity implements Serializable {
     }
 
     /**
-     * Gets the X coordinate of the entity's center.
-     * @return the center X position value
+     * Returns the X coordinate of the entity center.
+     *
+     * @return the center X position
      */
     public int getCenterX() { return posX + width / 2; }
     
     /**
-     * Gets the Y coordinate of the entity's center.
-     * @return the center Y position value
+     * Returns the Y coordinate of the entity center.
+     *
+     * @return the center Y position
      */
     public int getCenterY() { return posY + height / 2; }
     
     /**
-     * Gets the current X coordinate of the entity.
-     * @return the X position value
+     * Returns the current X coordinate of the entity.
+     *
+     * @return the X position
      */
     public int getPosX() { return posX; }
     
     /**
-     * Gets the current Y coordinate of the entity.
-     * @return the Y position value
+     * Returns the current Y coordinate of the entity.
+     *
+     * @return the Y position
      */
     public int getPosY() { return posY; }
 
     /**
-     * Gets the horizontal velocity of the entity.
-     * @return the velocity in the X direction
+     * Returns the horizontal velocity of the entity.
+     *
+     * @return the velocity on the X axis
      */
     public double getVelX() { return velX; }
 
     /**
-     * Gets the vertical velocity of the entity.
-     * @return the velocity in the Y direction
+     * Returns the vertical velocity of the entity.
+     *
+     * @return the velocity on the Y axis
      */
     public double getVelY() { return velY; }
     
     /**
-     * Gets the width of the entity.
+     * Returns the width of the entity.
+     *
      * @return the width value
      */
     public int getWidth() { return width; }
     
     /**
-     * Gets the height of the entity.
+     * Returns the height of the entity.
+     *
      * @return the height value
      */
     public int getHeight() { return height; }
     
     /**
      * Sets the X coordinate of the entity.
-     * @param posX the new X position value
+     *
+     * @param posX the new X position
      */
     public void setPosX(int posX) { this.posX = posX; }
     
     /**
      * Sets the Y coordinate of the entity.
-     * @param posY the new Y position value
+     *
+     * @param posY the new Y position
      */
     public void setPosY(int posY) { this.posY = posY; }
     
     /**
      * Sets the horizontal velocity of the entity.
-     * @param velX the new velocity in the X direction
+     *
+     * @param velX the new velocity on the X axis
      */
     public void setVelX(double velX) { this.velX = velX; }
     
     /**
      * Sets the vertical velocity of the entity.
-     * @param velY the new velocity in the Y direction
+     *
+     * @param velY the new velocity on the Y axis
      */
     public void setVelY(double velY) { this.velY = velY; }
 }

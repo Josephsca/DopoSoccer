@@ -16,7 +16,7 @@ import java.util.Set;
 
 /**
  * Panel where the match is drawn and keyboard inputs are read.
- * 
+ *
  * Images (optional, see images/LEEME.txt). If an image does not exist,
  * the next option is used and finally a simple shape:
  *   Stadium: images/stadiums/[name].png -> images/stadium.png -> drawn field
@@ -40,8 +40,9 @@ public class GamePanel extends JPanel {
     private int frames;
 
     /**
-     * Constructs a new GamePanel linked to the main GUI and game controller.
-     * @param gui the main application window
+     * Creates a new GamePanel linked to the main GUI and game controller.
+     *
+     * @param gui  the main game window
      * @param game the game domain controller
      */
     public GamePanel(DopoSoccerGUI gui, DopoSoccer game) {
@@ -59,8 +60,9 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Gets the names of available stadiums (.png files in images/stadiums).
-     * @return an array of available stadium names
+     * Returns the names of available stadiums from .png files in images/stadiums.
+     *
+     * @return an array of available stadium names without file extensions
      */
     public static String[] availableStadiums() {
         File folder = new File(IMAGES + "stadiums");
@@ -72,15 +74,16 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Sets the stadium to be drawn (null for the basic field).
-     * @param stadiumName the name of the stadium
+     * Sets the stadium name to draw, or null to draw the basic field.
+     *
+     * @param stadiumName the stadium name, or null for the default field
      */
     public void setStadium(String stadiumName) {
         this.stadiumName = stadiumName;
     }
 
     /**
-     * Starts running the current match.
+     * Clears pressed keys, resets frame movement tracking, and starts the match timer.
      */
     public void start() {
         pressed.clear();
@@ -90,7 +93,8 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Processes one game frame: reads held keys, updates the domain state, and triggers a repaint.
+     * Runs one match frame by handling held movement keys, updating the game,
+     * repainting, and checking if the match ended.
      */
     private void tick() {
         if (pressed.contains(KeyEvent.VK_A)) game.moveLeft(1);
@@ -114,7 +118,8 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Prepares key event listeners for player movement, actions, and menu shortcuts.
+     * Registers keyboard listeners for player jumps, kicks, power shots, and
+     * pause shortcuts.
      */
     private void prepareKeys() {
         addKeyListener(new KeyAdapter() {
@@ -150,10 +155,10 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Searches for an image (the first existing option from the given paths).
-     * Images are loaded only once and cached.
-     * @param options paths inside images/, without ".png"
-     * @return the loaded BufferedImage, or null if none exist
+     * Finds and caches the first existing image from a list of paths inside images/.
+     *
+     * @param options image paths under images/ without the ".png" extension
+     * @return the loaded image, or null if no image is found
      */
     private BufferedImage getImage(String... options) {
         for (String option : options) {
@@ -176,9 +181,10 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Determines the player pose based on their state in the domain.
-     * @param p the player object
-     * @return the pose name string
+     * Chooses the sprite pose name for a player based on their current state.
+     *
+     * @param p the player to check
+     * @return the pose name ("stunned", "kick", "jump", "walk1", "walk2", or "idle")
      */
     private String pose(Player p) {
         boolean moving = lastX.containsKey(p) && lastX.get(p) != p.getPosX();
@@ -190,8 +196,9 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Renders all match components including stadium, referee, goals, players, ball, and HUD.
-     * @param g the graphics context
+     * Draws the stadium, referee, goals, players, ball, illusion balls, and HUD.
+     *
+     * @param g the graphics context used for painting
      */
     @Override
     protected void paintComponent(Graphics g) {
@@ -232,9 +239,10 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Draws the stadium background or a default field if no image is found.
-     * @param g the graphics context
-     * @param stadium the stadium object
+     * Draws the stadium image or a default sky and grass field if no image exists.
+     *
+     * @param g       the graphics context
+     * @param stadium the stadium to draw
      */
     private void drawStadium(Graphics2D g, Stadium stadium) {
         int w = stadium.getWidth();
@@ -254,9 +262,10 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Draws a goal net and crossbar structure.
-     * @param g the graphics context
-     * @param goal the goal object
+     * Draws the net lines, crossbar, and goal post for a goal.
+     *
+     * @param g    the graphics context
+     * @param goal the goal to draw
      */
     private void drawGoal(Graphics2D g, Goal goal) {
         int x = goal.getPosX();
@@ -273,9 +282,10 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Draws a player sprite or placeholder shape, along with active status effects.
+     * Draws a player's power aura and sprite, flipping it if on the right side.
+     *
      * @param g the graphics context
-     * @param p the player object
+     * @param p the player to draw
      */
     private void drawPlayer(Graphics2D g, Player p) {
         int x = p.getPosX();
@@ -300,9 +310,10 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Draws the ball sprite or default circular representation with power shot glow effects.
-     * @param g the graphics context
-     * @param ball the ball object
+     * Draws the ball with a power aura when active, using an image or a circle fallback.
+     *
+     * @param g    the graphics context
+     * @param ball the ball to draw
      */
     private void drawBall(Graphics2D g, Ball ball) {
         int x = ball.getPosX();
@@ -326,12 +337,12 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Draws seven fake balls while the USA illusion is active.
+     * Draws seven bouncing fake balls while the USA illusion effect is active.
      * Fake balls are visual only and cannot score goals.
      *
-     * @param g graphics context
-     * @param ball real ball
-     * @param stadium current stadium
+     * @param g       the graphics context
+     * @param ball    the real match ball
+     * @param stadium the current stadium
      */
     private void drawIllusionBalls(
             Graphics2D g,
@@ -371,9 +382,10 @@ public class GamePanel extends JPanel {
 
 
     /**
-     * Draws the score, match timer, player info bars, and pause overlay.
-     * @param g the graphics context
-     * @param match the match object
+     * Draws the scoreboard, match timer, player info cards, and pause overlay.
+     *
+     * @param g     the graphics context
+     * @param match the current match
      */
     private void drawHud(Graphics2D g, Match match) {
         int w = match.getStadium().getWidth();
@@ -402,10 +414,11 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Draws individual player status cards including health, power bar, stats, and points.
+     * Draws a player status card with name, health bar, power bar, stats, and points.
+     *
      * @param g the graphics context
-     * @param p the player object
-     * @param x the X coordinate offset for the info card
+     * @param p the player whose info is drawn
+     * @param x the horizontal X coordinate of the card
      */
     private void drawPlayerInfo(Graphics2D g, Player p, int x) {
         g.setColor(Color.black);
@@ -445,9 +458,10 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Formats the match time string according to the win condition rules.
-     * @param match the match object
-     * @return the formatted time string
+     * Formats the remaining or elapsed match time text based on the win condition.
+     *
+     * @param match the current match
+     * @return the formatted time string or sudden death label
      */
     private String timeText(Match match) {
         if (match.getWinCondition() instanceof TimeCondition) {
@@ -461,9 +475,10 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Gets the theme colors for each country: [shirt/aura, hair].
-     * @param country the country name string
-     * @return an array of Color objects
+     * Returns the theme colors [shirt/aura, hair] for a given country.
+     *
+     * @param country the country name
+     * @return an array with the primary color and hair color
      */
     private Color[] countryColors(String country) {
         switch (country) {
@@ -476,9 +491,10 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Gets the display name for each country's special effect.
-     * @param country the country name string
-     * @return the effect name string
+     * Returns the display label for a country's special power effect.
+     *
+     * @param country the country name
+     * @return the effect label in Spanish, or an empty string if unknown
      */
     private String effectName(String country) {
         switch (country) {

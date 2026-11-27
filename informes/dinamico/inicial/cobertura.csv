@@ -1,0 +1,46 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+DopoSoccer - Cobertura inicial,presentation,GamePanel.new KeyAdapter() {...},94,0,14,0,18,0,13,0,3,0
+DopoSoccer - Cobertura inicial,presentation,Button.new MouseAdapter() {...},25,0,0,0,7,0,3,0,3,0
+DopoSoccer - Cobertura inicial,presentation,GamePanel,1456,0,100,0,225,0,75,0,22,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new ActionListener() {...},14,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new JPanel() {...},29,0,0,0,4,0,2,0,2,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new ActionListener() {...},14,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new ActionListener() {...},26,0,0,0,6,0,2,0,2,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new ActionListener() {...},26,0,0,0,6,0,2,0,2,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new ActionListener() {...},13,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new ActionListener() {...},13,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new ActionListener() {...},14,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new ActionListener() {...},14,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new ActionListener() {...},13,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new ActionListener() {...},13,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new ActionListener() {...},30,0,2,0,6,0,3,0,2,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new ActionListener() {...},14,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura inicial,presentation,Button,128,0,2,0,29,0,5,0,4,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI.new ActionListener() {...},13,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura inicial,presentation,DopoSoccerGUI,1582,0,78,0,305,0,57,0,18,0
+DopoSoccer - Cobertura inicial,domain,BlueAura,28,6,0,0,7,2,2,1,2,1
+DopoSoccer - Cobertura inicial,domain,OffensiveStrategy,66,0,10,0,18,0,7,0,2,0
+DopoSoccer - Cobertura inicial,domain,TornadoShot,12,19,0,0,3,7,1,2,1,2
+DopoSoccer - Cobertura inicial,domain,Character,8,26,0,0,2,8,2,5,2,5
+DopoSoccer - Cobertura inicial,domain,LightningShot,12,16,0,0,3,6,1,2,1,2
+DopoSoccer - Cobertura inicial,domain,ClumsyStrategy,59,14,18,0,17,5,12,1,1,1
+DopoSoccer - Cobertura inicial,domain,Cameroon,0,7,0,0,0,2,0,1,0,1
+DopoSoccer - Cobertura inicial,domain,Player,94,694,21,66,19,148,19,77,3,47
+DopoSoccer - Cobertura inicial,domain,SouthKorea,0,7,0,0,0,2,0,1,0,1
+DopoSoccer - Cobertura inicial,domain,DopoSoccer,215,556,45,57,57,134,38,49,4,29
+DopoSoccer - Cobertura inicial,domain,USA,0,7,0,0,0,2,0,1,0,1
+DopoSoccer - Cobertura inicial,domain,Log,39,0,0,0,12,0,2,0,2,0
+DopoSoccer - Cobertura inicial,domain,DopoSoccerException,0,4,0,0,0,2,0,1,0,1
+DopoSoccer - Cobertura inicial,domain,PowerShot,13,18,2,0,5,7,3,3,2,3
+DopoSoccer - Cobertura inicial,domain,TimeCondition,11,35,0,4,2,9,2,5,2,3
+DopoSoccer - Cobertura inicial,domain,Machine,13,9,0,0,5,3,3,1,3,1
+DopoSoccer - Cobertura inicial,domain,IllusionShot,16,10,0,0,4,4,1,2,1,2
+DopoSoccer - Cobertura inicial,domain,GoalCondition,3,22,0,4,1,5,1,4,1,2
+DopoSoccer - Cobertura inicial,domain,Goal,9,133,1,25,2,23,2,19,1,7
+DopoSoccer - Cobertura inicial,domain,Stadium,26,99,3,11,5,21,4,10,1,5
+DopoSoccer - Cobertura inicial,domain,Nigeria,0,7,0,0,0,1,0,1,0,1
+DopoSoccer - Cobertura inicial,domain,Entity,0,122,1,11,0,24,1,20,0,15
+DopoSoccer - Cobertura inicial,domain,ExpertStrategy,197,0,48,0,42,0,26,0,2,0
+DopoSoccer - Cobertura inicial,domain,Match,62,553,14,42,9,116,12,42,1,25
+DopoSoccer - Cobertura inicial,domain,Ball,39,156,3,9,5,31,7,11,5,7
+DopoSoccer - Cobertura inicial,domain,DefensiveStrategy,122,0,24,0,30,0,14,0,2,0

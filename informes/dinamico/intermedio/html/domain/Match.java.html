@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Match.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura intermedia</a> &gt; <a href="index.source.html" class="el_package">domain</a> &gt; <span class="el_source">Match.java</span></div><h1>Match.java</h1><pre class="source lang-java linenums">package domain;
+import java.io.Serializable;
+/**
+ * Represents a match between two players. Contains the stadium, goals, and ball,
+ * and uses a WinCondition to determine when the game ends.
+ */
+public class Match implements Serializable{
+    public static final int FPS = 60;               
+    public static final double DT = 1.0 / FPS;     
+    public static final int WIN_POINTS = 100;
+    public static final int LOSE_POINTS = 25;
+    /** Los dibujos de los personajes tienen bordes transparentes, por eso dejamos que se acerquen 22 px. */
+    public static final int ALLOWED_OVERLAP = 22;
+    private int timer;          
+    private boolean isPaused;
+    private boolean isFinished;
+    private Player winner;
+    private Player leftPlayer;
+    private Player rightPlayer;
+    private Ball ball;
+    private Goal leftGoal;
+    private Goal rightGoal;
+    private Stadium stadium;
+    private WinCondition winCondition;
+
+    /**
+     * Constructs a new match with a 0-0 score and sets all entities to their initial positions.
+     * @param leftPlayer the player on the left side
+     * @param rightPlayer the player on the right side
+     * @param stadium the stadium where the match takes place
+     * @param winCondition the rule that determines the end of the match
+     */
+<span class="fc" id="L33">    public Match(Player leftPlayer, Player rightPlayer, Stadium stadium, WinCondition winCondition) {</span>
+<span class="fc" id="L34">        this.leftPlayer = leftPlayer;</span>
+<span class="fc" id="L35">        this.rightPlayer = rightPlayer;</span>
+<span class="fc" id="L36">        this.stadium = stadium;</span>
+<span class="fc" id="L37">        this.winCondition = winCondition;</span>
+<span class="fc" id="L38">        this.timer = 0;</span>
+<span class="fc" id="L39">        this.isPaused = false;</span>
+<span class="fc" id="L40">        this.isFinished = false;</span>
+<span class="fc" id="L41">        this.winner = null;</span>
+
+<span class="fc" id="L43">        int goalWidth = stadium.getWidth() / 14;</span>
+<span class="fc" id="L44">        int goalHeight = stadium.getHeight() / 3;</span>
+<span class="fc" id="L45">        int goalY = stadium.getGroundY() - goalHeight;</span>
+<span class="fc" id="L46">        leftGoal = new Goal(0, goalY, goalWidth, goalHeight, true);</span>
+<span class="fc" id="L47">        rightGoal = new Goal(stadium.getWidth() - goalWidth, goalY, goalWidth, goalHeight, false);</span>
+<span class="fc" id="L48">        ball = new Ball(stadium.getWidth() / 2, stadium.getHeight() / 4, 14, 0.45);</span>
+
+<span class="fc" id="L50">        leftPlayer.startMatch();</span>
+<span class="fc" id="L51">        rightPlayer.startMatch();</span>
+<span class="fc" id="L52">        resetPositions();</span>
+<span class="fc" id="L53">    }</span>
+
+    /**
+     * Advances the match simulation by one frame.
+     */
+    public void update() {
+<span class="pc bpc" id="L59" title="1 of 4 branches missed.">        if (isPaused || isFinished) return;</span>
+
+<span class="fc" id="L61">        timer++;</span>
+
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (leftPlayer instanceof Machine) {</span>
+<span class="fc" id="L64">            ((Machine) leftPlayer).decide(this);</span>
+        }
+
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        if (rightPlayer instanceof Machine) {</span>
+<span class="nc" id="L68">            ((Machine) rightPlayer).decide(this);</span>
+        }
+
+<span class="fc" id="L71">        leftPlayer.update();</span>
+<span class="fc" id="L72">        rightPlayer.update();</span>
+
+<span class="fc" id="L74">        ball.update();</span>
+
+<span class="fc" id="L76">        separatePlayers();</span>
+<span class="fc" id="L77">        stadium.keepInBounds(leftPlayer);</span>
+<span class="fc" id="L78">        stadium.keepInBounds(rightPlayer);</span>
+<span class="fc" id="L79">        stadium.keepInBounds(ball);</span>
+
+<span class="fc" id="L81">        checkCollisions();</span>
+<span class="fc" id="L82">        checkGoal();</span>
+
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (winCondition.isGameOver(this)) finish();</span>
+<span class="fc" id="L85">    }</span>
+
+    /**
+     * Checks all game collisions: power shots against the rival, players touching the ball,
+     * and the ball hitting the crossbars.
+     */
+    public void checkCollisions() {
+<span class="fc" id="L92">        Player shooter = ball.getPowerShooter();</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if (shooter != null) {</span>
+<span class="fc" id="L94">            Player rival = getRival(shooter);</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">            if (ball.intersects(rival)) {</span>
+<span class="fc" id="L96">                Character power = shooter.getCharacter();</span>
+<span class="fc" id="L97">                rival.receiveDamage(power.getShotDamage() * shooter.getKickMultiplier());</span>
+<span class="fc" id="L98">                power.applyEffect(rival);</span>
+<span class="fc" id="L99">                ball.setPowerShooter(null);</span>
+<span class="fc" id="L100">                ball.setVelX(-ball.getVelX() * 0.4);</span>
+            }
+        }
+<span class="pc bpc" id="L103" title="3 of 4 branches missed.">        if (leftPlayer.intersects(ball) &amp;&amp; ball.getPowerShooter() != leftPlayer) leftPlayer.touchBall(ball);</span>
+<span class="pc bpc" id="L104" title="1 of 4 branches missed.">        if (rightPlayer.intersects(ball) &amp;&amp; ball.getPowerShooter() != rightPlayer) rightPlayer.touchBall(ball);</span>
+<span class="fc" id="L105">        leftGoal.checkCrossbar(ball);</span>
+<span class="fc" id="L106">        rightGoal.checkCrossbar(ball);</span>
+<span class="fc" id="L107">    }</span>
+
+    /**
+     * Checks if the ball has entered a goal and awards the point to the opposing player.
+     */
+    public void checkGoal() {
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (leftGoal.containsBall(ball)) {</span>
+<span class="fc" id="L114">            scoreGoal(rightPlayer, leftPlayer);</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        } else if (rightGoal.containsBall(ball)) {</span>
+<span class="fc" id="L116">            scoreGoal(leftPlayer, rightPlayer);</span>
+        }
+<span class="fc" id="L118">    }</span>
+
+    /**
+     * Resets player positions to their sides and drops the ball from the center after a goal.
+     */
+    public void resetPositions() {
+<span class="fc" id="L124">        int groundY = stadium.getGroundY();</span>
+<span class="fc" id="L125">        leftPlayer.resetPosition(stadium.getWidth() / 4 - Player.WIDTH / 2, groundY - Player.HEIGHT);</span>
+<span class="fc" id="L126">        rightPlayer.resetPosition(3 * stadium.getWidth() / 4 - Player.WIDTH / 2, groundY - Player.HEIGHT);</span>
+<span class="fc" id="L127">        ball.reset(stadium.getWidth() / 2, stadium.getHeight() / 5);</span>
+<span class="fc" id="L128">    }</span>
+
+    /**
+     * Moves the player to the left, but first checks that it will not collide with the rival.
+     * @param player the player that wants to move
+     */
+    public void moveLeft(Player player) {
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        if (!willCollide(player, -1)) {</span>
+<span class="fc" id="L136">            player.moveLeft();</span>
+        }
+<span class="fc" id="L138">    }</span>
+
+    /**
+     * Moves the player to the right, but first checks that it will not collide with the rival.
+     * @param player the player that wants to move
+     */
+    public void moveRight(Player player) {
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        if (!willCollide(player, 1)) {</span>
+<span class="fc" id="L146">            player.moveRight();</span>
+        }
+<span class="fc" id="L148">    }</span>
+
+    /**
+     * Checks if the player would collide with the rival after taking one step.
+     * Only counts as a collision if the player is walking towards the rival,
+     * so a player can always walk away from the other one.
+     * @param player the player that wants to move
+     * @param direction -1 to the left, 1 to the right
+     * @return true if the step would make the player crash into the rival
+     */
+    public boolean willCollide(Player player, int direction) {
+<span class="fc" id="L159">        Player rival = getRival(player);</span>
+
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        boolean goingTowardsRival = (rival.getCenterX() - player.getCenterX()) * direction &gt; 0;</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if (!goingTowardsRival) {</span>
+<span class="fc" id="L163">            return false;</span>
+        }
+
+<span class="fc" id="L166">        int nextX = player.getPosX() + direction * player.getStep();</span>
+
+<span class="fc" id="L168">        int overlapX = Math.min(nextX + player.getWidth(), rival.getPosX() + rival.getWidth())</span>
+<span class="fc" id="L169">                     - Math.max(nextX, rival.getPosX());</span>
+<span class="fc" id="L170">        int overlapY = Math.min(player.getPosY() + player.getHeight(), rival.getPosY() + rival.getHeight())</span>
+<span class="fc" id="L171">                     - Math.max(player.getPosY(), rival.getPosY());</span>
+
+<span class="fc bfc" id="L173" title="All 4 branches covered.">        return overlapX &gt; ALLOWED_OVERLAP &amp;&amp; overlapY &gt; 0;</span>
+    }
+
+    /**
+     * Safety check for the cases where moveLeft/moveRight cannot prevent the crash
+     * (for example when a player falls on top of the other after a jump, or a power pushes him).
+     * Prevents players from passing through each other: if they overlap, 
+     * each one moves outward to their respective side until they touch.
+     */ 
+    private void separatePlayers() {
+<span class="fc" id="L183">        int overlapX = Math.min(leftPlayer.getPosX() + leftPlayer.getWidth(),</span>
+<span class="fc" id="L184">                                rightPlayer.getPosX() + rightPlayer.getWidth())</span>
+<span class="fc" id="L185">                    - Math.max(leftPlayer.getPosX(), rightPlayer.getPosX()) - ALLOWED_OVERLAP;</span>
+<span class="fc" id="L186">        int overlapY = Math.min(leftPlayer.getPosY() + leftPlayer.getHeight(),</span>
+<span class="fc" id="L187">                                rightPlayer.getPosY() + rightPlayer.getHeight())</span>
+<span class="fc" id="L188">                    - Math.max(leftPlayer.getPosY(), rightPlayer.getPosY());</span>
+<span class="pc bpc" id="L189" title="3 of 4 branches missed.">        if (overlapX &lt;= 0 || overlapY &lt;= 0) return;  </span>
+
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        Player lefter = leftPlayer.getCenterX() &lt;= rightPlayer.getCenterX() ? leftPlayer : rightPlayer;</span>
+<span class="nc" id="L192">        Player righter = getRival(lefter);</span>
+<span class="nc" id="L193">        int push = (overlapX + 1) / 2;</span>
+<span class="nc" id="L194">        lefter.setPosX(lefter.getPosX() - push);</span>
+<span class="nc" id="L195">        righter.setPosX(righter.getPosX() + push);</span>
+<span class="nc" id="L196">    }</span>
+
+    /**
+     * Checks whether the match is over.
+     * @return true if the match has finished, false otherwise
+     */
+    public boolean isGameOver() {
+<span class="fc" id="L203">        return isFinished;</span>
+    }
+
+    /**
+     * Gets the winner of the match.
+     * @return the winning Player instance, or null if the match is ongoing or tied
+     */
+    public Player getWinner() {
+<span class="fc" id="L211">        return winner;</span>
+    }
+
+    /**
+     * Pauses the match if it has not finished yet.
+     */
+    public void pause() {
+<span class="pc bpc" id="L218" title="1 of 2 branches missed.">        if (!isFinished) isPaused = true;</span>
+<span class="fc" id="L219">    }</span>
+
+    /**
+     * Resumes the paused match.
+     */
+    public void resume() {
+<span class="fc" id="L225">        isPaused = false;</span>
+<span class="fc" id="L226">    }</span>
+
+    /**
+     * Finishes the match, determines the winner, and distributes points.
+     */
+    public void finish() {
+<span class="fc bfc" id="L232" title="All 2 branches covered.">        if (isFinished) return;</span>
+<span class="fc" id="L233">        isFinished = true;</span>
+<span class="fc" id="L234">        isPaused = false;</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">        if (leftPlayer.getScore() &gt; rightPlayer.getScore()) {</span>
+<span class="fc" id="L236">            winner = leftPlayer;</span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">        } else if (rightPlayer.getScore() &gt; leftPlayer.getScore()) {</span>
+<span class="fc" id="L238">            winner = rightPlayer;</span>
+        }
+<span class="fc bfc" id="L240" title="All 2 branches covered.">        if (winner == null) {</span>
+<span class="fc" id="L241">            leftPlayer.addPoints(LOSE_POINTS);</span>
+<span class="fc" id="L242">            rightPlayer.addPoints(LOSE_POINTS);</span>
+        } else {
+<span class="fc" id="L244">            winner.addPoints(WIN_POINTS);</span>
+<span class="fc" id="L245">            getRival(winner).addPoints(LOSE_POINTS);</span>
+        }
+<span class="fc" id="L247">    }</span>
+
+    /**
+     * Records a goal for the scorer and grants power charge to the conceding player.
+     * @param scorer the player who scored the goal
+     * @param conceded the player who conceded the goal
+     */
+    private void scoreGoal(Player scorer, Player conceded) {
+<span class="fc" id="L255">        scorer.addGoal();</span>
+<span class="fc" id="L256">        conceded.chargePowerBar(Player.POWER_CHARGE_TIME / 4);</span>
+<span class="fc" id="L257">        resetPositions();</span>
+<span class="fc" id="L258">    }</span>
+
+    /**
+     * Gets the rival player of the specified player.
+     * @param player the reference player
+     * @return the opposing Player instance
+     */
+    public Player getRival(Player player) {
+<span class="fc bfc" id="L266" title="All 2 branches covered.">        if (player == leftPlayer) {</span>
+<span class="fc" id="L267">            return rightPlayer;</span>
+        } else {
+<span class="fc" id="L269">            return leftPlayer;</span>
+        }
+    }
+
+    /**
+     * Gets the elapsed time of the match in seconds.
+     * @return the elapsed seconds
+     */
+<span class="fc" id="L277">    public int getSeconds() { return timer / FPS; }</span>
+
+    /**
+     * Gets the raw timer value in frames.
+     * @return the elapsed time in frames
+     */
+<span class="fc" id="L283">    public int getTimer() { return timer; }</span>
+
+    /**
+     * Checks if the match is currently paused.
+     * @return true if paused, false otherwise
+     */
+<span class="fc" id="L289">    public boolean isPaused() { return isPaused; }</span>
+
+    /**
+     * Gets the left player instance.
+     * @return the left Player object
+     */
+<span class="fc" id="L295">    public Player getLeftPlayer() { return leftPlayer; }</span>
+
+    /**
+     * Gets the right player instance.
+     * @return the right Player object
+     */
+<span class="fc" id="L301">    public Player getRightPlayer() { return rightPlayer; }</span>
+
+    /**
+     * Gets the ball instance used in the match.
+     * @return the Ball object
+     */
+<span class="fc" id="L307">    public Ball getBall() { return ball; }</span>
+
+    /**
+     * Gets the left goal instance.
+     * @return the left Goal object
+     */
+<span class="fc" id="L313">    public Goal getLeftGoal() { return leftGoal; }</span>
+
+    /**
+     * Gets the right goal instance.
+     * @return the right Goal object
+     */
+<span class="fc" id="L319">    public Goal getRightGoal() { return rightGoal; }</span>
+
+    /**
+     * Gets the stadium instance of the match.
+     * @return the Stadium object
+     */
+<span class="fc" id="L325">    public Stadium getStadium() { return stadium; }</span>
+
+    /**
+     * Gets the win condition rule used in the match.
+     * @return the WinCondition object
+     */
+<span class="nc" id="L331">    public WinCondition getWinCondition() { return winCondition; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

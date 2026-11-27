@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Ball.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura inicial</a> &gt; <a href="index.source.html" class="el_package">domain</a> &gt; <span class="el_source">Ball.java</span></div><h1>Ball.java</h1><pre class="source lang-java linenums">package domain;
+
+/**
+ * Represents the match ball affected by gravity and capable of bouncing off the ground, boundaries, and goals.
+ */
+public class Ball extends Entity {
+
+    public static final double BOUNCE_LOSS = 0.72;  
+    public static final double AIR_FRICTION = 0.97;
+
+    private double radius;
+    private double gravity;
+    private Player powerShooter;
+    private double illusionRemaining;
+    private double illusionElapsed;
+
+    /**
+     * Constructs a new ball with its center positioned at (centerX, centerY).
+     * @param centerX the initial X coordinate of the ball's center
+     * @param centerY the initial Y coordinate of the ball's center
+     * @param radius the radius of the ball
+     * @param gravity the gravity force applied to the ball
+     */
+    public Ball(int centerX, int centerY, double radius, double gravity) {
+<span class="fc" id="L25">        super((int) (centerX - radius), (int) (centerY - radius), (int) (radius * 2), (int) (radius * 2));</span>
+<span class="fc" id="L26">        this.radius = radius;</span>
+<span class="fc" id="L27">        this.gravity = gravity;</span>
+<span class="fc" id="L28">        this.powerShooter = null;</span>
+<span class="fc" id="L29">    }</span>
+
+    /**
+     * Applies gravity and air friction to move the ball according to its velocity.
+     */
+    @Override
+    public void update() {
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if (illusionRemaining &gt; 0) { illusionRemaining = Math.max(0, illusionRemaining - Match.DT); illusionElapsed += Match.DT; }</span>
+<span class="fc" id="L37">        velY += gravity;</span>
+<span class="fc" id="L38">        velX *= AIR_FRICTION;</span>
+<span class="fc" id="L39">        posX += (int) Math.round(velX);</span>
+<span class="fc" id="L40">        posY += (int) Math.round(velY);</span>
+<span class="fc" id="L41">    }</span>
+
+    /**
+     * Bounces the ball off a surface based on the surface normal direction.
+     * @param normalX the X component of the surface normal direction (-1, 0, or 1)
+     * @param normalY the Y component of the surface normal direction (-1, 0, or 1)
+     */
+    public void bounce(double normalX, double normalY) {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (normalX != 0) {</span>
+<span class="fc" id="L50">            velX = Math.abs(velX) * BOUNCE_LOSS * Math.signum(normalX);</span>
+        }
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        if (normalY != 0) {</span>
+<span class="fc" id="L53">            velY = Math.abs(velY) * BOUNCE_LOSS * Math.signum(normalY);</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">            if (Math.abs(velY) &lt; 1.5) velY = 0;  </span>
+        }
+<span class="fc" id="L56">    }</span>
+
+    /**
+     * Handles boundary collisions by making the ball bounce instead of stopping.
+     * @param normalX the X component of the boundary normal direction (-1, 0, or 1)
+     * @param normalY the Y component of the boundary normal direction (-1, 0, or 1)
+     */
+    @Override
+    public void hitBoundary(double normalX, double normalY) {
+<span class="fc" id="L65">        bounce(normalX, normalY);</span>
+        // si el tiro de poder llega a una pared lateral es porque no tocó al rival: el tiro se acaba
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (normalX != 0) {</span>
+<span class="fc" id="L68">            powerShooter = null;</span>
+        }
+<span class="fc" id="L70">    }</span>
+
+    /**
+     * Resets the ball to a stationary state at a specific center position.
+     * @param x the new X coordinate for the center of the ball
+     * @param y the new Y coordinate for the center of the ball
+     */
+    public void reset(int x, int y) {
+<span class="fc" id="L78">        posX = (int) (x - radius);</span>
+<span class="fc" id="L79">        posY = (int) (y - radius);</span>
+<span class="fc" id="L80">        velX = 0;</span>
+<span class="fc" id="L81">        velY = 0;</span>
+<span class="fc" id="L82">        powerShooter = null;</span>
+<span class="fc" id="L83">        illusionRemaining = 0;</span>
+<span class="fc" id="L84">        illusionElapsed = 0;</span>
+<span class="fc" id="L85">    }</span>
+
+    /**
+     * Starts the illusion of the USA power: 8 balls are drawn for some seconds.
+     * @param seconds how long the illusion lasts
+     */
+<span class="nc" id="L91">    public void activateIllusion(double seconds) { illusionRemaining = seconds; illusionElapsed = 0; }</span>
+    /**
+     * Checks whether the illusion is active.
+     * @return true while the 8 balls are shown
+     */
+<span class="nc bnc" id="L96" title="All 2 branches missed.">    public boolean hasIllusion() { return illusionRemaining &gt; 0; }</span>
+    /**
+     * Gets how many seconds have passed since the illusion started (used to draw the fake balls).
+     * @return the elapsed seconds
+     */
+<span class="nc" id="L101">    public double getIllusionElapsed() { return illusionElapsed; }</span>
+
+    /**
+     * Gets the radius of the ball.
+     * @return the radius value
+     */
+<span class="nc" id="L107">    public double getRadius() { return radius; }</span>
+    
+    /**
+     * Gets the gravity value affecting the ball.
+     * @return the gravity value
+     */
+<span class="nc" id="L113">    public double getGravity() { return gravity; }</span>
+    
+    /**
+     * Gets the player who performed the active power shot with this ball.
+     * @return the Player object, or null if no power shot is active
+     */
+<span class="fc" id="L119">    public Player getPowerShooter() { return powerShooter; }</span>
+    
+    /**
+     * Sets the player responsible for the active power shot on this ball.
+     * @param powerShooter the Player object who executed the power shot
+     */
+<span class="fc" id="L125">    public void setPowerShooter(Player powerShooter) { this.powerShooter = powerShooter; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

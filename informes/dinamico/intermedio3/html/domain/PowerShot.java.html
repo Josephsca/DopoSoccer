@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PowerShot.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura intermedia 3</a> &gt; <a href="index.source.html" class="el_package">domain</a> &gt; <span class="el_source">PowerShot.java</span></div><h1>PowerShot.java</h1><pre class="source lang-java linenums">package domain;
+
+import java.io.Serializable;
+
+/**
+ * Represents a special shot that can be used by a character.
+ */
+public abstract class PowerShot implements Serializable{
+    private final String name;
+    private final int damage;
+    private final double duration;
+
+<span class="fc" id="L13">    protected PowerShot(String name, int damage, double duration) {</span>
+<span class="fc" id="L14">        this.name = name;</span>
+<span class="fc" id="L15">        this.damage = damage;</span>
+<span class="fc" id="L16">        this.duration = duration;</span>
+<span class="fc" id="L17">    }</span>
+
+    /**
+     * Gets the name of the shot.
+     * @return the shot name
+     */
+<span class="fc" id="L23">    public final String getName() { return name; }</span>
+    
+    /**
+     * Gets the base damage of the shot.
+     * @return the damage
+     */
+<span class="fc" id="L29">    public final int getDamage() { return damage; }</span>
+    
+    /**
+     * Gets the duration of the effect.
+     * @return the duration in seconds
+     */
+<span class="fc" id="L35">    public final double getDuration() { return duration; }</span>
+    
+    /**
+     * Gets the direction of the shot, towards the rival goal.
+     * @param ball the ball with the shooter
+     * @return 1 to the right, -1 to the left
+     */
+    protected final int direction(Ball ball) {
+<span class="fc" id="L43">        Player shooter = ball.getPowerShooter();</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (shooter == null) {</span>
+<span class="fc" id="L45">            return 1;</span>
+        } else {
+<span class="fc" id="L47">            return shooter.getAttackDirection();</span>
+        }
+    }
+    
+    /**
+     * Gives the ball the movement of this shot.
+     * @param ball the match ball
+     */
+    public abstract void launch(Ball ball);
+    
+    /**
+     * Applies the effect of this shot when it hits the rival.
+     * @param rival the player hit by the shot
+     * @param source the character that launched the shot
+     */
+    public abstract void onHit(Player rival, Character source);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

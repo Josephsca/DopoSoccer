@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BlueAura.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura intermedia 4</a> &gt; <a href="index.source.html" class="el_package">domain</a> &gt; <span class="el_source">BlueAura.java</span></div><h1>BlueAura.java</h1><pre class="source lang-java linenums">package domain;
+
+/** South Korea: straight fast shot that pushes the rival towards his own goal. */
+public class BlueAura extends PowerShot {
+    public static final int PUSH_DISTANCE = 150;
+    public BlueAura() { 
+<span class="fc" id="L7">        super(&quot;Aura Azul&quot;, 40, 1.5);</span>
+<span class="fc" id="L8">    }</span>
+    @Override 
+    public void launch(Ball ball) {
+<span class="fc" id="L11">        ball.setVelX(22 * direction(ball)); </span>
+<span class="fc" id="L12">        ball.setVelY(-2);</span>
+<span class="fc" id="L13">    }</span>
+    @Override 
+    public void onHit(Player rival, Character source) {
+<span class="fc" id="L16">        rival.setEffect(source);</span>
+<span class="fc" id="L17">        rival.setCanMove(false);</span>
+<span class="fc" id="L18">        rival.setPosX(rival.getPosX() - PUSH_DISTANCE * rival.getAttackDirection());</span>
+<span class="fc" id="L19">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

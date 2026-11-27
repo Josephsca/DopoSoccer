@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Log.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura intermedia 4</a> &gt; <a href="index.source.html" class="el_package">domain</a> &gt; <span class="el_source">Log.java</span></div><h1>Log.java</h1><pre class="source lang-java linenums">package domain;    
+
+import java.util.logging.Logger;
+import java.util.logging.FileHandler;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.Level;
+
+/**
+ * Handles error logging for developers.
+ * Each error is recorded in the DopoSoccer.log file inside the project folder.
+ */
+<span class="nc" id="L12">public class Log{</span>
+    public static final String NAME =&quot;DopoSoccer&quot;;
+
+    /**
+     * Records the details of an error into the log file.
+     * @param e the exception error to be logged
+     */
+    public static void record(Exception e){
+        try{
+<span class="nc" id="L21">            Logger logger=Logger.getLogger(NAME);</span>
+<span class="nc" id="L22">            logger.setUseParentHandlers(false);</span>
+<span class="nc" id="L23">            FileHandler file=new FileHandler(NAME+&quot;.log&quot;,true);</span>
+<span class="nc" id="L24">            file.setFormatter(new SimpleFormatter());</span>
+<span class="nc" id="L25">            logger.addHandler(file);</span>
+<span class="nc" id="L26">            logger.log(Level.SEVERE,e.toString(),e);</span>
+<span class="nc" id="L27">            file.close();</span>
+<span class="nc" id="L28">        }catch (Exception oe){</span>
+<span class="nc" id="L29">            System.err.println(&quot;No se pudo escribir el log: &quot; + oe.getMessage());</span>
+<span class="nc" id="L30">        }</span>
+<span class="nc" id="L31">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>
