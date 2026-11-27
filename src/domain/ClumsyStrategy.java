@@ -8,15 +8,20 @@ import java.util.Random;
  */
 public class ClumsyStrategy implements MachineStrategy {
 
+    // Identificador de versión para la serialización de la estrategia.
     private static final long serialVersionUID = 1L;
 
+    // Generador aleatorio usado para elegir la acción de cada ciclo.
     private Random random = new Random();
+    // Contador de cuadros dentro del ciclo actual de 60 cuadros.
     private int frame = 0;
+    // Índice de la acción aleatoria elegida para el ciclo activo.
     private int movimiento = 0;
 
     /**
      * Creates a new ClumsyStrategy with default initial values.
      */
+    // Crea una instancia de estrategia torpe con sus contadores en estado inicial.
     public ClumsyStrategy() {
     }
     
@@ -27,6 +32,7 @@ public class ClumsyStrategy implements MachineStrategy {
      * @param machine the machine player controlled by this strategy
      * @param match   the current match state
      */
+    // Elige una acción al inicio del ciclo y la ejecuta según el cuadro actual del partido.
     @Override
     public void decide(Machine machine, Match match) {
 

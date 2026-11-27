@@ -6,8 +6,11 @@ import java.io.Serializable;
  * Represents a special shot that can be launched by a character during a match.
  */
 public abstract class PowerShot implements Serializable{
+    // Nombre identificador del tiro especial.
     private final String name;
+    // Daño base que provoca el tiro al impactar al jugador rival.
     private final int damage;
+    // Duración en segundos del efecto aplicado al rival.
     private final double duration;
 
     /**
@@ -17,6 +20,7 @@ public abstract class PowerShot implements Serializable{
      * @param damage   the base damage dealt when hitting the rival
      * @param duration the duration of the effect in seconds
      */
+    // Inicializa las propiedades base del tiro especial para las subclases que lo extienden.
     protected PowerShot(String name, int damage, double duration) {
         this.name = name;
         this.damage = damage;
@@ -28,6 +32,7 @@ public abstract class PowerShot implements Serializable{
      *
      * @return the shot name
      */
+    // Devuelve el nombre del tiro especial.
     public final String getName() { return name; }
     
     /**
@@ -35,6 +40,7 @@ public abstract class PowerShot implements Serializable{
      *
      * @return the base damage value
      */
+    // Devuelve el daño base del tiro especial.
     public final int getDamage() { return damage; }
     
     /**
@@ -42,6 +48,7 @@ public abstract class PowerShot implements Serializable{
      *
      * @return the effect duration in seconds
      */
+    // Devuelve la duración del efecto en segundos.
     public final double getDuration() { return duration; }
     
     /**
@@ -50,6 +57,7 @@ public abstract class PowerShot implements Serializable{
      * @param ball the match ball holding the shooter reference
      * @return 1 if aiming to the right, or -1 if aiming to the left
      */
+    // Obtiene la dirección horizontal de ataque (1 o -1) a partir del lanzador asociado al balón.
     protected final int direction(Ball ball) {
         Player shooter = ball.getPowerShooter();
         if (shooter == null) {
@@ -64,6 +72,7 @@ public abstract class PowerShot implements Serializable{
      *
      * @param ball the match ball
      */
+    // Define cómo se impulsa el balón y qué efecto especial se activa al lanzar el tiro.
     public abstract void launch(Ball ball);
     
     /**
@@ -72,5 +81,6 @@ public abstract class PowerShot implements Serializable{
      * @param rival  the opposing player hit by the shot
      * @param source the character that launched the shot
      */
+    // Aplica el efecto del tiro especial cuando el balón golpea al jugador rival.
     public abstract void onHit(Player rival, Character source);
 }

@@ -6,22 +6,38 @@ import java.io.Serializable;
  * ball, and uses a WinCondition to decide when the game ends.
  */
 public class Match implements Serializable{
+    // Cuadros por segundo objetivo para la simulación del partido.
     public static final int FPS = 60;               
+    // Duración de un cuadro en segundos según los FPS configurados.
     public static final double DT = 1.0 / FPS;     
+    // Puntos otorgados al jugador que gana el partido.
     public static final int WIN_POINTS = 100;
+    // Puntos otorgados al jugador que pierde o en caso de empate.
     public static final int LOSE_POINTS = 25;
 
+    // Solapamiento horizontal tolerado en píxeles antes de bloquear o separar jugadores.
     public static final int ALLOWED_OVERLAP = 22;
+    // Contador de cuadros transcurridos desde que inició el partido.
     private int timer;          
+    // Indica si el partido está pausado temporalmente.
     private boolean isPaused;
+    // Indica si el partido ya finalizó.
     private boolean isFinished;
+    // Jugador ganador del partido, o null si sigue en curso o empataron.
     private Player winner;
+    // Jugador ubicado en el lado izquierdo de la cancha.
     private Player leftPlayer;
+    // Jugador ubicado en el lado derecho de la cancha.
     private Player rightPlayer;
+    // Balón principal del partido.
     private Ball ball;
+    // Portería del lado izquierdo.
     private Goal leftGoal;
+    // Portería del lado derecho.
     private Goal rightGoal;
+    // Estadio donde se disputa el partido.
     private Stadium stadium;
+    // Regla que determina cuándo termina el partido.
     private WinCondition winCondition;
 
     /**
@@ -33,6 +49,7 @@ public class Match implements Serializable{
      * @param stadium      the stadium where the match takes place
      * @param winCondition the rule that determines when the match ends
      */
+    // Inicializa el partido, crea las porterías y el balón según el estadio y ubica a los jugadores.
     public Match(Player leftPlayer, Player rightPlayer, Stadium stadium, WinCondition winCondition) {
         this.leftPlayer = leftPlayer;
         this.rightPlayer = rightPlayer;
@@ -58,6 +75,7 @@ public class Match implements Serializable{
     /**
      * Advances the match simulation by one frame.
      */
+    // Ejecuta un ciclo de simulación: decisiones de IA, actualización de entidades, límites, colisiones, goles y fin de partido.
     public void update() {
         if (isPaused || isFinished) return;
 
@@ -91,6 +109,7 @@ public class Match implements Serializable{
      * Checks all match collisions: power shots hitting a rival, players touching
      * the ball, and the ball hitting the crossbars.
      */
+    // Evalúa impactos de tiros especiales sobre el rival, contacto de jugadores con el balón y rebotes en travesaños.
     public void checkCollisions() {
         Player shooter = ball.getPowerShooter();
         if (shooter != null) {
@@ -113,6 +132,7 @@ public class Match implements Serializable{
      * Checks whether the ball has entered either goal and awards a point to the
      * scoring player.
      */
+    // Revisa si el balón entró en la portería izquierda o derecha para anotar el gol correspondiente.
     public void checkGoal() {
         if (leftGoal.containsBall(ball)) {
             scoreGoal(rightPlayer, leftPlayer);
@@ -125,6 +145,7 @@ public class Match implements Serializable{
      * Resets both players to their starting sides and drops the ball from the
      * center after a goal.
      */
+    // Devuelve a ambos jugadores a sus posiciones iniciales y reinicia el balón sobre el centro de la cancha.
     public void resetPositions() {
         int groundY = stadium.getGroundY();
         leftPlayer.resetPosition(stadium.getWidth() / 4 - Player.WIDTH / 2, groundY - Player.HEIGHT);
@@ -137,6 +158,7 @@ public class Match implements Serializable{
      *
      * @param player the player to move
      */
+    // Desplaza al jugador hacia la izquierda si el paso no provoca colisión con el rival.
     public void moveLeft(Player player) {
         if (!willCollide(player, -1)) {
             player.moveLeft();
@@ -148,6 +170,7 @@ public class Match implements Serializable{
      *
      * @param player the player to move
      */
+    // Desplaza al jugador hacia la derecha si el paso no provoca colisión con el rival.
     public void moveRight(Player player) {
         if (!willCollide(player, 1)) {
             player.moveRight();
@@ -162,6 +185,7 @@ public class Match implements Serializable{
      * @param direction the movement direction (-1 for left, 1 for right)
      * @return true if the step would cause a collision, false otherwise
      */
+    // Calcula si avanzar un paso en la dirección dada superaría el solapamiento permitido con el rival.
     public boolean willCollide(Player player, int direction) {
         Player rival = getRival(player);
 
@@ -184,6 +208,7 @@ public class Match implements Serializable{
      * Pushes overlapping players apart horizontally so they do not pass through
      * each other after jumps or power shots.
      */ 
+    // Separa en partes iguales hacia izquierda y derecha a los jugadores cuando superan el solapamiento permitido.
     private void separatePlayers() {
         int overlapX = Math.min(leftPlayer.getPosX() + leftPlayer.getWidth(),
                                 rightPlayer.getPosX() + rightPlayer.getWidth())
@@ -205,6 +230,7 @@ public class Match implements Serializable{
      *
      * @return true if the match is finished, false otherwise
      */
+    // Indica si el partido ya terminó.
     public boolean isGameOver() {
         return isFinished;
     }
@@ -214,6 +240,7 @@ public class Match implements Serializable{
      *
      * @return the winning player, or null if the match is still running or tied
      */
+    // Devuelve el jugador ganador o null si el partido sigue activo o terminó en empate.
     public Player getWinner() {
         return winner;
     }
@@ -221,6 +248,7 @@ public class Match implements Serializable{
     /**
      * Pauses the match if it has not finished yet.
      */
+    // Activa la pausa del partido siempre que no haya finalizado.
     public void pause() {
         if (!isFinished) isPaused = true;
     }
@@ -228,6 +256,7 @@ public class Match implements Serializable{
     /**
      * Resumes the paused match.
      */
+    // Reanuda el partido retirando la pausa.
     public void resume() {
         isPaused = false;
     }
@@ -235,6 +264,7 @@ public class Match implements Serializable{
     /**
      * Ends the match, sets the winner, and gives match points to both players.
      */
+    // Cierra el partido, determina el ganador según los goles y asigna los puntos correspondientes.
     public void finish() {
         if (isFinished) return;
         isFinished = true;
@@ -260,6 +290,7 @@ public class Match implements Serializable{
      * @param scorer   the player who scored the goal
      * @param conceded the player who conceded the goal
      */
+    // Suma el gol al anotador, otorga carga parcial de poder a quien recibió el gol y reinicia posiciones.
     private void scoreGoal(Player scorer, Player conceded) {
         scorer.addGoal();
         conceded.chargePowerBar(Player.POWER_CHARGE_TIME / 4);
@@ -272,6 +303,7 @@ public class Match implements Serializable{
      * @param player the reference player
      * @return the opposing player
      */
+    // Devuelve el jugador contrario al recibido como parámetro.
     public Player getRival(Player player) {
         if (player == leftPlayer) {
             return rightPlayer;
@@ -285,6 +317,7 @@ public class Match implements Serializable{
      *
      * @return the elapsed seconds
      */
+    // Convierte el contador de cuadros transcurridos a segundos de partido.
     public int getSeconds() { return timer / FPS; }
 
     /**
@@ -292,6 +325,7 @@ public class Match implements Serializable{
      *
      * @return the timer value in frames
      */
+    // Devuelve el tiempo transcurrido del partido en cuadros.
     public int getTimer() { return timer; }
 
     /**
@@ -299,6 +333,7 @@ public class Match implements Serializable{
      *
      * @return true if the match is paused, false otherwise
      */
+    // Indica si el partido está pausado en este momento.
     public boolean isPaused() { return isPaused; }
 
     /**
@@ -306,6 +341,7 @@ public class Match implements Serializable{
      *
      * @return the left player
      */
+    // Devuelve el jugador del lado izquierdo.
     public Player getLeftPlayer() { return leftPlayer; }
 
     /**
@@ -313,6 +349,7 @@ public class Match implements Serializable{
      *
      * @return the right player
      */
+    // Devuelve el jugador del lado derecho.
     public Player getRightPlayer() { return rightPlayer; }
 
     /**
@@ -320,6 +357,7 @@ public class Match implements Serializable{
      *
      * @return the match ball
      */
+    // Devuelve el balón del partido.
     public Ball getBall() { return ball; }
 
     /**
@@ -327,6 +365,7 @@ public class Match implements Serializable{
      *
      * @return the left goal
      */
+    // Devuelve la portería izquierda.
     public Goal getLeftGoal() { return leftGoal; }
 
     /**
@@ -334,6 +373,7 @@ public class Match implements Serializable{
      *
      * @return the right goal
      */
+    // Devuelve la portería derecha.
     public Goal getRightGoal() { return rightGoal; }
 
     /**
@@ -341,6 +381,7 @@ public class Match implements Serializable{
      *
      * @return the match stadium
      */
+    // Devuelve el estadio del partido.
     public Stadium getStadium() { return stadium; }
 
     /**
@@ -348,5 +389,6 @@ public class Match implements Serializable{
      *
      * @return the winning condition
      */
+    // Devuelve la condición de victoria configurada para el partido.
     public WinCondition getWinCondition() { return winCondition; }
 }

@@ -6,7 +6,9 @@ import java.io.Serializable;
  * Represents a playable country character that has a replaceable special shot.
  */
 public abstract class Character implements Serializable {
+    // Nombre del país que identifica al personaje.
     private final String country;
+    // Tiro especial asignado actualmente al personaje.
     private PowerShot powerShot;
 
     /**
@@ -15,6 +17,7 @@ public abstract class Character implements Serializable {
      * @param country   the name of the country
      * @param powerShot the special shot assigned to this character
      */
+    // Inicializa el personaje con su nombre de país y su tiro especial por defecto.
     protected Character(String country, PowerShot powerShot) {
         this.country = country;
         this.powerShot = powerShot;
@@ -25,6 +28,7 @@ public abstract class Character implements Serializable {
      *
      * @return the country name
      */
+    // Devuelve el nombre del país del personaje.
     public String getCountry() { return country; }
     
     /**
@@ -32,6 +36,7 @@ public abstract class Character implements Serializable {
      *
      * @return the power shot
      */
+    // Devuelve el tiro especial configurado para el personaje.
     public PowerShot getPowerShot() { return powerShot; }
     
     /**
@@ -39,6 +44,7 @@ public abstract class Character implements Serializable {
      *
      * @return the shot damage value
      */
+    // Devuelve el daño base del tiro especial del personaje.
     public int getShotDamage() { return powerShot.getDamage(); }
     
     /**
@@ -46,6 +52,7 @@ public abstract class Character implements Serializable {
      *
      * @return the effect duration in seconds
      */
+    // Devuelve la duración en segundos del efecto aplicado al rival.
     public double getEffectDuration() { return powerShot.getDuration(); }
     
     /**
@@ -53,6 +60,7 @@ public abstract class Character implements Serializable {
      *
      * @param ball the match ball
      */
+    // Ejecuta el lanzamiento del tiro especial sobre el balón del partido.
     public void powerShot(Ball ball) { powerShot.launch(ball); }
     
     /**
@@ -60,5 +68,6 @@ public abstract class Character implements Serializable {
      *
      * @param rival the player hit by the shot
      */
+    // Aplica sobre el jugador rival el efecto del tiro especial de este personaje.
     public void applyEffect(Player rival) { powerShot.onHit(rival, this); }
 }

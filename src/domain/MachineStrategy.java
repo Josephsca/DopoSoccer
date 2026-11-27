@@ -15,5 +15,6 @@ public interface MachineStrategy extends Serializable {
      * @param machine the machine player to control
      * @param match   the current match state
      */
+    // Determina y ejecuta las acciones del jugador máquina durante un cuadro del partido.
     public abstract void decide(Machine machine, Match match);
 }

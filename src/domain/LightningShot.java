@@ -9,6 +9,7 @@ public class LightningShot extends PowerShot {
     /**
      * Creates a new LightningShot power shot with its default name, damage, and duration.
      */
+    // Inicializa el tiro especial Rayo con su nombre, daño y duración por defecto.
     public LightningShot() { 
         super("Rayo", 60, 3); 
     }
@@ -18,6 +19,7 @@ public class LightningShot extends PowerShot {
      *
      * @param ball the match ball to launch
      */
+    // Dispara el balón a alta velocidad horizontal y con un leve impulso hacia arriba.
     @Override 
     public void launch(Ball ball) {
         ball.setVelX(18 * direction(ball)); 
@@ -31,6 +33,7 @@ public class LightningShot extends PowerShot {
      * @param rival  the opposing player hit by the power shot
      * @param source the character that used the power shot
      */
+    // Aplica el efecto del personaje, impide saltar al rival y reduce su velocidad a la mitad.
     @Override 
     public void onHit(Player rival, Character source) {
         rival.setEffect(source);

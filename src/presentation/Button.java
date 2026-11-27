@@ -11,10 +11,14 @@ import java.awt.event.MouseEvent;
  */
 public class Button extends JButton {
 
+    // Color de fondo normal del botón.
     private static final Color BACKGROUND = new Color(20, 20, 30);
+    // Color de fondo cuando el cursor pasa por encima del botón.
     private static final Color HOVER = new Color(40, 50, 50);
+    // Color usado para el texto y el borde del botón.
     private static final Color TEXT = Color.WHITE;
 
+    // Indica si el ratón está actualmente sobre el botón.
     private boolean mouseOver;
 
     /**
@@ -22,6 +26,7 @@ public class Button extends JButton {
      *
      * @param text the text displayed on the button
      */
+    // Configura la apariencia, fuente, cursor y tamaño del botón e instala sus eventos.
     public Button(String text) {
         super(text);
         mouseOver = false;
@@ -40,6 +45,7 @@ public class Button extends JButton {
      * Attaches mouse listeners to update the hover state when the cursor
      * enters or leaves the button.
      */
+    // Registra los oyentes de ratón para cambiar el estado visual al entrar o salir.
     private void prepareActions() {
         addMouseListener(new MouseAdapter() {
             @Override
@@ -62,6 +68,7 @@ public class Button extends JButton {
      *
      * @param g the graphics context used to paint the component
      */
+    // Dibuja el fondo redondeado y el borde del botón antes de pintar su texto.
     @Override
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();

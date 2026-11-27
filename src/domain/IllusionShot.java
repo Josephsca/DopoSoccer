@@ -9,6 +9,7 @@ public class IllusionShot extends PowerShot {
     /**
      * Creates a new IllusionShot power shot with its default name, damage, and duration.
      */
+    // Inicializa el tiro especial Ilusión con su nombre, daño y duración por defecto.
     public IllusionShot() { 
         super("Ilusión", 30, 2.5);
     }
@@ -18,6 +19,7 @@ public class IllusionShot extends PowerShot {
      *
      * @param ball the match ball to launch
      */
+    // Impulsa el balón hacia adelante y hacia arriba y activa el efecto de ilusión por la duración del tiro.
     @Override public void launch(Ball ball) {
         ball.setVelX(14 * direction(ball)); 
         ball.setVelY(-7);
@@ -30,6 +32,7 @@ public class IllusionShot extends PowerShot {
      * @param rival  the opposing player hit by the power shot
      * @param source the character that used the power shot
      */
+    // Aplica el efecto del personaje que lanzó el tiro sobre el jugador rival impactado.
     @Override public void onHit(Player rival, Character source) {
         rival.setEffect(source);
     }

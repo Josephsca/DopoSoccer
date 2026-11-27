@@ -6,13 +6,16 @@ package domain;
  */
 public class DefensiveStrategy implements MachineStrategy {
 
+    // Identificador de versión para la serialización de la estrategia.
     private static final long serialVersionUID = 1L;
 
+    // Contador cíclico de cuadros para espaciar saltos y despejes.
     private int frame = 0;
 
     /**
      * Creates a new DefensiveStrategy with default initial values.
      */
+    // Crea una instancia de estrategia defensiva con su contador de cuadros en cero.
     public DefensiveStrategy() {
     }
     
@@ -23,6 +26,7 @@ public class DefensiveStrategy implements MachineStrategy {
      * @param machine the machine player controlled by this strategy
      * @param match   the current match state
      */
+    // Posiciona a la máquina cerca de su arco, salta y despeja si el balón se acerca, y usa el poder en zona de peligro.
     @Override
     public void decide(Machine machine, Match match) {
 

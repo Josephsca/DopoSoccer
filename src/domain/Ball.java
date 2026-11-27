@@ -9,17 +9,24 @@ public class Ball extends Entity {
     /**
      * Energy kept after a bounce.
      */
+    // Factor de velocidad que conserva el balón tras rebotar.
     public static final double BOUNCE_LOSS = 0.72;
 
     /**
      * Speed reduction factor caused by air friction.
      */
+    // Factor de fricción del aire que reduce la velocidad horizontal del balón.
     public static final double AIR_FRICTION = 0.97;
 
+    // Radio del balón en píxeles.
     private double radius;
+    // Fuerza de gravedad aplicada al balón en cada cuadro.
     private double gravity;
+    // Jugador que disparó el tiro especial activo sobre el balón, o null si no hay ninguno.
     private Player powerShooter;
+    // Tiempo restante en segundos del efecto de ilusión del balón.
     private double illusionRemaining;
+    // Tiempo transcurrido en segundos desde que se activó la ilusión.
     private double illusionElapsed;
 
     /**
@@ -30,6 +37,7 @@ public class Ball extends Entity {
      * @param radius  the radius of the ball
      * @param gravity the gravity force applied to the ball
      */
+    // Crea el balón centrado en las coordenadas indicadas con su radio y gravedad.
     public Ball(int centerX, int centerY, double radius, double gravity) {
         super((int) (centerX - radius), (int) (centerY - radius), (int) (radius * 2), (int) (radius * 2));
         this.radius = radius;
@@ -41,6 +49,7 @@ public class Ball extends Entity {
      * Moves the ball using gravity and air friction, and updates any active
      * illusion timer.
      */
+    // Actualiza los temporizadores de ilusión, aplica gravedad y fricción, y mueve el balón.
     @Override
     public void update() {
         if (illusionRemaining > 0) {
@@ -59,6 +68,7 @@ public class Ball extends Entity {
      * @param normalX the X direction of the surface (-1, 0, or 1)
      * @param normalY the Y direction of the surface (-1, 0, or 1)
      */
+    // Invierte y reduce la velocidad del balón según la normal de la superficie donde rebota.
     public void bounce(double normalX, double normalY) {
         if (normalX != 0) {
             velX = Math.abs(velX) * BOUNCE_LOSS * Math.signum(normalX);
@@ -78,6 +88,7 @@ public class Ball extends Entity {
      * @param normalX the X direction of the boundary (-1, 0, or 1)
      * @param normalY the Y direction of the boundary (-1, 0, or 1)
      */
+    // Hace rebotar el balón en los límites del campo y limpia el tirador especial si choca lateralmente.
     @Override
     public void hitBoundary(double normalX, double normalY) {
         bounce(normalX, normalY);
@@ -92,6 +103,7 @@ public class Ball extends Entity {
      * @param x the new X coordinate of the ball center
      * @param y the new Y coordinate of the ball center
      */
+    // Centra el balón en la posición dada, detiene su movimiento y reinicia poderes e ilusiones.
     public void reset(int x, int y) {
         posX = (int) (x - radius);
         posY = (int) (y - radius);
@@ -107,6 +119,7 @@ public class Ball extends Entity {
      *
      * @param seconds the duration of the illusion in seconds
      */
+    // Activa el efecto de ilusión por la duración indicada y reinicia el contador transcurrido.
     public void activateIllusion(double seconds) {
         illusionRemaining = seconds;
         illusionElapsed = 0;
@@ -117,6 +130,7 @@ public class Ball extends Entity {
      *
      * @return true if the illusion is active, false otherwise
      */
+    // Indica si todavía queda tiempo activo en el efecto de ilusión del balón.
     public boolean hasIllusion() {
         return illusionRemaining > 0;
     }
@@ -126,6 +140,7 @@ public class Ball extends Entity {
      *
      * @return the elapsed time in seconds
      */
+    // Devuelve cuántos segundos lleva activo el efecto de ilusión.
     public double getIllusionElapsed() {
         return illusionElapsed;
     }
@@ -135,6 +150,7 @@ public class Ball extends Entity {
      *
      * @return the radius value
      */
+    // Devuelve el radio del balón.
     public double getRadius() {
         return radius;
     }
@@ -144,6 +160,7 @@ public class Ball extends Entity {
      *
      * @return the gravity value
      */
+    // Devuelve la gravedad configurada para el balón.
     public double getGravity() {
         return gravity;
     }
@@ -153,6 +170,7 @@ public class Ball extends Entity {
      *
      * @return the player who made the power shot, or null if none is active
      */
+    // Devuelve el jugador que lanzó el tiro especial actual, o null si no hay alguno.
     public Player getPowerShooter() {
         return powerShooter;
     }
@@ -162,6 +180,7 @@ public class Ball extends Entity {
      *
      * @param powerShooter the player who made the power shot
      */
+    // Asigna el jugador responsable del tiro especial aplicado al balón.
     public void setPowerShooter(Player powerShooter) {
         this.powerShooter = powerShooter;
     }

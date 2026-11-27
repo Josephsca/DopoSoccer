@@ -7,11 +7,17 @@ import java.io.Serializable;
  */
 public abstract class Entity implements Serializable {
 
+    // Coordenada horizontal actual de la esquina superior izquierda de la entidad.
     protected int posX;
+    // Coordenada vertical actual de la esquina superior izquierda de la entidad.
     protected int posY;
+    // Velocidad horizontal de la entidad en el eje X.
     protected double velX;
+    // Velocidad vertical de la entidad en el eje Y.
     protected double velY;
+    // Ancho del área rectangular de la entidad.
     protected int width;
+    // Alto del área rectangular de la entidad.
     protected int height;
 
     /**
@@ -22,6 +28,7 @@ public abstract class Entity implements Serializable {
      * @param width  the width of the entity
      * @param height the height of the entity
      */
+    // Inicializa la posición, el tamaño y las velocidades iniciales en cero de la entidad.
     public Entity(int posX, int posY, int width, int height) {
         this.posX = posX;
         this.posY = posY;
@@ -34,6 +41,7 @@ public abstract class Entity implements Serializable {
     /**
      * Advances the entity by one game frame according to its movement rules.
      */
+    // Actualiza el estado y movimiento de la entidad en un cuadro del juego.
     public abstract void update();
 
     /**
@@ -42,6 +50,7 @@ public abstract class Entity implements Serializable {
      * @param other the other entity to check intersection with
      * @return true if the rectangular areas overlap, false otherwise
      */
+    // Comprueba si el rectángulo de esta entidad se superpone con el de otra entidad.
     public boolean intersects(Entity other) {
         return posX < other.posX + other.width
             && posX + width > other.posX
@@ -56,6 +65,7 @@ public abstract class Entity implements Serializable {
      * @param normalX the X direction of the boundary (-1, 0, or 1)
      * @param normalY the Y direction of the boundary (-1, 0, or 1)
      */
+    // Detiene la velocidad en el eje X o en el eje Y según la normal del límite impactado.
     public void hitBoundary(double normalX, double normalY) {
         if (normalX != 0) velX = 0;
         if (normalY != 0) velY = 0;
@@ -66,6 +76,7 @@ public abstract class Entity implements Serializable {
      *
      * @return the center X position
      */
+    // Devuelve la coordenada horizontal del centro de la entidad.
     public int getCenterX() { return posX + width / 2; }
     
     /**
@@ -73,6 +84,7 @@ public abstract class Entity implements Serializable {
      *
      * @return the center Y position
      */
+    // Devuelve la coordenada vertical del centro de la entidad.
     public int getCenterY() { return posY + height / 2; }
     
     /**
@@ -80,6 +92,7 @@ public abstract class Entity implements Serializable {
      *
      * @return the X position
      */
+    // Devuelve la posición actual en el eje X.
     public int getPosX() { return posX; }
     
     /**
@@ -87,6 +100,7 @@ public abstract class Entity implements Serializable {
      *
      * @return the Y position
      */
+    // Devuelve la posición actual en el eje Y.
     public int getPosY() { return posY; }
 
     /**
@@ -94,6 +108,7 @@ public abstract class Entity implements Serializable {
      *
      * @return the velocity on the X axis
      */
+    // Devuelve la velocidad actual en el eje X.
     public double getVelX() { return velX; }
 
     /**
@@ -101,6 +116,7 @@ public abstract class Entity implements Serializable {
      *
      * @return the velocity on the Y axis
      */
+    // Devuelve la velocidad actual en el eje Y.
     public double getVelY() { return velY; }
     
     /**
@@ -108,6 +124,7 @@ public abstract class Entity implements Serializable {
      *
      * @return the width value
      */
+    // Devuelve el ancho de la entidad.
     public int getWidth() { return width; }
     
     /**
@@ -115,6 +132,7 @@ public abstract class Entity implements Serializable {
      *
      * @return the height value
      */
+    // Devuelve el alto de la entidad.
     public int getHeight() { return height; }
     
     /**
@@ -122,6 +140,7 @@ public abstract class Entity implements Serializable {
      *
      * @param posX the new X position
      */
+    // Actualiza la posición de la entidad en el eje X.
     public void setPosX(int posX) { this.posX = posX; }
     
     /**
@@ -129,6 +148,7 @@ public abstract class Entity implements Serializable {
      *
      * @param posY the new Y position
      */
+    // Actualiza la posición de la entidad en el eje Y.
     public void setPosY(int posY) { this.posY = posY; }
     
     /**
@@ -136,6 +156,7 @@ public abstract class Entity implements Serializable {
      *
      * @param velX the new velocity on the X axis
      */
+    // Actualiza la velocidad de la entidad en el eje X.
     public void setVelX(double velX) { this.velX = velX; }
     
     /**
@@ -143,5 +164,6 @@ public abstract class Entity implements Serializable {
      *
      * @param velY the new velocity on the Y axis
      */
+    // Actualiza la velocidad de la entidad en el eje Y.
     public void setVelY(double velY) { this.velY = velY; }
 }

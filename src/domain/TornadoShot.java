@@ -10,6 +10,7 @@ public class TornadoShot extends PowerShot {
     /**
      * Creates a new TornadoShot power shot with its default name, damage, and duration.
      */
+    // Inicializa el tiro especial Tornado con su nombre, daño y duración por defecto.
     public TornadoShot() { 
         super("Tornado", 40, 3); 
     }
@@ -19,6 +20,7 @@ public class TornadoShot extends PowerShot {
      *
      * @param ball the match ball to launch
      */
+    // Impulsa el balón hacia adelante y hacia abajo para que avance rebotando cerca del suelo.
     @Override 
     public void launch(Ball ball) {
         ball.setVelX(15 * direction(ball));
@@ -32,6 +34,7 @@ public class TornadoShot extends PowerShot {
      * @param rival  the opposing player hit by the power shot
      * @param source the character that used the power shot
      */
+    // Aplica el efecto del personaje, bloquea movimiento y salto del rival y lo impulsa hacia arriba.
     @Override 
     public void onHit(Player rival, Character source) {
         rival.setEffect(source); 

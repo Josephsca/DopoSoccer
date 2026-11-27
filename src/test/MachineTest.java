@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.AfterEach;
+
 public class MachineTest {
 
     private Machine machine;
@@ -274,5 +276,15 @@ public class MachineTest {
 
         assertEquals(initialTime + 1, match.getTimer());
         assertTrue(machine.getPosX() > initialX);
+    }
+
+    /**
+     * Tears down the test fixture.
+     *
+     * Called after every test case method.
+     */
+    @AfterEach
+    public void tearDown()
+    {
     }
 }

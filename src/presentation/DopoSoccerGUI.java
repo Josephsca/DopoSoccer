@@ -19,44 +19,78 @@ import java.awt.event.ActionListener;
  */
 public class DopoSoccerGUI extends JFrame {
 
+    // Identificador de la pantalla del menú principal.
     private static final String MENU = "menu";
+    // Identificador de la pantalla de configuración del partido.
     private static final String CONFIG = "config";
+    // Identificador de la pantalla donde se juega el partido.
     private static final String GAME = "game";
+    // Nombres de países mostrados en los selectores de personajes.
     private static final String[] COUNTRY_NAMES = {"Corea del Sur", "Camerún", "Nigeria", "Estados Unidos"};
+    // Resoluciones disponibles para el estadio del partido.
     private static final String[] RESOLUTIONS = {Stadium.SMALL, Stadium.MEDIUM, Stadium.LARGE};
+    // Indica si el partido se jugará contra la máquina en lugar de dos humanos.
     private boolean againstMachine = false;
 
+    // Controlador principal del dominio del juego.
     private DopoSoccer game;
+    // Administrador de tarjetas para cambiar entre las pantallas de la ventana.
     private CardLayout cards;
+    // Contenedor principal que almacena cada pantalla del juego.
     private JPanel container;
+    // Panel donde se renderiza y ejecuta el partido en curso.
     private GamePanel gamePanel;
 
     // Menu screen buttons
+    // Botón para entrar al menú de selección de modo de juego.
     private JButton enterToPlay;
+    // Botón para abrir la configuración previa al inicio del partido.
     private JButton selectPlayers;
+    // Botón para activar o desactivar el sonido del juego.
     private JButton soundButton;
+    // Botón para elegir el modo de juego jugador contra jugador.
     private JButton playerVsPlayer;
+    // Botón para elegir el modo de juego jugador contra máquina.
     private JButton playerVsMachine;
+    // Botón para iniciar un partido rápido con la configuración actual.
     private JButton quickStart;
+    // Botón para volver desde la selección de modo al menú inicial.
     private JButton backToMenu;
+    // Botón para volver desde las opciones de inicio a la elección de modo.
     private JButton backToMode;
+    // Botón para cargar una partida guardada desde disco.
     private Button loadGameButton;
+    // Botón para abrir el menú de mejora de estadísticas de jugadores.
     private Button upgradeButton;
 
     // Configuration screen components
+    // Campo de texto para el nombre del jugador 1.
     private JTextField name1;
+    // Campo de texto para el nombre del jugador 2.
     private JTextField name2;
+    // Selector de país para el personaje del jugador 1.
     private JComboBox<String> country1;
+    // Selector de país para el personaje del jugador 2.
     private JComboBox<String> country2;
+    // Selector del lado de la cancha donde juega la máquina.
     private JComboBox<String> machineSide;
+    // Selector de estrategia de inteligencia artificial para la máquina.
     private JComboBox<String> machineStrategy;
+    // Panel que agrupa las opciones específicas cuando hay una máquina.
     private JPanel machineOptions;
+    // Selector del tipo de partido (por tiempo o por goles).
     private JComboBox<String> matchType;
+    // Selector numérico del límite de minutos o goles para ganar.
     private JSpinner limit;
+    // Selector de resolución de pantalla para la cancha.
     private JComboBox<String> resolution;
+    // Botón para regresar al menú principal desde la configuración.
     private JButton back;
+    // Botón para iniciar el partido con los parámetros configurados.
     private JButton start;
+    // Contenedor visual con los campos de configuración del jugador 1.
     private JPanel playerBox1;
+    // Contenedor visual con los campos de configuración del jugador 2.
     private JPanel playerBox2;
     
 
@@ -64,6 +98,7 @@ public class DopoSoccerGUI extends JFrame {
      * Creates the main game window, initializes the domain controller, and sets
      * up UI elements and event listeners.
      */
+    // Crea la instancia del dominio, arma las pantallas y registra los eventos de la interfaz.
     public DopoSoccerGUI() {
         game = new DopoSoccer();
         prepareElements();
@@ -73,6 +108,7 @@ public class DopoSoccerGUI extends JFrame {
     /**
      * Sets up the window properties, card container, and screen panels.
      */
+    // Configura la ventana, crea las pantallas del juego y muestra el menú inicial.
     private void prepareElements() {
         setTitle("DopoSoccer");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -92,6 +128,7 @@ public class DopoSoccerGUI extends JFrame {
      *
      * @return the configured menu panel
      */
+    // Construye el panel del menú principal con imagen de fondo y botones por pasos.
     private JPanel createMenuPanel() {
         final Image background = new ImageIcon("images/menu_bg.jpg").getImage();   
         JPanel panel = new JPanel(new GridBagLayout()) {                          
@@ -149,6 +186,7 @@ public class DopoSoccerGUI extends JFrame {
      * @param row    the starting grid row
      * @param width  the number of columns the button spans
      */
+    // Ubica un botón en la cuadrícula del menú según su columna, fila y ancho en columnas.
     private void addButton(JPanel panel, GridBagConstraints c, JButton button, int column, int row, int width) {
         c.gridx = column;
         c.gridy = row;
@@ -161,6 +199,7 @@ public class DopoSoccerGUI extends JFrame {
      *
      * @param step the menu step to display (0 for main, 1 for mode, 2 for start options)
      */
+    // Alterna la visibilidad de los botones del menú según el nivel de navegación activo.
     private void showMenuStep(int step) {
         enterToPlay.setVisible(step == 0);
         soundButton.setVisible(step == 0);
@@ -180,6 +219,7 @@ public class DopoSoccerGUI extends JFrame {
      *
      * @return the configured configuration panel
      */
+    // Crea el panel de configuración con datos de jugadores, reglas del partido y ajustes de IA.
     private JPanel createConfigPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setPreferredSize(new Dimension(800, 450));
@@ -256,6 +296,7 @@ public class DopoSoccerGUI extends JFrame {
      * @param country the combo box for selecting the country character
      * @return the configured player box panel
      */
+    // Construye un bloque con título para ingresar el nombre y elegir el país de un jugador.
     private JPanel createPlayerBox(String title, JTextField name, JComboBox<String> country) {
         JPanel box = new JPanel(new GridLayout(4, 1, 5, 5));
         box.setBorder(BorderFactory.createTitledBorder(title));
@@ -270,6 +311,7 @@ public class DopoSoccerGUI extends JFrame {
      * Registers listeners for all buttons and controls across the menu and
      * configuration screens.
      */
+    // Asocia las acciones de navegación, sonido, inicio de partido, carga y mejoras a cada control.
     private void prepareActions() {
         enterToPlay.addActionListener(new ActionListener() {
             @Override
@@ -380,6 +422,7 @@ public class DopoSoccerGUI extends JFrame {
     /**
      * Starts a new match using the selected settings and opens the game screen.
      */            
+    // Lee los parámetros elegidos, crea el partido en el dominio y abre el panel de juego.
     private void startMatch() {
         try {
             String type = matchType.getSelectedIndex() == 0
@@ -466,6 +509,7 @@ public class DopoSoccerGUI extends JFrame {
      * Updates the player box titles and name fields based on the selected game
      * mode and machine side.
      */
+    // Actualiza los títulos, controles y habilitación de nombres según el modo y lado de la máquina.
     private void updatePlayerLabels() {
 
         if (!againstMachine) {
@@ -512,6 +556,7 @@ public class DopoSoccerGUI extends JFrame {
     /**
      * Opens the pause dialog so the user can resume, save, or finish the match.
      */
+    // Pausa el partido y muestra las opciones para reanudar, guardar en archivo o finalizar.
     public void showPauseMenu() {
         game.pauseMatch();
 
@@ -581,6 +626,7 @@ public class DopoSoccerGUI extends JFrame {
     /**
      * Opens a file chooser to load a saved match and starts the game screen.
      */
+    // Selecciona un archivo de partida guardada, restaura el partido y reanuda la vista de juego.
     private void loadMatch() {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Cargar partida");
@@ -619,6 +665,7 @@ public class DopoSoccerGUI extends JFrame {
      * Shows a dialog with the match result, score, and earned points, then lets
      * the user replay or return to the menu.
      */
+    // Muestra el resultado final, goles y puntos ganados, y permite jugar de nuevo o volver al menú.
     public void showWinner() {
         Match match = game.getCurrentMatch();
         Player left = match.getLeftPlayer();
@@ -645,6 +692,7 @@ public class DopoSoccerGUI extends JFrame {
      * Opens dialogs to pick a saved player profile and upgrade its stats using
      * earned points.
      */
+    // Abre los cuadros de diálogo para elegir un perfil guardado y mejorar sus estadísticas con puntos.
     private void showUpgradeMenu() {
         String[] savedPlayers = game.getSavedPlayers();
         if (savedPlayers.length == 0) {
@@ -704,6 +752,7 @@ public class DopoSoccerGUI extends JFrame {
      *
      * @param screen the card name of the screen to show
      */
+    // Cambia la pantalla visible en el CardLayout, ajusta el tamaño de la ventana y la centra.
     private void showScreen(String screen) {
         cards.show(container, screen);
         if (!screen.equals(GAME)) {
@@ -719,6 +768,7 @@ public class DopoSoccerGUI extends JFrame {
      *
      * @param e the DopoSoccerException to display and log
      */
+    // Muestra un mensaje de error en pantalla y registra la excepción en el log.
     private void showError(DopoSoccerException e) {
         JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         Log.record(e);
@@ -729,6 +779,7 @@ public class DopoSoccerGUI extends JFrame {
      *
      * @param args command-line arguments
      */
+    // Crea la ventana principal de DopoSoccer y la hace visible.
     public static void main(String[] args) {
         DopoSoccerGUI gui=new DopoSoccerGUI();
         gui.setVisible(true);

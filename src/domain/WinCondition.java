@@ -13,5 +13,6 @@ public interface WinCondition extends Serializable{
      * @param match the current match
      * @return true if the match has ended, false otherwise
      */
+    // Evalúa si el partido ha terminado según la condición de victoria implementada.
     public abstract boolean isGameOver(Match match);
 }

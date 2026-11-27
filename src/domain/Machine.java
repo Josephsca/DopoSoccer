@@ -6,8 +6,10 @@ package domain;
  */
 public class Machine extends Player {
 
+    // Identificador de versión para la serialización del jugador controlado por IA.
     private static final long serialVersionUID = 1L;
 
+    // Estrategia actual que determina las decisiones de movimiento y acción de la máquina.
     private MachineStrategy strategy;
 
     /**
@@ -18,6 +20,7 @@ public class Machine extends Player {
      * @param leftSide  true if the machine plays on the left side, false for the right side
      * @param strategy  the strategy that controls the machine behavior
      */
+    // Inicializa el jugador máquina con su personaje, lado de la cancha y estrategia asignada.
     public Machine(String name, Character character, boolean leftSide, MachineStrategy strategy) {
 
         super(name, character, leftSide);
@@ -29,6 +32,7 @@ public class Machine extends Player {
      *
      * @param match the current match state
      */
+    // Delega a la estrategia activa la decisión del jugador máquina en el estado actual del partido.
     public void decide(Match match) {
         strategy.decide(this, match);
     }
@@ -38,6 +42,7 @@ public class Machine extends Player {
      *
      * @param strategy the new machine strategy
      */
+    // Cambia la estrategia de decisión asignada a la máquina.
     public void setStrategy(MachineStrategy strategy) {
         this.strategy = strategy;
     }
@@ -47,6 +52,7 @@ public class Machine extends Player {
      *
      * @return the current machine strategy
      */
+    // Devuelve la estrategia que controla actualmente el comportamiento de la máquina.
     public MachineStrategy getStrategy() {
         return strategy;
     }

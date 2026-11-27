@@ -14,6 +14,7 @@ public class Log{
     /**
      * Base name used for the logger and the log file.
      */
+    // Nombre base empleado para el logger y el archivo de registro.
     public static final String NAME ="DopoSoccer";
 
     /**
@@ -21,6 +22,7 @@ public class Log{
      *
      * @param e the exception to log
      */
+    // Configura un manejador de archivo en modo anexo y guarda los detalles de la excepción ocurrida.
     public static void record(Exception e){
         try{
             Logger logger=Logger.getLogger(NAME);
