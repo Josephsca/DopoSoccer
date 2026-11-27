@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Player.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura inicial</a> &gt; <a href="index.source.html" class="el_package">domain</a> &gt; <span class="el_source">Player.java</span></div><h1>Player.java</h1><pre class="source lang-java linenums">package domain;
+
+/**
+ * Represents a match player. Controls a character (country), has health, a power bar,
+ * and attributes (speed, jump, kick, survival) ranging from 1 to 10.
+ */
+public class Player extends Entity {
+
+    public static final int WIDTH = 50;
+    public static final int HEIGHT = 80;
+    public static final double BASE_LIFE = 100;
+    public static final double KICK_DAMAGE = 10;
+    public static final double POWER_FULL = 100;
+    public static final double POWER_CHARGE_TIME = 10;  
+    public static final double STUN_TIME = 3;            
+    public static final int MAX_STAT = 10;
+    public static final int BASE_UPGRADE_COST = 500;
+    public static final double BASE_SPEED = 5;
+    public static final double BASE_JUMP = 13;
+    public static final double GRAVITY = 0.7;
+    public static final int KICK_REACH = 25;
+    /** Segundos que dura una patada: se ve la pose de patear y no se puede volver a patear. */
+    public static final double KICK_TIME = 0.3;
+    private String name;
+    private int score;
+    private boolean isJumping;
+    private double life;
+    private double powerBar;
+    private boolean hasAura;
+    private double stunTime;
+    private double effectTime;
+    private double kickTime;
+    private int speed;
+    private int jumpStat;
+    private int kickStat;
+    private int survival;
+    private int points;
+    private int matchPoints;
+    private boolean leftSide; 
+    private double speedFactor;     
+    private boolean canMove;
+    private boolean canJump;
+    private Character character;   
+    private Character affectedBy;   
+
+    /**
+     * Constructs a new player with all attributes set to 1 and maximum health.
+     * @param name the name of the player
+     * @param character the chosen character (country)
+     * @param leftSide true if the player plays on the left side
+     */
+    public Player(String name, Character character, boolean leftSide) {
+<span class="fc" id="L53">        super(0, 0, WIDTH, HEIGHT);</span>
+<span class="fc" id="L54">        this.name = name;</span>
+<span class="fc" id="L55">        this.character = character;</span>
+<span class="fc" id="L56">        this.leftSide = leftSide;</span>
+<span class="fc" id="L57">        this.speed = 1;</span>
+<span class="fc" id="L58">        this.jumpStat = 1;</span>
+<span class="fc" id="L59">        this.kickStat = 1;</span>
+<span class="fc" id="L60">        this.survival = 1;</span>
+<span class="fc" id="L61">        this.points = 0;</span>
+<span class="fc" id="L62">        startMatch();</span>
+<span class="fc" id="L63">    }</span>
+
+    /**
+     * Prepares the player to start a match with a zero score, empty power bar, maximum health, and no active effects.
+     */
+    public void startMatch() {
+<span class="fc" id="L69">        score = 0;</span>
+<span class="fc" id="L70">        matchPoints = 0;</span>
+<span class="fc" id="L71">        powerBar = 0;</span>
+<span class="fc" id="L72">        hasAura = false;</span>
+<span class="fc" id="L73">        stunTime = 0;</span>
+<span class="fc" id="L74">        kickTime = 0;</span>
+<span class="fc" id="L75">        life = getMaxLife();</span>
+<span class="fc" id="L76">        clearEffect();</span>
+<span class="fc" id="L77">    }</span>
+
+    /**
+     * Advances the player simulation by one frame, handling stun and effect timers, power bar charging, and movement.
+     */
+    @Override
+    public void update() {
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (stunTime &gt; 0) {</span>
+<span class="fc" id="L85">            stunTime -= Match.DT;</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">            if (stunTime &lt;= 0) {</span>
+<span class="fc" id="L87">                stunTime = 0;</span>
+<span class="fc" id="L88">                life = getMaxLife();  </span>
+            }
+        }
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (effectTime &gt; 0) {</span>
+<span class="fc" id="L92">            effectTime -= Match.DT;</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">            if (effectTime &lt;= 0) clearEffect();</span>
+        }
+<span class="fc" id="L95">        chargePowerBar(Match.DT);</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        if (kickTime &gt; 0) {</span>
+<span class="fc" id="L97">            kickTime = Math.max(0, kickTime - Match.DT);</span>
+        }
+
+<span class="fc" id="L100">        velY += GRAVITY;</span>
+<span class="fc" id="L101">        posX += (int) Math.round(velX);</span>
+<span class="fc" id="L102">        posY += (int) Math.round(velY);</span>
+<span class="fc" id="L103">        velX = 0; </span>
+<span class="fc" id="L104">    }</span>
+
+    /**
+     * Stops jumping when the player touches the ground boundary.
+     * @param normalX the X component of the boundary normal direction (-1, 0, or 1)
+     * @param normalY the Y component of the boundary normal direction (-1, 0, or 1)
+     */
+    @Override
+    public void hitBoundary(double normalX, double normalY) {
+<span class="fc" id="L113">        super.hitBoundary(normalX, normalY);</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        if (normalY &lt; 0) isJumping = false;</span>
+<span class="fc" id="L115">    }</span>
+
+    /**
+     * Moves the player to the left if action is permitted.
+     */
+    public void moveLeft() {
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">        if (!canAct()) return;</span>
+<span class="fc" id="L122">        velX = -getMoveSpeed() * speedFactor;</span>
+<span class="fc" id="L123">    }</span>
+
+    /**
+     * Moves the player to the right if action is permitted.
+     */
+    public void moveRight() {
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        if (!canAct()) return;</span>
+<span class="fc" id="L130">        velX = getMoveSpeed() * speedFactor;</span>
+<span class="fc" id="L131">    }</span>
+
+    /**
+     * Makes the player jump if action is permitted and they are not already jumping.
+     */
+    public void jump() {
+<span class="pc bpc" id="L137" title="5 of 6 branches missed.">        if (!canAct() || !canJump || isJumping) return;</span>
+<span class="nc" id="L138">        velY = -BASE_JUMP * (1 + 0.10 * (jumpStat - 1));</span>
+<span class="nc" id="L139">        isJumping = true;</span>
+<span class="nc" id="L140">    }</span>
+
+    /**
+     * Performs a kick action. If the ball is within reach, it propels the ball;
+     * otherwise, if the rival is within reach, it deals damage to the rival.
+     * @param rival the opposing player
+     * @param ball the match ball
+     */
+    public void kick(Player rival, Ball ball) {
+<span class="fc bfc" id="L149" title="All 4 branches covered.">        if (!canAct() || isKicking()) return;   // no se puede patear otra vez hasta que termine la patada</span>
+<span class="fc" id="L150">        kickTime = KICK_TIME;</span>
+<span class="pc bpc" id="L151" title="1 of 4 branches missed.">        if (inReach(ball) &amp;&amp; (ball.getCenterX() - getCenterX()) * getAttackDirection() &gt;= 0) {</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">            if (hasAura) {</span>
+<span class="nc" id="L153">                firePower(ball);</span>
+            } else {
+<span class="fc" id="L155">                ball.setVelX(14 * getAttackDirection());</span>
+<span class="fc" id="L156">                ball.setVelY(-9);</span>
+            }
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">        } else if (inReach(rival)) {</span>
+<span class="fc" id="L159">            rival.receiveDamage(KICK_DAMAGE * getKickMultiplier());</span>
+        }
+<span class="fc" id="L161">    }</span>
+
+
+    /**
+     * Handles the player touching the ball with their body or head.
+     * If the aura is active, the power shot is executed.
+     * @param ball the match ball
+     */
+    public void touchBall(Ball ball) {
+<span class="pc bpc" id="L170" title="3 of 4 branches missed.">        if (hasAura &amp;&amp; canAct()) {</span>
+<span class="nc" id="L171">            firePower(ball);</span>
+<span class="nc" id="L172">            return;</span>
+        }
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">        if (ball.getCenterY() &lt; posY + 15) {</span>
+<span class="fc" id="L175">            ball.setVelY(-Math.abs(ball.getVelY()) * 0.8 - 4);</span>
+<span class="fc" id="L176">            ball.setVelX(ball.getVelX() + 1.5 * getAttackDirection());</span>
+<span class="fc" id="L177">            ball.setPosY(posY - ball.getHeight());</span>
+        } else {
+            int side;
+<span class="nc bnc" id="L180" title="All 2 branches missed.">            if (ball.getCenterX() &lt; getCenterX()) {</span>
+<span class="nc" id="L181">                side = -1;</span>
+            } else {
+<span class="nc" id="L183">                side = 1;</span>
+            }
+<span class="nc" id="L185">            ball.setVelX(side * Math.max(Math.abs(ball.getVelX()), 5));</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">            if (side &lt; 0) {</span>
+<span class="nc" id="L187">                ball.setPosX(posX - ball.getWidth());</span>
+            } else {
+<span class="nc" id="L189">                ball.setPosX(posX + width);</span>
+            }
+        }
+<span class="fc" id="L192">    }</span>
+
+    /**
+     * Increments the player's score by one goal.
+     */
+    public void addGoal() {
+<span class="fc" id="L198">        score++;</span>
+<span class="fc" id="L199">    }</span>
+
+    /**
+     * Receives damage. Health never drops below 0; if it reaches 0, the player becomes stunned.
+     * @param damage the amount of damage received
+     */
+    public void receiveDamage(double damage) {
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        if (isStunned()) return;</span>
+<span class="fc" id="L207">        life = Math.max(0, life - damage);</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">        if (life == 0) stunTime = STUN_TIME;</span>
+<span class="fc" id="L209">    }</span>
+
+    /**
+     * Activates the special power if the power bar is full and the player has no active aura or stun.
+     */
+    public void activatePower() {
+<span class="fc bfc" id="L215" title="All 6 branches covered.">        if (powerBar &gt;= POWER_FULL &amp;&amp; !hasAura &amp;&amp; !isStunned()) {</span>
+<span class="fc" id="L216">            hasAura = true;</span>
+<span class="fc" id="L217">            powerBar = 0;</span>
+        }
+<span class="fc" id="L219">    }</span>
+
+    /**
+     * Charges the power bar based on elapsed seconds.
+     * @param seconds the seconds of charge time
+     */
+    public void chargePowerBar(double seconds) {
+<span class="fc" id="L226">        powerBar = Math.min(POWER_FULL, powerBar + POWER_FULL * seconds / POWER_CHARGE_TIME);</span>
+<span class="fc" id="L227">    }</span>
+
+    /**
+     * Checks whether the player is currently stunned.
+     * @return true if stunned, false otherwise
+     */
+    public boolean isStunned() {
+<span class="fc bfc" id="L234" title="All 2 branches covered.">        return stunTime &gt; 0;</span>
+    }
+
+    /**
+     * Gets the maximum health limit based on the survival stat.
+     * @return the maximum life value
+     */
+    /** vidaMax = 100 * (1 + 0.10 * (Survival - 1)) */
+    public double getMaxLife() {
+<span class="fc" id="L243">        return BASE_LIFE * (1 + 0.10 * (survival - 1));</span>
+    }
+
+    /**
+     * Gets the kick damage multiplier based on the kick stat.
+     * @return the kick multiplier value
+     */
+    /** multiplicadorKick = 1 + 0.10 * (Kick - 1) */
+    public double getKickMultiplier() {
+<span class="fc" id="L252">        return 1 + 0.10 * (kickStat - 1);</span>
+    }
+
+    /**
+     * Upgrades a specified attribute by 1 point using the player's points.
+     * @param stat the name of the attribute to upgrade (&quot;speed&quot;, &quot;jump&quot;, &quot;kick&quot;, or &quot;survival&quot;)
+     * @throws DopoSoccerException if the stat does not exist, has reached the maximum level of 10, or points are insufficient
+     */
+    public void upgradeStat(String stat) throws DopoSoccerException {
+<span class="fc" id="L261">        int cost = getUpgradeCost(stat);</span>
+<span class="fc bfc" id="L262" title="All 2 branches covered.">        if (getStat(stat) &gt;= MAX_STAT) throw new DopoSoccerException(DopoSoccerException.MAX_STAT_REACHED);</span>
+<span class="fc bfc" id="L263" title="All 2 branches covered.">        if (points &lt; cost) throw new DopoSoccerException(DopoSoccerException.NOT_ENOUGH_POINTS);</span>
+<span class="fc" id="L264">        points -= cost;</span>
+<span class="fc bfc" id="L265" title="All 4 branches covered.">        switch (stat.toLowerCase()) {</span>
+<span class="fc" id="L266">            case &quot;speed&quot;: speed++; break;</span>
+<span class="fc" id="L267">            case &quot;jump&quot;: jumpStat++; break;</span>
+<span class="fc" id="L268">            case &quot;kick&quot;: kickStat++; break;</span>
+<span class="fc" id="L269">            default: survival++; life = getMaxLife(); break;</span>
+        }
+<span class="fc" id="L271">    }</span>
+
+    /**
+     * Calculates the cost for the next upgrade of a specified attribute.
+     * @param stat the name of the attribute
+     * @return the upgrade cost value
+     * @throws DopoSoccerException if the stat is invalid
+     */
+    public int getUpgradeCost(String stat) throws DopoSoccerException {
+<span class="fc" id="L280">        return BASE_UPGRADE_COST * (int) Math.pow(2, getStat(stat) - 1);</span>
+    }
+
+    /**
+     * Gets the current value of a specified attribute.
+     * @param stat the name of the attribute
+     * @return the current attribute level
+     * @throws DopoSoccerException if the stat is invalid or null
+     */
+    public int getStat(String stat) throws DopoSoccerException {
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">        if (stat == null) throw new DopoSoccerException(DopoSoccerException.INVALID_STAT);</span>
+<span class="fc bfc" id="L291" title="All 5 branches covered.">        switch (stat.toLowerCase()) {</span>
+<span class="fc" id="L292">            case &quot;speed&quot;: return speed;</span>
+<span class="fc" id="L293">            case &quot;jump&quot;: return jumpStat;</span>
+<span class="fc" id="L294">            case &quot;kick&quot;: return kickStat;</span>
+<span class="fc" id="L295">            case &quot;survival&quot;: return survival;</span>
+<span class="fc" id="L296">            default: throw new DopoSoccerException(DopoSoccerException.INVALID_STAT);</span>
+        }
+    }
+
+    /**
+     * Adds points to the player's currency balance.
+     * @param newPoints the number of points to add
+     */
+    public void addPoints(int newPoints) {
+<span class="fc" id="L305">        points += newPoints;</span>
+<span class="fc" id="L306">        matchPoints += newPoints;</span>
+<span class="fc" id="L307">    }</span>
+
+    /**
+     * Copies the saved progress (points and stats) of another player into this one.
+     * It is used to keep the progress of a player between matches.
+     * @param saved the player with the saved progress
+     */
+    public void copyProgress(Player saved) {
+<span class="fc" id="L315">        points = saved.points;</span>
+<span class="fc" id="L316">        speed = saved.speed;</span>
+<span class="fc" id="L317">        jumpStat = saved.jumpStat;</span>
+<span class="fc" id="L318">        kickStat = saved.kickStat;</span>
+<span class="fc" id="L319">        survival = saved.survival;</span>
+<span class="fc" id="L320">        life = getMaxLife();</span>
+<span class="fc" id="L321">    }</span>
+
+    /**
+     * Gets how many pixels the player moves in one frame (depends on speed and effects).
+     * @return the size of one step
+     */
+    public int getStep() {
+<span class="fc" id="L328">        return (int) Math.round(getMoveSpeed() * speedFactor);</span>
+    }
+
+    /**
+     * Applies a new effect to the player. Effects do not stack; the new one replaces the previous one.
+     * @param source the character whose power shot caused the effect
+     */
+    public void setEffect(Character source) {
+<span class="fc" id="L336">        clearEffect();</span>
+<span class="fc" id="L337">        affectedBy = source;</span>
+<span class="fc" id="L338">        effectTime = source.getEffectDuration();</span>
+<span class="fc" id="L339">    }</span>
+
+    /**
+     * Removes any active effect and restores the player to normal status.
+     */
+    public void clearEffect() {
+<span class="fc" id="L345">        affectedBy = null;</span>
+<span class="fc" id="L346">        effectTime = 0;</span>
+<span class="fc" id="L347">        speedFactor = 1;</span>
+<span class="fc" id="L348">        canMove = true;</span>
+<span class="fc" id="L349">        canJump = true;</span>
+<span class="fc" id="L350">    }</span>
+
+    /**
+     * Resets the player to a stationary state at a specific position.
+     * @param x the new X coordinate
+     * @param y the new Y coordinate
+     */
+    public void resetPosition(int x, int y) {
+<span class="fc" id="L358">        posX = x;</span>
+<span class="fc" id="L359">        posY = y;</span>
+<span class="fc" id="L360">        velX = 0;</span>
+<span class="fc" id="L361">        velY = 0;</span>
+<span class="fc" id="L362">        isJumping = false;</span>
+<span class="fc" id="L363">    }</span>
+
+    /**
+     * Gets the direction of the player's attack.
+     * @return 1 if the player is on the left side, -1 if on the right side
+     */
+    public int getAttackDirection() {
+<span class="fc bfc" id="L370" title="All 2 branches covered.">        if (leftSide) {</span>
+<span class="fc" id="L371">            return 1;</span>
+        } else {
+<span class="fc" id="L373">            return -1;</span>
+        }
+    }
+
+    /**
+     * Checks if the player can perform an action.
+     * @return true if the player can act, false otherwise
+     */
+    private boolean canAct() {
+<span class="pc bpc" id="L382" title="1 of 4 branches missed.">        return !isStunned() &amp;&amp; canMove;</span>
+    }
+
+    /**
+     * Calculates the movement speed based on the speed stat.
+     * @return the calculated movement speed
+     */
+    private double getMoveSpeed() {
+<span class="fc" id="L390">        return BASE_SPEED * (1 + 0.10 * (speed - 1));</span>
+    }
+
+    /**
+     * Checks whether another entity is within the player's reach.
+     * @param e the target entity
+     * @return true if within reach, false otherwise
+     */
+    private boolean inReach(Entity e) {
+<span class="fc bfc" id="L399" title="All 2 branches covered.">        return e.getPosX() &lt; posX + width + KICK_REACH</span>
+<span class="fc bfc" id="L400" title="All 2 branches covered.">            &amp;&amp; e.getPosX() + e.getWidth() &gt; posX - KICK_REACH</span>
+<span class="pc bpc" id="L401" title="1 of 2 branches missed.">            &amp;&amp; e.getPosY() &lt; posY + height + KICK_REACH</span>
+<span class="pc bpc" id="L402" title="1 of 2 branches missed.">            &amp;&amp; e.getPosY() + e.getHeight() &gt; posY - KICK_REACH;</span>
+    }
+
+    /**
+     * Triggers the power shot on the ball and resets the aura.
+     * @param ball the match ball
+     */
+    private void firePower(Ball ball) {
+<span class="nc" id="L410">        hasAura = false;</span>
+<span class="nc" id="L411">        ball.setPowerShooter(this);</span>
+<span class="nc" id="L412">        character.powerShot(ball);</span>
+<span class="nc" id="L413">    }</span>
+
+   /**
+     * Gets the player's name.
+     * @return the name string
+     */
+<span class="fc" id="L419">    public String getName() { return name; }</span>
+
+    /**
+     * Gets the player's current goal score.
+     * @return the score value
+     */
+<span class="fc" id="L425">    public int getScore() { return score; }</span>
+
+    /**
+     * Checks whether the player is currently jumping.
+     * @return true if jumping, false otherwise
+     */
+<span class="fc" id="L431">    public boolean isJumping() { return isJumping; }</span>
+
+    /**
+     * Gets the player's current health.
+     * @return the life value
+     */
+<span class="fc" id="L437">    public double getLife() { return life; }</span>
+
+    /**
+     * Gets the player's power bar progress value.
+     * @return the power bar value
+     */
+<span class="fc" id="L443">    public double getPowerBar() { return powerBar; }</span>
+
+    /**
+     * Checks whether the player has an active power aura.
+     * @return true if the aura is active, false otherwise
+     */
+<span class="fc" id="L449">    public boolean hasAura() { return hasAura; }</span>
+
+    /**
+     * Gets the remaining stun time in seconds.
+     * @return the stun time value
+     */
+<span class="nc" id="L455">    public double getStunTime() { return stunTime; }</span>
+
+    /**
+     * Gets the remaining effect time in seconds.
+     * @return the effect time value
+     */
+<span class="fc" id="L461">    public double getEffectTime() { return effectTime; }</span>
+
+    /**
+     * Gets the player's accumulated points currency.
+     * @return the points value
+     */
+<span class="fc" id="L467">    public int getPoints() { return points; }</span>
+
+    /**
+     * Gets the points earned in the current match only.
+     * @return the points earned in this match
+     */
+<span class="fc" id="L473">    public int getMatchPoints() { return matchPoints; }</span>
+
+    /**
+     * Checks whether the player is on the left side of the field.
+     * @return true if on the left side, false otherwise
+     */
+<span class="nc" id="L479">    public boolean isLeftSide() { return leftSide; }</span>
+
+    /**
+     * Gets the current speed factor multiplier affecting the player.
+     * @return the speed factor value
+     */
+<span class="fc" id="L485">    public double getSpeedFactor() { return speedFactor; }</span>
+
+    /**
+     * Checks whether movement is allowed.
+     * @return true if movement is allowed, false otherwise
+     */
+<span class="fc" id="L491">    public boolean canMove() { return canMove; }</span>
+
+    /**
+     * Checks whether jumping is allowed.
+     * @return true if jumping is allowed, false otherwise
+     */
+<span class="fc" id="L497">    public boolean canJump() { return canJump; }</span>
+
+    /**
+     * Gets the character associated with this player.
+     * @return the Character object
+     */
+<span class="fc" id="L503">    public Character getCharacter() { return character; }</span>
+
+    /**
+     * Gets the character that caused the active effect on this player.
+     * @return the Character source object, or null if unaffected
+     */
+<span class="fc" id="L509">    public Character getAffectedBy() { return affectedBy; }</span>
+
+    /**
+     * Checks whether the player is currently moving or kicking.
+     * @return true if moving horizontally, false otherwise
+     */
+<span class="fc bfc" id="L515" title="All 2 branches covered.">    public boolean isKicking() { return kickTime &gt; 0; }</span>
+
+    /**
+     * Sets whether movement is permitted.
+     * @param canMove true to allow movement, false to restrict it
+     */
+<span class="fc" id="L521">    public void setCanMove(boolean canMove) { this.canMove = canMove; }</span>
+
+    /**
+     * Sets whether jumping is permitted.
+     * @param canJump true to allow jumping, false to restrict it
+     */
+<span class="fc" id="L527">    public void setCanJump(boolean canJump) { this.canJump = canJump; }</span>
+
+    /**
+     * Sets the speed factor multiplier for the player.
+     * @param speedFactor the new speed factor value
+     */
+<span class="fc" id="L533">    public void setSpeedFactor(double speedFactor) { this.speedFactor = speedFactor; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

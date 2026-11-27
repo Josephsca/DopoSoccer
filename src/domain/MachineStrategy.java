@@ -1,19 +1,19 @@
-
 package domain;
 
 import java.io.Serializable;
 
 /**
- * Defines the behavior of a machine player.
- * Each difficulty implements its own strategy.
+ * Defines the behavior of a machine player. Each difficulty level implements
+ * its own strategy.
  */
 public interface MachineStrategy extends Serializable {
 
     /**
-     * Decides the actions the machine performs during a frame.
+     * Decides and performs the actions of the machine player during a single
+     * match frame.
      *
-     * @param machine the machine player
-     * @param match the current match
+     * @param machine the machine player to control
+     * @param match   the current match state
      */
     public abstract void decide(Machine machine, Match match);
 }

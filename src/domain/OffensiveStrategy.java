@@ -1,14 +1,28 @@
-
 package domain;
 
+/**
+ * Represents an offensive strategy for a machine player that constantly chases
+ * the ball, activates its power shot when ready, and kicks frequently.
+ */
 public class OffensiveStrategy implements MachineStrategy {
 
     private static final long serialVersionUID = 1L;
 
     private int frame = 0;
 
+    /**
+     * Creates a new OffensiveStrategy with default initial values.
+     */
     public OffensiveStrategy() {
     }
+
+    /**
+     * Moves the machine player toward the ball, activates its power shot as
+     * soon as the bar is full, and kicks when the ball is close.
+     *
+     * @param machine the machine player controlled by this strategy
+     * @param match   the current match state
+     */
     @Override
     public void decide(Machine machine, Match match) {
 

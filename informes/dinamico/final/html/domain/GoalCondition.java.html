@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GoalCondition.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura final</a> &gt; <a href="index.source.html" class="el_package">domain</a> &gt; <span class="el_source">GoalCondition.java</span></div><h1>GoalCondition.java</h1><pre class="source lang-java linenums">package domain;
+
+/**
+ * Represents a goal-based match condition where the first player to reach a specific score wins.
+ */
+public class GoalCondition implements WinCondition {
+
+    private int goalsToWin;
+
+    /**
+     * Constructs a new GoalCondition with the specified goal target.
+     * @param goalsToWin the number of goals required to win the match
+     */
+<span class="fc" id="L14">    public GoalCondition(int goalsToWin) {</span>
+<span class="fc" id="L15">        this.goalsToWin = goalsToWin;</span>
+<span class="fc" id="L16">    }</span>
+
+    /**
+     * Checks if the game is over based on the goal condition.
+     * @param match the current match
+     * @return true if the game is over, false otherwise
+     */
+    @Override
+    public boolean isGameOver(Match match) {
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        return match.getLeftPlayer().getScore() &gt;= goalsToWin</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">            || match.getRightPlayer().getScore() &gt;= goalsToWin;</span>
+    }
+
+    /**
+     * Gets the number of goals required to win the match.
+     * @return the goal target value
+     */
+<span class="nc" id="L33">    public int getGoalsToWin() { return goalsToWin; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

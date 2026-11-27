@@ -1,11 +1,19 @@
 package domain;
 
 /**
- * Represents the match ball affected by gravity and capable of bouncing off the ground, boundaries, and goals.
+ * Represents the match ball. It is affected by gravity and can bounce off the
+ * ground, boundaries, and goals.
  */
 public class Ball extends Entity {
 
-    public static final double BOUNCE_LOSS = 0.72;  
+    /**
+     * Energy kept after a bounce.
+     */
+    public static final double BOUNCE_LOSS = 0.72;
+
+    /**
+     * Speed reduction factor caused by air friction.
+     */
     public static final double AIR_FRICTION = 0.97;
 
     private double radius;
@@ -15,10 +23,11 @@ public class Ball extends Entity {
     private double illusionElapsed;
 
     /**
-     * Constructs a new ball with its center positioned at (centerX, centerY).
-     * @param centerX the initial X coordinate of the ball's center
-     * @param centerY the initial Y coordinate of the ball's center
-     * @param radius the radius of the ball
+     * Creates a new ball with its center at the given coordinates.
+     *
+     * @param centerX the initial X coordinate of the ball center
+     * @param centerY the initial Y coordinate of the ball center
+     * @param radius  the radius of the ball
      * @param gravity the gravity force applied to the ball
      */
     public Ball(int centerX, int centerY, double radius, double gravity) {
@@ -29,11 +38,15 @@ public class Ball extends Entity {
     }
 
     /**
-     * Applies gravity and air friction to move the ball according to its velocity.
+     * Moves the ball using gravity and air friction, and updates any active
+     * illusion timer.
      */
     @Override
     public void update() {
-        if (illusionRemaining > 0) { illusionRemaining = Math.max(0, illusionRemaining - Match.DT); illusionElapsed += Match.DT; }
+        if (illusionRemaining > 0) {
+            illusionRemaining = Math.max(0, illusionRemaining - Match.DT);
+            illusionElapsed += Match.DT;
+        }
         velY += gravity;
         velX *= AIR_FRICTION;
         posX += (int) Math.round(velX);
@@ -41,9 +54,10 @@ public class Ball extends Entity {
     }
 
     /**
-     * Bounces the ball off a surface based on the surface normal direction.
-     * @param normalX the X component of the surface normal direction (-1, 0, or 1)
-     * @param normalY the Y component of the surface normal direction (-1, 0, or 1)
+     * Bounces the ball off a surface using the surface normal direction.
+     *
+     * @param normalX the X direction of the surface (-1, 0, or 1)
+     * @param normalY the Y direction of the surface (-1, 0, or 1)
      */
     public void bounce(double normalX, double normalY) {
         if (normalX != 0) {
@@ -51,28 +65,32 @@ public class Ball extends Entity {
         }
         if (normalY != 0) {
             velY = Math.abs(velY) * BOUNCE_LOSS * Math.signum(normalY);
-            if (Math.abs(velY) < 1.5) velY = 0;  
+            if (Math.abs(velY) < 1.5) {
+                velY = 0;
+            }
         }
     }
 
     /**
-     * Handles boundary collisions by making the ball bounce instead of stopping.
-     * @param normalX the X component of the boundary normal direction (-1, 0, or 1)
-     * @param normalY the Y component of the boundary normal direction (-1, 0, or 1)
+     * Bounces the ball when it hits a field boundary and cancels any active
+     * horizontal power shot.
+     *
+     * @param normalX the X direction of the boundary (-1, 0, or 1)
+     * @param normalY the Y direction of the boundary (-1, 0, or 1)
      */
     @Override
     public void hitBoundary(double normalX, double normalY) {
         bounce(normalX, normalY);
-        // si el tiro de poder llega a una pared lateral es porque no tocó al rival: el tiro se acaba
         if (normalX != 0) {
             powerShooter = null;
         }
     }
 
     /**
-     * Resets the ball to a stationary state at a specific center position.
-     * @param x the new X coordinate for the center of the ball
-     * @param y the new Y coordinate for the center of the ball
+     * Stops the ball and moves its center to a new position.
+     *
+     * @param x the new X coordinate of the ball center
+     * @param y the new Y coordinate of the ball center
      */
     public void reset(int x, int y) {
         posX = (int) (x - radius);
@@ -85,42 +103,66 @@ public class Ball extends Entity {
     }
 
     /**
-     * Starts the illusion of the USA power: 8 balls are drawn for some seconds.
-     * @param seconds how long the illusion lasts
+     * Starts the illusion effect where 8 balls are shown on screen.
+     *
+     * @param seconds the duration of the illusion in seconds
      */
-    public void activateIllusion(double seconds) { illusionRemaining = seconds; illusionElapsed = 0; }
-    /**
-     * Checks whether the illusion is active.
-     * @return true while the 8 balls are shown
-     */
-    public boolean hasIllusion() { return illusionRemaining > 0; }
-    /**
-     * Gets how many seconds have passed since the illusion started (used to draw the fake balls).
-     * @return the elapsed seconds
-     */
-    public double getIllusionElapsed() { return illusionElapsed; }
+    public void activateIllusion(double seconds) {
+        illusionRemaining = seconds;
+        illusionElapsed = 0;
+    }
 
     /**
-     * Gets the radius of the ball.
+     * Checks if the ball illusion effect is currently active.
+     *
+     * @return true if the illusion is active, false otherwise
+     */
+    public boolean hasIllusion() {
+        return illusionRemaining > 0;
+    }
+
+    /**
+     * Returns the time passed since the illusion effect started.
+     *
+     * @return the elapsed time in seconds
+     */
+    public double getIllusionElapsed() {
+        return illusionElapsed;
+    }
+
+    /**
+     * Returns the radius of the ball.
+     *
      * @return the radius value
      */
-    public double getRadius() { return radius; }
-    
+    public double getRadius() {
+        return radius;
+    }
+
     /**
-     * Gets the gravity value affecting the ball.
+     * Returns the gravity force applied to the ball.
+     *
      * @return the gravity value
      */
-    public double getGravity() { return gravity; }
-    
+    public double getGravity() {
+        return gravity;
+    }
+
     /**
-     * Gets the player who performed the active power shot with this ball.
-     * @return the Player object, or null if no power shot is active
+     * Returns the player who used the active power shot on this ball.
+     *
+     * @return the player who made the power shot, or null if none is active
      */
-    public Player getPowerShooter() { return powerShooter; }
-    
+    public Player getPowerShooter() {
+        return powerShooter;
+    }
+
     /**
-     * Sets the player responsible for the active power shot on this ball.
-     * @param powerShooter the Player object who executed the power shot
+     * Sets the player who used a power shot on this ball.
+     *
+     * @param powerShooter the player who made the power shot
      */
-    public void setPowerShooter(Player powerShooter) { this.powerShooter = powerShooter; }
+    public void setPowerShooter(Player powerShooter) {
+        this.powerShooter = powerShooter;
+    }
 }

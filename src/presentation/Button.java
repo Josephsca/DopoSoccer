@@ -6,7 +6,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * Styled button. 
+ * Represents a custom styled arcade button with a rounded background, border,
+ * and hover effect.
  */
 public class Button extends JButton {
 
@@ -17,7 +18,8 @@ public class Button extends JButton {
     private boolean mouseOver;
 
     /**
-     * Constructs a new arcade button with the specified text.
+     * Creates a new arcade button with the given label text and visual style.
+     *
      * @param text the text displayed on the button
      */
     public Button(String text) {
@@ -35,7 +37,8 @@ public class Button extends JButton {
 
 
     /**
-     * Prepares mouse event listeners to handle hover effects.
+     * Attaches mouse listeners to update the hover state when the cursor
+     * enters or leaves the button.
      */
     private void prepareActions() {
         addMouseListener(new MouseAdapter() {
@@ -54,8 +57,10 @@ public class Button extends JButton {
     }
 
     /**
-     * Draws the background and white border of the button; the text is drawn by JButton.
-     * @param g the graphics context used for painting
+     * Paints the rounded background and white border, then lets JButton draw
+     * the text label.
+     *
+     * @param g the graphics context used to paint the component
      */
     @Override
     public void paintComponent(Graphics g) {

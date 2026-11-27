@@ -1,8 +1,11 @@
-
 package domain;
 
 import java.util.Random;
 
+/**
+ * Represents a basic strategy for a machine player that chooses random actions
+ * every 60 frames.
+ */
 public class ClumsyStrategy implements MachineStrategy {
 
     private static final long serialVersionUID = 1L;
@@ -11,9 +14,19 @@ public class ClumsyStrategy implements MachineStrategy {
     private int frame = 0;
     private int movimiento = 0;
 
+    /**
+     * Creates a new ClumsyStrategy with default initial values.
+     */
     public ClumsyStrategy() {
     }
     
+    /**
+     * Selects and executes a random action for the machine player during the
+     * current match frame.
+     *
+     * @param machine the machine player controlled by this strategy
+     * @param match   the current match state
+     */
     @Override
     public void decide(Machine machine, Match match) {
 

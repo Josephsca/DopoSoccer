@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GamePanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura final</a> &gt; <a href="index.source.html" class="el_package">presentation</a> &gt; <span class="el_source">GamePanel.java</span></div><h1>GamePanel.java</h1><pre class="source lang-java linenums">package presentation;
+
+import domain.*;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Panel where the match is drawn and keyboard inputs are read.
+ * 
+ * Images (optional, see images/LEEME.txt). If an image does not exist,
+ * the next option is used and finally a simple shape:
+ *   Stadium: images/stadiums/[name].png -&gt; images/stadium.png -&gt; drawn field
+ *   Player:  images/[Country]/[pose].png -&gt; images/[Country]/idle.png -&gt; images/[Country].png -&gt; shape
+ *            poses: idle, walk1, walk2, jump, kick, stunned
+ *   Ball:    images/ball.png
+ * Characters are drawn facing right; player 2 is flipped automatically.
+ */
+public class GamePanel extends JPanel {
+
+<span class="fc" id="L30">    private static final String IMAGES = &quot;images&quot; + File.separator;</span>
+    private static final int WALK_FRAME_TICKS = 8;   
+
+    private DopoSoccerGUI gui;
+    private DopoSoccer game;
+    private Timer timer;
+    private Set&lt;Integer&gt; pressed;
+    private Map&lt;String, BufferedImage&gt; images;
+    private Map&lt;Player, Integer&gt; lastX;
+    private String stadiumName;
+    private int frames;
+
+    /**
+     * Constructs a new GamePanel linked to the main GUI and game controller.
+     * @param gui the main application window
+     * @param game the game domain controller
+     */
+<span class="fc" id="L47">    public GamePanel(DopoSoccerGUI gui, DopoSoccer game) {</span>
+<span class="fc" id="L48">        this.gui = gui;</span>
+<span class="fc" id="L49">        this.game = game;</span>
+<span class="fc" id="L50">        this.pressed = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L51">        this.images = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L52">        this.lastX = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L53">        this.stadiumName = null;</span>
+<span class="fc" id="L54">        this.frames = 0;</span>
+<span class="fc" id="L55">        setFocusable(true);</span>
+<span class="fc" id="L56">        setBackground(Color.BLACK);</span>
+<span class="fc" id="L57">        prepareKeys();</span>
+<span class="pc" id="L58">        timer = new Timer(1000 / Match.FPS, e -&gt; tick());</span>
+<span class="fc" id="L59">    }</span>
+
+    /**
+     * Gets the names of available stadiums (.png files in images/stadiums).
+     * @return an array of available stadium names
+     */
+    public static String[] availableStadiums() {
+<span class="fc" id="L66">        File folder = new File(IMAGES + &quot;stadiums&quot;);</span>
+<span class="pc" id="L67">        String[] files = folder.list((dir, name) -&gt; name.toLowerCase().endsWith(&quot;.png&quot;));</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if (files == null) return new String[0];</span>
+<span class="nc" id="L69">        java.util.Arrays.sort(files);</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        for (int i = 0; i &lt; files.length; i++) files[i] = files[i].substring(0, files[i].length() - 4);</span>
+<span class="nc" id="L71">        return files;</span>
+    }
+
+    /**
+     * Sets the stadium to be drawn (null for the basic field).
+     * @param stadiumName the name of the stadium
+     */
+    public void setStadium(String stadiumName) {
+<span class="fc" id="L79">        this.stadiumName = stadiumName;</span>
+<span class="fc" id="L80">    }</span>
+
+    /**
+     * Starts running the current match.
+     */
+    public void start() {
+<span class="fc" id="L86">        pressed.clear();</span>
+<span class="fc" id="L87">        lastX.clear();</span>
+<span class="fc" id="L88">        timer.start();</span>
+<span class="fc" id="L89">        requestFocusInWindow();</span>
+<span class="fc" id="L90">    }</span>
+
+    /**
+     * Processes one game frame: reads held keys, updates the domain state, and triggers a repaint.
+     */
+    private void tick() {
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        if (pressed.contains(KeyEvent.VK_A)) game.moveLeft(1);</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if (pressed.contains(KeyEvent.VK_D)) game.moveRight(1);</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (pressed.contains(KeyEvent.VK_LEFT)) game.moveLeft(2);</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        if (pressed.contains(KeyEvent.VK_RIGHT)) game.moveRight(2);</span>
+<span class="fc" id="L100">        Match current = game.getCurrentMatch();</span>
+<span class="pc bpc" id="L101" title="1 of 4 branches missed.">        if (current != null &amp;&amp; frames % WALK_FRAME_TICKS == 0) {</span>
+<span class="fc" id="L102">            lastX.put(current.getLeftPlayer(), current.getLeftPlayer().getPosX());</span>
+<span class="fc" id="L103">            lastX.put(current.getRightPlayer(), current.getRightPlayer().getPosX());</span>
+        }
+<span class="fc" id="L105">        game.update();</span>
+<span class="fc" id="L106">        frames++;</span>
+<span class="fc" id="L107">        repaint();</span>
+<span class="fc" id="L108">        Match match = game.getCurrentMatch();</span>
+<span class="pc bpc" id="L109" title="2 of 4 branches missed.">        if (match != null &amp;&amp; match.isGameOver()) {</span>
+<span class="nc" id="L110">            timer.stop();</span>
+<span class="nc" id="L111">            pressed.clear();</span>
+<span class="nc" id="L112">            gui.showWinner();</span>
+        }
+<span class="fc" id="L114">    }</span>
+
+    /**
+     * Prepares key event listeners for player movement, actions, and menu shortcuts.
+     */
+    private void prepareKeys() {
+<span class="fc" id="L120">        addKeyListener(new KeyAdapter() {</span>
+            @Override
+            public void keyPressed(KeyEvent e) {
+<span class="fc" id="L123">                int code = e.getKeyCode();</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">                boolean firstPress = !pressed.contains(code);</span>
+<span class="fc" id="L125">                pressed.add(code);</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">                if (!firstPress) return;   </span>
+<span class="pc bpc" id="L127" title="1 of 8 branches missed.">                switch (code) {</span>
+<span class="fc" id="L128">                    case KeyEvent.VK_W: game.jump(1); break;</span>
+<span class="fc" id="L129">                    case KeyEvent.VK_S: game.kick(1); break;</span>
+<span class="fc" id="L130">                    case KeyEvent.VK_Q: game.activatePower(1); break;</span>
+<span class="fc" id="L131">                    case KeyEvent.VK_UP: game.jump(2); break;</span>
+<span class="fc" id="L132">                    case KeyEvent.VK_DOWN: game.kick(2); break;</span>
+                    case KeyEvent.VK_CONTROL:
+<span class="fc bfc" id="L134" title="All 2 branches covered.">                        if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) game.activatePower(2);</span>
+                        break;
+                    case KeyEvent.VK_P:
+                    case KeyEvent.VK_ESCAPE:
+<span class="nc" id="L138">                        pressed.clear();</span>
+<span class="nc" id="L139">                        gui.showPauseMenu();</span>
+<span class="nc" id="L140">                        break;</span>
+                    default: break;
+                }
+<span class="fc" id="L143">            }</span>
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+<span class="fc" id="L147">                pressed.remove(e.getKeyCode());</span>
+<span class="fc" id="L148">            }</span>
+        });
+<span class="fc" id="L150">    }</span>
+
+    /**
+     * Searches for an image (the first existing option from the given paths).
+     * Images are loaded only once and cached.
+     * @param options paths inside images/, without &quot;.png&quot;
+     * @return the loaded BufferedImage, or null if none exist
+     */
+    private BufferedImage getImage(String... options) {
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        for (String option : options) {</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">            if (option == null) continue;</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">            if (!images.containsKey(option)) {</span>
+<span class="fc" id="L162">                BufferedImage image = null;</span>
+<span class="fc" id="L163">                File file = new File(IMAGES + option.replace(&quot;/&quot;, File.separator) + &quot;.png&quot;);</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">                if (file.exists()) {</span>
+                    try {
+<span class="fc" id="L166">                        image = ImageIO.read(file);</span>
+<span class="nc" id="L167">                    } catch (Exception e) {</span>
+<span class="nc" id="L168">                        image = null;   </span>
+<span class="fc" id="L169">                    }</span>
+                }
+<span class="fc" id="L171">                images.put(option, image);</span>
+            }
+<span class="fc bfc" id="L173" title="All 2 branches covered.">            if (images.get(option) != null) return images.get(option);</span>
+        }
+<span class="fc" id="L175">        return null;</span>
+    }
+
+    /**
+     * Determines the player pose based on their state in the domain.
+     * @param p the player object
+     * @return the pose name string
+     */
+    private String pose(Player p) {
+<span class="pc bpc" id="L184" title="3 of 4 branches missed.">        boolean moving = lastX.containsKey(p) &amp;&amp; lastX.get(p) != p.getPosX();</span>
+<span class="pc bpc" id="L185" title="1 of 2 branches missed.">        if (p.isStunned()) return &quot;stunned&quot;;</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        if (p.isKicking()) return &quot;kick&quot;;</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        if (p.isJumping()) return &quot;jump&quot;;</span>
+<span class="pc bpc" id="L188" title="3 of 4 branches missed.">        if (moving) return (frames / WALK_FRAME_TICKS) % 2 == 0 ? &quot;walk1&quot; : &quot;walk2&quot;;</span>
+<span class="fc" id="L189">        return &quot;idle&quot;;</span>
+    }
+
+    /**
+     * Renders all match components including stadium, referee, goals, players, ball, and HUD.
+     * @param g the graphics context
+     */
+    @Override
+    protected void paintComponent(Graphics g) {
+<span class="fc" id="L198">        super.paintComponent(g);</span>
+<span class="fc" id="L199">        Match match = game.getCurrentMatch();</span>
+<span class="pc bpc" id="L200" title="1 of 2 branches missed.">        if (match == null) return;</span>
+<span class="fc" id="L201">        Graphics2D g2 = (Graphics2D) g;</span>
+<span class="fc" id="L202">        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);</span>
+
+<span class="fc" id="L204">        drawStadium(g2, match.getStadium());</span>
+
+<span class="fc" id="L206">        BufferedImage referee = getImage(&quot;referee&quot;);</span>
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">        if (referee != null) {</span>
+<span class="fc" id="L208">            int rh = 60;</span>
+<span class="fc" id="L209">            int rw = referee.getWidth() * rh / referee.getHeight();</span>
+<span class="fc" id="L210">            int rx = match.getStadium().getWidth() / 2 - rw / 2;</span>
+<span class="fc" id="L211">            int ry = match.getStadium().getGroundY() - rh;</span>
+<span class="fc" id="L212">            g2.drawImage(referee, rx, ry, rw, rh, null);</span>
+        }
+
+<span class="fc" id="L215">        drawGoal(g2, match.getLeftGoal());</span>
+<span class="fc" id="L216">        drawGoal(g2, match.getRightGoal());</span>
+        
+<span class="fc" id="L218">        drawPlayer(g2, match.getLeftPlayer());</span>
+<span class="fc" id="L219">        drawPlayer(g2, match.getRightPlayer());</span>
+
+<span class="fc" id="L221">        drawBall(g2, match.getBall());</span>
+
+<span class="fc" id="L223">        drawIllusionBalls(</span>
+                g2,
+<span class="fc" id="L225">                match.getBall(),</span>
+<span class="fc" id="L226">                match.getStadium()</span>
+        );
+
+        // Draw the interface.
+<span class="fc" id="L230">        drawHud(g2, match);</span>
+
+<span class="fc" id="L232">    }</span>
+
+    /**
+     * Draws the stadium background or a default field if no image is found.
+     * @param g the graphics context
+     * @param stadium the stadium object
+     */
+    private void drawStadium(Graphics2D g, Stadium stadium) {
+<span class="fc" id="L240">        int w = stadium.getWidth();</span>
+<span class="fc" id="L241">        int h = stadium.getHeight();</span>
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">        BufferedImage image = getImage(stadiumName == null ? null : &quot;stadiums/&quot; + stadiumName, &quot;stadium&quot;);</span>
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">        if (image != null) {</span>
+<span class="nc" id="L244">            g.drawImage(image, 0, 0, w, h, null);</span>
+<span class="nc" id="L245">            return;</span>
+        }
+<span class="fc" id="L247">        g.setPaint(new GradientPaint(0, 0, new Color(90, 160, 230), 0, h, new Color(190, 225, 250)));</span>
+<span class="fc" id="L248">        g.fillRect(0, 0, w, h);</span>
+<span class="fc" id="L249">        g.setColor(new Color(60, 150, 60));</span>
+<span class="fc" id="L250">        g.fillRect(0, stadium.getGroundY(), w, h - stadium.getGroundY());</span>
+<span class="fc" id="L251">        g.setColor(Color.WHITE);</span>
+<span class="fc" id="L252">        g.drawLine(0, stadium.getGroundY(), w, stadium.getGroundY());</span>
+<span class="fc" id="L253">        g.drawLine(w / 2, stadium.getGroundY(), w / 2, h);</span>
+<span class="fc" id="L254">    }</span>
+
+    /**
+     * Draws a goal net and crossbar structure.
+     * @param g the graphics context
+     * @param goal the goal object
+     */
+    private void drawGoal(Graphics2D g, Goal goal) {
+<span class="fc" id="L262">        int x = goal.getPosX();</span>
+<span class="fc" id="L263">        int y = goal.getPosY();</span>
+<span class="fc" id="L264">        g.setColor(new Color(255, 255, 255, 90));</span>
+<span class="fc bfc" id="L265" title="All 2 branches covered.">        for (int i = 0; i &lt; goal.getWidth(); i += 10) g.drawLine(x + i, y, x + i, y + goal.getHeight());</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">        for (int j = 0; j &lt; goal.getHeight(); j += 10) g.drawLine(x, y + j, x + goal.getWidth(), y + j);</span>
+<span class="fc" id="L267">        g.setColor(Color.WHITE);</span>
+<span class="fc" id="L268">        g.setStroke(new BasicStroke(5));</span>
+<span class="fc" id="L269">        g.drawLine(x, y, x + goal.getWidth(), y);  </span>
+<span class="fc bfc" id="L270" title="All 2 branches covered.">        int postX = goal.isLeftGoal() ? x + goal.getWidth() : x;</span>
+<span class="fc" id="L271">        g.drawLine(postX, y, postX, y + goal.getHeight());  </span>
+<span class="fc" id="L272">        g.setStroke(new BasicStroke(1));</span>
+<span class="fc" id="L273">    }</span>
+
+    /**
+     * Draws a player sprite or placeholder shape, along with active status effects.
+     * @param g the graphics context
+     * @param p the player object
+     */
+    private void drawPlayer(Graphics2D g, Player p) {
+<span class="fc" id="L281">        int x = p.getPosX();</span>
+<span class="fc" id="L282">        int y = p.getPosY();</span>
+<span class="fc" id="L283">        int w = p.getWidth();</span>
+<span class="fc" id="L284">        int h = p.getHeight();</span>
+<span class="fc" id="L285">        String country = p.getCharacter().getCountry();</span>
+<span class="fc" id="L286">        Color[] colors = countryColors(country);</span>
+
+
+
+<span class="fc bfc" id="L290" title="All 2 branches covered.">        if (p.hasAura()) {</span>
+<span class="fc" id="L291">            g.setColor(new Color(colors[0].getRed(), colors[0].getGreen(), colors[0].getBlue(), 110));</span>
+<span class="fc" id="L292">            g.fillOval(x - 8, y - 8, w + 8, h + 8);</span>
+        }
+
+<span class="fc" id="L295">        BufferedImage image = getImage(country + &quot;/&quot; + pose(p), country + &quot;/idle&quot;, country);</span>
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">        if (image != null) {</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">            if (p.isLeftSide()) g.drawImage(image, x, y, w, h, null);</span>
+<span class="fc" id="L298">            else g.drawImage(image, x + w, y, -w, h, null);</span>
+        }
+<span class="fc" id="L300">    }</span>
+
+    /**
+     * Draws the ball sprite or default circular representation with power shot glow effects.
+     * @param g the graphics context
+     * @param ball the ball object
+     */
+    private void drawBall(Graphics2D g, Ball ball) {
+<span class="fc" id="L308">        int x = ball.getPosX();</span>
+<span class="fc" id="L309">        int y = ball.getPosY();</span>
+<span class="fc" id="L310">        int d = ball.getWidth();</span>
+<span class="pc bpc" id="L311" title="1 of 4 branches missed.">        if (ball.getPowerShooter() != null &amp;&amp; !ball.hasIllusion()) {</span>
+<span class="fc" id="L312">            Color c = countryColors(ball.getPowerShooter().getCharacter().getCountry())[0];</span>
+<span class="fc" id="L313">            g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 140));</span>
+<span class="fc" id="L314">            g.fillOval(x - 8, y - 8, d + 16, d + 16);</span>
+        }
+<span class="fc" id="L316">        BufferedImage image = getImage(&quot;ball&quot;);</span>
+<span class="pc bpc" id="L317" title="1 of 2 branches missed.">        if (image != null) {</span>
+<span class="fc" id="L318">            g.drawImage(image, x, y, d, d, null);</span>
+        } else {
+<span class="nc" id="L320">            g.setColor(Color.WHITE);</span>
+<span class="nc" id="L321">            g.fillOval(x, y, d, d);</span>
+<span class="nc" id="L322">            g.setColor(Color.BLACK);</span>
+<span class="nc" id="L323">            g.drawOval(x, y, d, d);</span>
+<span class="nc" id="L324">            g.fillOval(x + d / 3, y + d / 3, d / 3, d / 3);</span>
+        }
+<span class="fc" id="L326">    }</span>
+
+    /**
+     * Draws seven fake balls while the USA illusion is active.
+     * Fake balls are visual only and cannot score goals.
+     *
+     * @param g graphics context
+     * @param ball real ball
+     * @param stadium current stadium
+     */
+    private void drawIllusionBalls(
+            Graphics2D g,
+            Ball ball,
+            Stadium stadium) {
+
+<span class="fc bfc" id="L341" title="All 2 branches covered.">        if (!ball.hasIllusion()) {</span>
+<span class="fc" id="L342">            return;</span>
+        }
+
+<span class="fc" id="L345">        int realX = ball.getPosX();</span>
+<span class="fc" id="L346">        int diameter = ball.getWidth();</span>
+
+<span class="fc" id="L348">        double time = ball.getIllusionElapsed();</span>
+
+<span class="fc" id="L350">        BufferedImage image = getImage(&quot;ball&quot;);</span>
+
+<span class="fc bfc" id="L352" title="All 2 branches covered.">        for (int i = 0; i &lt; 7; i++) {</span>
+
+<span class="fc" id="L354">            int fakeX = realX + i * 25 + (int)(time * 20);</span>
+
+<span class="fc" id="L356">            double rebote = Math.abs(Math.sin(time*6 + i));</span>
+
+<span class="fc" id="L358">            int fakeY = stadium.getGroundY() - diameter - (int)(rebote * 40);</span>
+
+<span class="fc" id="L360">            fakeX = Math.max(0, Math.min(fakeX, stadium.getWidth() - diameter));</span>
+
+<span class="pc bpc" id="L362" title="1 of 2 branches missed.">            if (image != null) {</span>
+<span class="fc" id="L363">                g.drawImage(image, fakeX, fakeY,</span>
+                            diameter, diameter, null);
+            } else {
+<span class="nc" id="L366">                g.setColor(Color.WHITE);</span>
+            }
+    
+        }
+<span class="fc" id="L370">    }</span>
+
+
+    /**
+     * Draws the score, match timer, player info bars, and pause overlay.
+     * @param g the graphics context
+     * @param match the match object
+     */
+    private void drawHud(Graphics2D g, Match match) {
+<span class="fc" id="L379">        int w = match.getStadium().getWidth();</span>
+<span class="fc" id="L380">        Player left = match.getLeftPlayer();</span>
+<span class="fc" id="L381">        Player right = match.getRightPlayer();</span>
+
+<span class="fc" id="L383">        String score = left.getName() + &quot;: &quot; + left.getScore() + &quot;  -  &quot; + right.getName() + &quot;: &quot; + right.getScore();</span>
+<span class="fc" id="L384">        g.setFont(new Font(&quot;SansSerif&quot;, Font.BOLD, 20));</span>
+<span class="fc" id="L385">        int scoreWidth = g.getFontMetrics().stringWidth(score);</span>
+<span class="fc" id="L386">        g.setColor(Color.black);</span>
+<span class="fc" id="L387">        g.fillRoundRect(w / 2 - scoreWidth / 2 - 12, 8, scoreWidth + 24, 56, 12, 12);</span>
+<span class="fc" id="L388">        g.setColor(Color.WHITE);</span>
+<span class="fc" id="L389">        g.drawString(score, w / 2 - scoreWidth / 2, 32);</span>
+
+<span class="fc" id="L391">        g.setFont(new Font(&quot;SansSerif&quot;, Font.BOLD, 15));</span>
+<span class="fc" id="L392">        String time = timeText(match);</span>
+<span class="fc" id="L393">        g.drawString(time, w / 2 - g.getFontMetrics().stringWidth(time) / 2, 55);</span>
+
+<span class="fc" id="L395">        drawPlayerInfo(g, left, 12);</span>
+<span class="fc" id="L396">        drawPlayerInfo(g, right, w - 212);</span>
+
+<span class="fc bfc" id="L398" title="All 2 branches covered.">        if (match.isPaused()) {</span>
+<span class="fc" id="L399">            g.setColor(new Color(0, 0, 0, 120));</span>
+<span class="fc" id="L400">            g.fillRect(0, 0, w, match.getStadium().getHeight());</span>
+        }
+<span class="fc" id="L402">    }</span>
+
+    /**
+     * Draws individual player status cards including health, power bar, stats, and points.
+     * @param g the graphics context
+     * @param p the player object
+     * @param x the X coordinate offset for the info card
+     */
+    private void drawPlayerInfo(Graphics2D g, Player p, int x) {
+<span class="fc" id="L411">        g.setColor(Color.black);</span>
+<span class="fc" id="L412">        g.fillRoundRect(x, 8, 200, 94, 10, 10);</span>
+<span class="fc" id="L413">        g.setColor(Color.WHITE);</span>
+<span class="fc" id="L414">        g.setFont(new Font(&quot;SansSerif&quot;, Font.BOLD, 13));</span>
+<span class="fc" id="L415">        g.drawString(p.getName() + &quot; (&quot; + p.getCharacter().getCountry() + &quot;)&quot;, x + 8, 25);</span>
+
+        // vida
+<span class="fc" id="L418">        double lifeRatio = p.getLife() / p.getMaxLife();</span>
+<span class="fc" id="L419">        g.setColor(Color.DARK_GRAY);</span>
+<span class="fc" id="L420">        g.fillRect(x + 8, 32, 184, 12);</span>
+<span class="fc bfc" id="L421" title="All 2 branches covered.">        g.setColor(lifeRatio &gt; 0.3 ? new Color(60, 200, 60) : Color.RED);</span>
+<span class="fc" id="L422">        g.fillRect(x + 8, 32, (int) (184 * lifeRatio), 12);</span>
+<span class="fc" id="L423">        g.setColor(Color.WHITE);</span>
+<span class="fc" id="L424">        g.setFont(new Font(&quot;SansSerif&quot;, Font.PLAIN, 10));</span>
+<span class="fc" id="L425">        g.drawString(&quot;Vida &quot; + (int) p.getLife() + &quot;/&quot; + (int) p.getMaxLife(), x + 12, 42);</span>
+
+        // barra de poder
+<span class="fc" id="L428">        double powerRatio = p.getPowerBar() / Player.POWER_FULL;</span>
+<span class="fc" id="L429">        g.setColor(Color.DARK_GRAY);</span>
+<span class="fc" id="L430">        g.fillRect(x + 8, 50, 184, 12);</span>
+<span class="fc bfc" id="L431" title="All 2 branches covered.">        g.setColor(powerRatio &gt;= 1 ? Color.ORANGE : new Color(80, 140, 255));</span>
+<span class="fc" id="L432">        g.fillRect(x + 8, 50, (int) (184 * powerRatio), 12);</span>
+<span class="fc" id="L433">        g.setColor(Color.WHITE);</span>
+<span class="fc bfc" id="L434" title="All 4 branches covered.">        String power = p.hasAura() ? &quot;AURA ACTIVA&quot; : (powerRatio &gt;= 1 ? &quot;PODER LISTO&quot; : &quot;Poder&quot;);</span>
+<span class="fc" id="L435">        g.drawString(power, x + 12, 60);</span>
+
+        // estadísticas y puntos
+<span class="fc" id="L438">        g.setFont(new Font(&quot;SansSerif&quot;, Font.PLAIN, 8));</span>
+        try {
+<span class="fc" id="L440">            g.drawString(&quot;Velocidad: &quot; + p.getStat(&quot;speed&quot;) + &quot;  Salto: &quot; + p.getStat(&quot;jump&quot;)</span>
+<span class="fc" id="L441">                + &quot;  Pase: &quot; + p.getStat(&quot;kick&quot;) + &quot;  Supervivencia: &quot; + p.getStat(&quot;survival&quot;), x + 8, 78);</span>
+<span class="nc" id="L442">        } catch (Exception e) {</span>
+<span class="fc" id="L443">        }</span>
+<span class="fc" id="L444">        g.drawString(&quot;Puntos: &quot; + p.getPoints(), x + 8, 92);</span>
+<span class="fc" id="L445">    }</span>
+
+    /**
+     * Formats the match time string according to the win condition rules.
+     * @param match the match object
+     * @return the formatted time string
+     */
+    private String timeText(Match match) {
+<span class="fc bfc" id="L453" title="All 2 branches covered.">        if (match.getWinCondition() instanceof TimeCondition) {</span>
+<span class="fc" id="L454">            TimeCondition condition = (TimeCondition) match.getWinCondition();</span>
+<span class="pc bpc" id="L455" title="1 of 2 branches missed.">            if (condition.isSuddenDeath()) return &quot;MUERTE SÚBITA&quot;;</span>
+<span class="fc" id="L456">            int seconds = condition.getRemainingSeconds(match);</span>
+<span class="fc" id="L457">            return String.format(&quot;%d:%02d&quot;, seconds / 60, seconds % 60);</span>
+        }
+<span class="fc" id="L459">        int seconds = match.getSeconds();</span>
+<span class="fc" id="L460">        return String.format(&quot;%d:%02d&quot;, seconds / 60, seconds % 60);</span>
+    }
+
+    /**
+     * Gets the theme colors for each country: [shirt/aura, hair].
+     * @param country the country name string
+     * @return an array of Color objects
+     */
+    private Color[] countryColors(String country) {
+<span class="pc bpc" id="L469" title="1 of 5 branches missed.">        switch (country) {</span>
+<span class="fc" id="L470">            case &quot;SouthKorea&quot;: return new Color[]{new Color(220, 30, 50), new Color(30, 30, 30)};</span>
+<span class="fc" id="L471">            case &quot;Cameroon&quot;: return new Color[]{new Color(0, 140, 70), new Color(250, 210, 0)};</span>
+<span class="fc" id="L472">            case &quot;Nigeria&quot;: return new Color[]{new Color(0, 160, 80), new Color(255, 255, 255)};</span>
+<span class="fc" id="L473">            case &quot;USA&quot;: return new Color[]{new Color(30, 50, 140), new Color(200, 30, 40)};</span>
+<span class="nc" id="L474">            default: return new Color[]{Color.GRAY, Color.BLACK};</span>
+        }
+    }
+
+    /**
+     * Gets the display name for each country's special effect.
+     * @param country the country name string
+     * @return the effect name string
+     */
+    private String effectName(String country) {
+<span class="nc bnc" id="L484" title="All 5 branches missed.">        switch (country) {</span>
+<span class="nc" id="L485">            case &quot;SouthKorea&quot;: return &quot;EMPUJADO&quot;;</span>
+<span class="nc" id="L486">            case &quot;Cameroon&quot;: return &quot;ELECTROCUTADO&quot;;    </span>
+<span class="nc" id="L487">            case &quot;Nigeria&quot;: return &quot;INCONSCIENTE&quot;;</span>
+<span class="nc" id="L488">            case &quot;USA&quot;: return &quot;CONFUNDIDO&quot;;</span>
+<span class="nc" id="L489">            default: return &quot;&quot;;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

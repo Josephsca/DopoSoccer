@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Machine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura intermedia 2</a> &gt; <a href="index.source.html" class="el_package">domain</a> &gt; <span class="el_source">Machine.java</span></div><h1>Machine.java</h1><pre class="source lang-java linenums">
+package domain;
+
+/**
+ * Represents a player controlled by artificial intelligence.
+ * Its behavior is defined by a MachineStrategy.
+ */
+public class Machine extends Player {
+
+    private static final long serialVersionUID = 1L;
+
+    private MachineStrategy strategy;
+
+    /**
+     * Creates a machine player with a specific strategy.
+     *
+     * @param name machine name
+     * @param character selected country character
+     * @param leftSide whether the machine plays on the left
+     * @param strategy behavior used by the machine
+     */
+    public Machine(String name, Character character, boolean leftSide, MachineStrategy strategy) {
+
+<span class="fc" id="L24">        super(name, character, leftSide);</span>
+<span class="fc" id="L25">        this.strategy = strategy;</span>
+<span class="fc" id="L26">    }</span>
+
+    /**
+     * Executes the decisions of the current strategy.
+     */
+    public void decide(Match match) {
+<span class="fc" id="L32">        strategy.decide(this, match);</span>
+<span class="fc" id="L33">    }</span>
+
+    /**
+     * Changes the machine behavior.
+     */
+    public void setStrategy(MachineStrategy strategy) {
+<span class="fc" id="L39">        this.strategy = strategy;</span>
+<span class="fc" id="L40">    }</span>
+
+    /**
+     * Gets the strategy that controls the machine.
+     * @return the machine strategy
+     */
+    public MachineStrategy getStrategy() {
+<span class="fc" id="L47">        return strategy;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

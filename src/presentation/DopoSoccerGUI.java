@@ -14,8 +14,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Main window of the game. It has three screens: menu, configuration, and match.
- * It only communicates with the domain through the DopoSoccer class.
+ * Main window of the game with three screens: menu, configuration, and match.
+ * It only talks to the domain layer through DopoSoccer.
  */
 public class DopoSoccerGUI extends JFrame {
 
@@ -61,7 +61,8 @@ public class DopoSoccerGUI extends JFrame {
     
 
     /**
-     * Constructs the main application window, initializes the game instance, and sets up UI elements and actions.
+     * Creates the main game window, initializes the domain controller, and sets
+     * up UI elements and event listeners.
      */
     public DopoSoccerGUI() {
         game = new DopoSoccer();
@@ -70,7 +71,7 @@ public class DopoSoccerGUI extends JFrame {
     }
 
     /**
-     * Initializes the main frame settings, layout container, and adds all game screens.
+     * Sets up the window properties, card container, and screen panels.
      */
     private void prepareElements() {
         setTitle("DopoSoccer");
@@ -87,8 +88,9 @@ public class DopoSoccerGUI extends JFrame {
     }
 
     /**
-     * Creates and configures the main menu panel with background image and options.
-     * @return the configured menu JPanel
+     * Creates the main menu panel with a background image and navigation buttons.
+     *
+     * @return the configured menu panel
      */
     private JPanel createMenuPanel() {
         final Image background = new ImageIcon("images/menu_bg.jpg").getImage();   
@@ -138,13 +140,14 @@ public class DopoSoccerGUI extends JFrame {
     }
 
     /**
-     * Adds a button to the menu panel in the given row and column.
-     * @param panel the menu panel
-     * @param c the constraints used by the layout
+     * Adds a button to the menu layout at the given row, column, and column span.
+     *
+     * @param panel  the target menu panel
+     * @param c      the grid bag constraints object to update
      * @param button the button to add
-     * @param column the column (0 or 1)
-     * @param row the row
-     * @param width how many columns the button uses
+     * @param column the starting grid column
+     * @param row    the starting grid row
+     * @param width  the number of columns the button spans
      */
     private void addButton(JPanel panel, GridBagConstraints c, JButton button, int column, int row, int width) {
         c.gridx = column;
@@ -154,8 +157,9 @@ public class DopoSoccerGUI extends JFrame {
     }
 
     /**
-     * Updates visibility of menu buttons based on the current menu navigation step.
-     * @param step the active menu step index
+     * Shows or hides menu buttons based on the active menu step.
+     *
+     * @param step the menu step to display (0 for main, 1 for mode, 2 for start options)
      */
     private void showMenuStep(int step) {
         enterToPlay.setVisible(step == 0);
@@ -171,8 +175,10 @@ public class DopoSoccerGUI extends JFrame {
     }
 
     /**
-     * Creates and configures the match configuration panel.
-     * @return the configured configuration JPanel
+     * Creates the match configuration panel with player boxes, match settings,
+     * and machine options.
+     *
+     * @return the configured configuration panel
      */
     private JPanel createConfigPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
@@ -243,11 +249,12 @@ public class DopoSoccerGUI extends JFrame {
     }
 
     /**
-     * Helper method to create a titled sub-panel for player configuration fields.
-     * @param title the section title
-     * @param name text field for the player's name
-     * @param country dropdown for selecting the player's character country
-     * @return a JPanel containing player setup fields
+     * Creates a titled box with fields for a player's name and country character.
+     *
+     * @param title   the border title of the box
+     * @param name    the text field for the player's name
+     * @param country the combo box for selecting the country character
+     * @return the configured player box panel
      */
     private JPanel createPlayerBox(String title, JTextField name, JComboBox<String> country) {
         JPanel box = new JPanel(new GridLayout(4, 1, 5, 5));
@@ -260,7 +267,8 @@ public class DopoSoccerGUI extends JFrame {
     }
 
     /**
-     * Registers all action listeners for menu buttons, configuration controls, and sound toggles.
+     * Registers listeners for all buttons and controls across the menu and
+     * configuration screens.
      */
     private void prepareActions() {
         enterToPlay.addActionListener(new ActionListener() {
@@ -370,7 +378,7 @@ public class DopoSoccerGUI extends JFrame {
     }
 
     /**
-     * Creates the match with the chosen configuration and switches to the game screen view.
+     * Starts a new match using the selected settings and opens the game screen.
      */            
     private void startMatch() {
         try {
@@ -454,6 +462,10 @@ public class DopoSoccerGUI extends JFrame {
     }
 
 
+    /**
+     * Updates the player box titles and name fields based on the selected game
+     * mode and machine side.
+     */
     private void updatePlayerLabels() {
 
         if (!againstMachine) {
@@ -498,9 +510,8 @@ public class DopoSoccerGUI extends JFrame {
 
 
     /**
-     * Opens the pause menu allowing the user to return, save, or finish the match.
+     * Opens the pause dialog so the user can resume, save, or finish the match.
      */
-
     public void showPauseMenu() {
         game.pauseMatch();
 
@@ -567,6 +578,9 @@ public class DopoSoccerGUI extends JFrame {
 
 
     
+    /**
+     * Opens a file chooser to load a saved match and starts the game screen.
+     */
     private void loadMatch() {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Cargar partida");
@@ -602,7 +616,8 @@ public class DopoSoccerGUI extends JFrame {
     }
 
     /**
-     * Displays the winner, final score, and earned points summary dialog.
+     * Shows a dialog with the match result, score, and earned points, then lets
+     * the user replay or return to the menu.
      */
     public void showWinner() {
         Match match = game.getCurrentMatch();
@@ -627,8 +642,8 @@ public class DopoSoccerGUI extends JFrame {
     }
 
     /**
-     * Shows the menu to upgrade the stats of a player with his saved points.
-     * The player writes his name and then chooses which stat to upgrade.
+     * Opens dialogs to pick a saved player profile and upgrade its stats using
+     * earned points.
      */
     private void showUpgradeMenu() {
         String[] savedPlayers = game.getSavedPlayers();
@@ -684,8 +699,10 @@ public class DopoSoccerGUI extends JFrame {
     }
 
     /**
-     * Switches the active card layout screen and resizes the window container.
-     * @param screen the name of the screen to display
+     * Switches to the requested screen card, adjusts the window size, and
+     * centers the frame.
+     *
+     * @param screen the card name of the screen to show
      */
     private void showScreen(String screen) {
         cards.show(container, screen);
@@ -698,8 +715,9 @@ public class DopoSoccerGUI extends JFrame {
     }
 
     /**
-     * Displays a clear error message dialog to the user and records the exception in the log file.
-     * @param e the DopSoccerException error to handle
+     * Shows an error message dialog to the user and logs the exception.
+     *
+     * @param e the DopoSoccerException to display and log
      */
     private void showError(DopoSoccerException e) {
         JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -707,7 +725,8 @@ public class DopoSoccerGUI extends JFrame {
     }
 
     /**
-     * Main entry point of the application.
+     * Starts the DopoSoccer graphical application.
+     *
      * @param args command-line arguments
      */
     public static void main(String[] args) {

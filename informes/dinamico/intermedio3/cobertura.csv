@@ -1,0 +1,46 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+DopoSoccer - Cobertura intermedia 3,presentation,GamePanel.new KeyAdapter() {...},9,85,1,13,3,15,1,12,0,3
+DopoSoccer - Cobertura intermedia 3,presentation,Button.new MouseAdapter() {...},0,25,0,0,0,7,0,3,0,3
+DopoSoccer - Cobertura intermedia 3,presentation,GamePanel,155,1301,28,72,24,201,27,48,3,19
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new ActionListener() {...},14,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new JPanel() {...},29,0,0,0,4,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new ActionListener() {...},14,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new ActionListener() {...},26,0,0,0,6,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new ActionListener() {...},26,0,0,0,6,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new ActionListener() {...},13,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new ActionListener() {...},13,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new ActionListener() {...},14,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new ActionListener() {...},14,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new ActionListener() {...},13,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new ActionListener() {...},13,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new ActionListener() {...},30,0,2,0,6,0,3,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new ActionListener() {...},14,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,Button,0,128,0,2,0,29,0,5,0,4
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI.new ActionListener() {...},13,0,0,0,3,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,presentation,DopoSoccerGUI,1582,0,78,0,305,0,57,0,18,0
+DopoSoccer - Cobertura intermedia 3,domain,BlueAura,0,34,0,0,0,9,0,3,0,3
+DopoSoccer - Cobertura intermedia 3,domain,OffensiveStrategy,0,66,1,9,0,18,1,6,0,2
+DopoSoccer - Cobertura intermedia 3,domain,TornadoShot,0,31,0,0,0,10,0,3,0,3
+DopoSoccer - Cobertura intermedia 3,domain,Character,0,34,0,0,0,10,0,7,0,7
+DopoSoccer - Cobertura intermedia 3,domain,LightningShot,0,28,0,0,0,9,0,3,0,3
+DopoSoccer - Cobertura intermedia 3,domain,ClumsyStrategy,0,73,1,17,0,22,1,12,0,2
+DopoSoccer - Cobertura intermedia 3,domain,Cameroon,0,7,0,0,0,2,0,1,0,1
+DopoSoccer - Cobertura intermedia 3,domain,Player,68,720,15,72,15,152,14,82,2,48
+DopoSoccer - Cobertura intermedia 3,domain,SouthKorea,0,7,0,0,0,2,0,1,0,1
+DopoSoccer - Cobertura intermedia 3,domain,DopoSoccer,177,594,34,68,53,138,34,53,4,29
+DopoSoccer - Cobertura intermedia 3,domain,USA,0,7,0,0,0,2,0,1,0,1
+DopoSoccer - Cobertura intermedia 3,domain,Log,39,0,0,0,12,0,2,0,2,0
+DopoSoccer - Cobertura intermedia 3,domain,DopoSoccerException,0,4,0,0,0,2,0,1,0,1
+DopoSoccer - Cobertura intermedia 3,domain,PowerShot,0,31,0,2,0,12,0,6,0,5
+DopoSoccer - Cobertura intermedia 3,domain,TimeCondition,3,43,0,4,1,10,1,6,1,4
+DopoSoccer - Cobertura intermedia 3,domain,Machine,0,22,0,0,0,8,0,4,0,4
+DopoSoccer - Cobertura intermedia 3,domain,IllusionShot,0,26,0,0,0,8,0,3,0,3
+DopoSoccer - Cobertura intermedia 3,domain,GoalCondition,3,22,0,4,1,5,1,4,1,2
+DopoSoccer - Cobertura intermedia 3,domain,Goal,6,136,1,25,1,24,1,20,0,8
+DopoSoccer - Cobertura intermedia 3,domain,Stadium,26,99,3,11,5,21,4,10,1,5
+DopoSoccer - Cobertura intermedia 3,domain,Nigeria,0,7,0,0,0,1,0,1,0,1
+DopoSoccer - Cobertura intermedia 3,domain,Entity,0,122,1,11,0,24,1,20,0,15
+DopoSoccer - Cobertura intermedia 3,domain,ExpertStrategy,39,158,18,30,3,39,16,10,0,2
+DopoSoccer - Cobertura intermedia 3,domain,Match,54,561,13,43,7,118,10,44,0,26
+DopoSoccer - Cobertura intermedia 3,domain,Ball,6,189,0,12,2,34,2,16,2,10
+DopoSoccer - Cobertura intermedia 3,domain,DefensiveStrategy,2,120,4,20,0,30,4,10,0,2

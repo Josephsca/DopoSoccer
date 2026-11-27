@@ -1,15 +1,16 @@
 package domain;
 import java.io.Serializable;
+
 /**
- * Represents a match between two players. Contains the stadium, goals, and ball,
- * and uses a WinCondition to determine when the game ends.
+ * Represents a match between two players. It contains the stadium, goals, and
+ * ball, and uses a WinCondition to decide when the game ends.
  */
 public class Match implements Serializable{
     public static final int FPS = 60;               
     public static final double DT = 1.0 / FPS;     
     public static final int WIN_POINTS = 100;
     public static final int LOSE_POINTS = 25;
-    /** Los dibujos de los personajes tienen bordes transparentes, por eso dejamos que se acerquen 22 px. */
+
     public static final int ALLOWED_OVERLAP = 22;
     private int timer;          
     private boolean isPaused;
@@ -24,11 +25,13 @@ public class Match implements Serializable{
     private WinCondition winCondition;
 
     /**
-     * Constructs a new match with a 0-0 score and sets all entities to their initial positions.
-     * @param leftPlayer the player on the left side
-     * @param rightPlayer the player on the right side
-     * @param stadium the stadium where the match takes place
-     * @param winCondition the rule that determines the end of the match
+     * Creates a new match with a 0-0 score and sets all entities to their
+     * starting positions.
+     *
+     * @param leftPlayer   the player on the left side
+     * @param rightPlayer  the player on the right side
+     * @param stadium      the stadium where the match takes place
+     * @param winCondition the rule that determines when the match ends
      */
     public Match(Player leftPlayer, Player rightPlayer, Stadium stadium, WinCondition winCondition) {
         this.leftPlayer = leftPlayer;
@@ -85,8 +88,8 @@ public class Match implements Serializable{
     }
 
     /**
-     * Checks all game collisions: power shots against the rival, players touching the ball,
-     * and the ball hitting the crossbars.
+     * Checks all match collisions: power shots hitting a rival, players touching
+     * the ball, and the ball hitting the crossbars.
      */
     public void checkCollisions() {
         Player shooter = ball.getPowerShooter();
@@ -107,7 +110,8 @@ public class Match implements Serializable{
     }
 
     /**
-     * Checks if the ball has entered a goal and awards the point to the opposing player.
+     * Checks whether the ball has entered either goal and awards a point to the
+     * scoring player.
      */
     public void checkGoal() {
         if (leftGoal.containsBall(ball)) {
@@ -118,7 +122,8 @@ public class Match implements Serializable{
     }
 
     /**
-     * Resets player positions to their sides and drops the ball from the center after a goal.
+     * Resets both players to their starting sides and drops the ball from the
+     * center after a goal.
      */
     public void resetPositions() {
         int groundY = stadium.getGroundY();
@@ -128,8 +133,9 @@ public class Match implements Serializable{
     }
 
     /**
-     * Moves the player to the left, but first checks that it will not collide with the rival.
-     * @param player the player that wants to move
+     * Moves the player to the left if doing so will not collide with the rival.
+     *
+     * @param player the player to move
      */
     public void moveLeft(Player player) {
         if (!willCollide(player, -1)) {
@@ -138,8 +144,9 @@ public class Match implements Serializable{
     }
 
     /**
-     * Moves the player to the right, but first checks that it will not collide with the rival.
-     * @param player the player that wants to move
+     * Moves the player to the right if doing so will not collide with the rival.
+     *
+     * @param player the player to move
      */
     public void moveRight(Player player) {
         if (!willCollide(player, 1)) {
@@ -148,12 +155,12 @@ public class Match implements Serializable{
     }
 
     /**
-     * Checks if the player would collide with the rival after taking one step.
-     * Only counts as a collision if the player is walking towards the rival,
-     * so a player can always walk away from the other one.
-     * @param player the player that wants to move
-     * @param direction -1 to the left, 1 to the right
-     * @return true if the step would make the player crash into the rival
+     * Checks whether the player would collide with the rival after taking one
+     * step toward them.
+     *
+     * @param player    the player that wants to move
+     * @param direction the movement direction (-1 for left, 1 for right)
+     * @return true if the step would cause a collision, false otherwise
      */
     public boolean willCollide(Player player, int direction) {
         Player rival = getRival(player);
@@ -166,26 +173,24 @@ public class Match implements Serializable{
         int nextX = player.getPosX() + direction * player.getStep();
 
         int overlapX = Math.min(nextX + player.getWidth(), rival.getPosX() + rival.getWidth())
-                     - Math.max(nextX, rival.getPosX());
+            - Math.max(nextX, rival.getPosX());
         int overlapY = Math.min(player.getPosY() + player.getHeight(), rival.getPosY() + rival.getHeight())
-                     - Math.max(player.getPosY(), rival.getPosY());
+            - Math.max(player.getPosY(), rival.getPosY());
 
         return overlapX > ALLOWED_OVERLAP && overlapY > 0;
     }
 
     /**
-     * Safety check for the cases where moveLeft/moveRight cannot prevent the crash
-     * (for example when a player falls on top of the other after a jump, or a power pushes him).
-     * Prevents players from passing through each other: if they overlap, 
-     * each one moves outward to their respective side until they touch.
+     * Pushes overlapping players apart horizontally so they do not pass through
+     * each other after jumps or power shots.
      */ 
     private void separatePlayers() {
         int overlapX = Math.min(leftPlayer.getPosX() + leftPlayer.getWidth(),
                                 rightPlayer.getPosX() + rightPlayer.getWidth())
-                    - Math.max(leftPlayer.getPosX(), rightPlayer.getPosX()) - ALLOWED_OVERLAP;
+            - Math.max(leftPlayer.getPosX(), rightPlayer.getPosX()) - ALLOWED_OVERLAP;
         int overlapY = Math.min(leftPlayer.getPosY() + leftPlayer.getHeight(),
                                 rightPlayer.getPosY() + rightPlayer.getHeight())
-                    - Math.max(leftPlayer.getPosY(), rightPlayer.getPosY());
+            - Math.max(leftPlayer.getPosY(), rightPlayer.getPosY());
         if (overlapX <= 0 || overlapY <= 0) return;  
 
         Player lefter = leftPlayer.getCenterX() <= rightPlayer.getCenterX() ? leftPlayer : rightPlayer;
@@ -196,16 +201,18 @@ public class Match implements Serializable{
     }
 
     /**
-     * Checks whether the match is over.
-     * @return true if the match has finished, false otherwise
+     * Checks whether the match has ended.
+     *
+     * @return true if the match is finished, false otherwise
      */
     public boolean isGameOver() {
         return isFinished;
     }
 
     /**
-     * Gets the winner of the match.
-     * @return the winning Player instance, or null if the match is ongoing or tied
+     * Returns the winner of the match.
+     *
+     * @return the winning player, or null if the match is still running or tied
      */
     public Player getWinner() {
         return winner;
@@ -226,7 +233,7 @@ public class Match implements Serializable{
     }
 
     /**
-     * Finishes the match, determines the winner, and distributes points.
+     * Ends the match, sets the winner, and gives match points to both players.
      */
     public void finish() {
         if (isFinished) return;
@@ -247,8 +254,10 @@ public class Match implements Serializable{
     }
 
     /**
-     * Records a goal for the scorer and grants power charge to the conceding player.
-     * @param scorer the player who scored the goal
+     * Adds a goal to the scorer, charges part of the conceding player's power bar,
+     * and resets entity positions.
+     *
+     * @param scorer   the player who scored the goal
      * @param conceded the player who conceded the goal
      */
     private void scoreGoal(Player scorer, Player conceded) {
@@ -258,9 +267,10 @@ public class Match implements Serializable{
     }
 
     /**
-     * Gets the rival player of the specified player.
+     * Returns the opponent of the given player.
+     *
      * @param player the reference player
-     * @return the opposing Player instance
+     * @return the opposing player
      */
     public Player getRival(Player player) {
         if (player == leftPlayer) {
@@ -271,62 +281,72 @@ public class Match implements Serializable{
     }
 
     /**
-     * Gets the elapsed time of the match in seconds.
+     * Returns the elapsed match time in seconds.
+     *
      * @return the elapsed seconds
      */
     public int getSeconds() { return timer / FPS; }
 
     /**
-     * Gets the raw timer value in frames.
-     * @return the elapsed time in frames
+     * Returns the elapsed match time in frames.
+     *
+     * @return the timer value in frames
      */
     public int getTimer() { return timer; }
 
     /**
-     * Checks if the match is currently paused.
-     * @return true if paused, false otherwise
+     * Checks whether the match is currently paused.
+     *
+     * @return true if the match is paused, false otherwise
      */
     public boolean isPaused() { return isPaused; }
 
     /**
-     * Gets the left player instance.
-     * @return the left Player object
+     * Returns the player on the left side of the stadium.
+     *
+     * @return the left player
      */
     public Player getLeftPlayer() { return leftPlayer; }
 
     /**
-     * Gets the right player instance.
-     * @return the right Player object
+     * Returns the player on the right side of the stadium.
+     *
+     * @return the right player
      */
     public Player getRightPlayer() { return rightPlayer; }
 
     /**
-     * Gets the ball instance used in the match.
-     * @return the Ball object
+     * Returns the ball used in the match.
+     *
+     * @return the match ball
      */
     public Ball getBall() { return ball; }
 
     /**
-     * Gets the left goal instance.
-     * @return the left Goal object
+     * Returns the goal on the left side of the stadium.
+     *
+     * @return the left goal
      */
     public Goal getLeftGoal() { return leftGoal; }
 
     /**
-     * Gets the right goal instance.
-     * @return the right Goal object
+     * Returns the goal on the right side of the stadium.
+     *
+     * @return the right goal
      */
     public Goal getRightGoal() { return rightGoal; }
 
     /**
-     * Gets the stadium instance of the match.
-     * @return the Stadium object
+     * Returns the stadium where the match is played.
+     *
+     * @return the match stadium
      */
     public Stadium getStadium() { return stadium; }
 
     /**
-     * Gets the win condition rule used in the match.
-     * @return the WinCondition object
+     * Returns the winning condition rule used in the match.
+     *
+     * @return the winning condition
      */
     public WinCondition getWinCondition() { return winCondition; }
 }

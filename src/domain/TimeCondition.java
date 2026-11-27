@@ -1,8 +1,8 @@
 package domain;
 
 /**
- * Represents a time-based match condition that lasts for a specific duration.
- * Enters sudden death if there is a tie when time runs out.
+ * Represents a time-based winning condition that lasts for a set number of
+ * minutes and enters sudden death if the score is tied when time expires.
  */
 public class TimeCondition implements WinCondition {
 
@@ -10,8 +10,9 @@ public class TimeCondition implements WinCondition {
     private boolean suddenDeath;
 
     /**
-     * Constructs a new TimeCondition with the specified duration in minutes.
-     * @param minutes the duration of the match in minutes
+     * Creates a new TimeCondition with the given match duration in minutes.
+     *
+     * @param minutes the match duration in minutes
      */
     public TimeCondition(int minutes) {
         this.duration = minutes * 60;
@@ -19,9 +20,11 @@ public class TimeCondition implements WinCondition {
     }
 
     /**
-     * Checks whether the match has ended based on time and score conditions.
-     * @param match the match instance to inspect
-     * @return true if the match is over, false otherwise
+     * Checks whether the match has ended because time expired with a winner,
+     * activating sudden death if the players are tied.
+     *
+     * @param match the current match
+     * @return true if the game is over, false otherwise
      */
     @Override
     public boolean isGameOver(Match match) {
@@ -32,22 +35,25 @@ public class TimeCondition implements WinCondition {
     }
 
     /**
-     * Calculates the remaining seconds left in the match.
-     * @param match the match instance to check
-     * @return the remaining seconds, or 0 if time has expired
+     * Returns the remaining time in seconds before the match duration ends.
+     *
+     * @param match the current match
+     * @return the remaining seconds, or 0 if time has run out
      */
     public int getRemainingSeconds(Match match) {
         return Math.max(0, duration - match.getSeconds());
     }
 
     /**
-     * Gets the total duration of the match in seconds.
-     * @return the match duration in seconds
+     * Returns the total match duration in seconds.
+     *
+     * @return the duration in seconds
      */
     public int getDuration() { return duration; }
 
     /**
      * Checks whether the match is currently in sudden death mode.
+     *
      * @return true if sudden death is active, false otherwise
      */
     public boolean isSuddenDeath() { return suddenDeath; }

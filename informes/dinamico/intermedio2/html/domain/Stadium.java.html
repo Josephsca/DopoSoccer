@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Stadium.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura intermedia 2</a> &gt; <a href="index.source.html" class="el_package">domain</a> &gt; <span class="el_source">Stadium.java</span></div><h1>Stadium.java</h1><pre class="source lang-java linenums">package domain;
+
+import java.io.Serializable;
+
+/**
+ * Represents the stadium of the match with three possible screen resolutions.
+ */
+public class Stadium implements Serializable{
+    public static final String SMALL = &quot;SMALL&quot;;    
+    public static final String MEDIUM = &quot;MEDIUM&quot;;   
+    public static final String LARGE = &quot;LARGE&quot;;  
+    private int width;
+    private int height;
+    private String resolution;
+
+    /**
+     * Constructs a new Stadium with the specified resolution size.
+     * @param resolution the resolution option, either SMALL, MEDIUM, or LARGE
+     * @throws DopoSoccerException if the resolution is invalid or null
+     */
+<span class="fc" id="L21">    public Stadium(String resolution) throws DopoSoccerException {</span>
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if (resolution == null) throw new DopoSoccerException(DopoSoccerException.INVALID_RESOLUTION);</span>
+<span class="fc bfc" id="L23" title="All 4 branches covered.">        switch (resolution.toUpperCase()) {</span>
+<span class="fc" id="L24">            case SMALL: width = 800; height = 450; break;</span>
+<span class="fc" id="L25">            case MEDIUM: width = 1024; height = 576; break;</span>
+<span class="fc" id="L26">            case LARGE: width = 1280; height = 720; break;</span>
+<span class="fc" id="L27">            default: throw new DopoSoccerException(DopoSoccerException.INVALID_RESOLUTION);</span>
+        }
+<span class="fc" id="L29">        this.resolution = resolution.toUpperCase();</span>
+<span class="fc" id="L30">    }</span>
+
+    /**
+     * Gets the vertical ground level position (Y coordinate) of the stadium. 
+     * @return the ground Y coordinate value
+     */
+    public int getGroundY() {
+<span class="fc" id="L37">        return height - height / 9;</span>
+    }
+
+    /**
+     * Keeps an entity within the boundaries of the stadium and triggers a reaction if a boundary is hit.
+     * @param entity the entity object, such as a player or the ball
+     */
+    public void keepInBounds(Entity entity) {
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (entity.getPosX() &lt; 0) {</span>
+<span class="fc" id="L46">            entity.setPosX(0);</span>
+<span class="fc" id="L47">            entity.hitBoundary(1, 0);</span>
+        }
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if (entity.getPosX() + entity.getWidth() &gt; width) {</span>
+<span class="nc" id="L50">            entity.setPosX(width - entity.getWidth());</span>
+<span class="nc" id="L51">            entity.hitBoundary(-1, 0);</span>
+        }
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if (entity.getPosY() &lt; 0) {</span>
+<span class="nc" id="L54">            entity.setPosY(0);</span>
+<span class="nc" id="L55">            entity.hitBoundary(0, 1);</span>
+        }
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (entity.getPosY() + entity.getHeight() &gt;= getGroundY()) {</span>
+<span class="fc" id="L58">            entity.setPosY(getGroundY() - entity.getHeight());</span>
+<span class="fc" id="L59">            entity.hitBoundary(0, -1);</span>
+        }
+<span class="fc" id="L61">    }</span>
+
+    /**
+     * Gets the total width of the stadium.
+     * @return the stadium width in pixels
+     */
+<span class="fc" id="L67">    public int getWidth() { return width; }</span>
+
+    /**
+     * Gets the total height of the stadium.
+     * @return the stadium height in pixels
+     */
+<span class="fc" id="L73">    public int getHeight() { return height; }</span>
+
+    /**
+     * Gets the current resolution name of the stadium.
+     * @return the resolution string
+     */
+<span class="nc" id="L79">    public String getResolution() { return resolution; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>

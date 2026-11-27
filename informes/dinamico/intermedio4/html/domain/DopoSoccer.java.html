@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DopoSoccer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">DopoSoccer - Cobertura intermedia 4</a> &gt; <a href="index.source.html" class="el_package">domain</a> &gt; <span class="el_source">DopoSoccer.java</span></div><h1>DopoSoccer.java</h1><pre class="source lang-java linenums">package domain;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+
+/**
+ * Clase principal del dominio. La interfaz gráfica solo habla con esta clase.
+ * Los jugadores se identifican como 1 (izquierda) y 2 (derecha).
+ */
+public class DopoSoccer {
+
+<span class="fc" id="L19">    public static final String[] COUNTRIES = {&quot;SouthKorea&quot;, &quot;Cameroon&quot;, &quot;Nigeria&quot;, &quot;USA&quot;};</span>
+    public static final String TIME = &quot;TIME&quot;;
+    public static final String GOALS = &quot;GOALS&quot;;
+    public static final String PROGRESS_FILE = &quot;progreso.dat&quot;;
+    private boolean sound;
+    private Match currentMatch;
+    private boolean progressSaved;
+    /** Progreso de cada jugador humano (puntos y estadísticas), buscado por su nombre. */
+    private HashMap&lt;String, Player&gt; profiles;
+
+    /**
+     * Constructs a new DopoSoccer game instance with default settings,
+     * loads the saved progress of the players and creates the default match.
+     */
+<span class="fc" id="L33">    public DopoSoccer() {</span>
+<span class="fc" id="L34">        sound = true;</span>
+<span class="fc" id="L35">        progressSaved = false;</span>
+<span class="fc" id="L36">        profiles = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L37">        loadProgress();</span>
+<span class="fc" id="L38">        createDefaultMatch();</span>
+<span class="fc" id="L39">    }</span>
+
+    /**
+     * Creates the match that exists as soon as the game starts (J1 vs J2, by goals).
+     * It stays paused until the players start a real match, so DopoSoccer always has a match.
+     */
+    private void createDefaultMatch() {
+        try {
+<span class="fc" id="L47">            startNewMatch(&quot;J1&quot;, COUNTRIES[0], &quot;J2&quot;, COUNTRIES[1], GOALS, 3, Stadium.MEDIUM);</span>
+<span class="fc" id="L48">            currentMatch.pause();</span>
+<span class="nc" id="L49">        } catch (DopoSoccerException e) {</span>
+<span class="nc" id="L50">            Log.record(e);</span>
+<span class="fc" id="L51">        }</span>
+<span class="fc" id="L52">    }</span>
+
+    /**
+     * Creates a new Player versus Player match.
+     * @param name1 the name of player 1
+     * @param country1 the country of player 1 (see COUNTRIES)
+     * @param name2 the name of player 2
+     * @param country2 the country of player 2
+     * @param matchType the type of match, either TIME or GOALS
+     * @param limit the time limit in minutes or goal target to win
+     * @param resolution the screen resolution size such as SMALL, MEDIUM, or LARGE
+     * @throws DopoSoccerException if any provided parameter is invalid or both players have the same name
+     */
+    public void startNewMatch(String name1, String country1, String name2, String country2, String matchType, int limit, String resolution) throws DopoSoccerException {
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        if (defaultName(name1, &quot;J1&quot;).equals(defaultName(name2, &quot;J2&quot;))) {</span>
+            // el progreso se guarda por nombre: si se llamaran igual, uno borraría el del otro
+<span class="fc" id="L68">            throw new DopoSoccerException(DopoSoccerException.SAME_NAMES);</span>
+        }
+<span class="fc" id="L70">        Stadium stadium = new Stadium(resolution);</span>
+<span class="fc" id="L71">        WinCondition condition = createWinCondition(matchType, limit);</span>
+<span class="fc" id="L72">        Player player1 = new Player(defaultName(name1, &quot;J1&quot;), createCharacter(country1), true);</span>
+<span class="fc" id="L73">        Player player2 = new Player(defaultName(name2, &quot;J2&quot;), createCharacter(country2), false);</span>
+<span class="fc" id="L74">        applyProgress(player1);</span>
+<span class="fc" id="L75">        applyProgress(player2);</span>
+<span class="fc" id="L76">        currentMatch = new Match(player1, player2, stadium, condition);</span>
+<span class="fc" id="L77">        progressSaved = false;</span>
+<span class="fc" id="L78">    }</span>
+
+    /**
+     * Creates a Player versus Machine match.
+     *
+     * @param playerName human player's name
+     * @param playerCountry human player's country
+     * @param machineCountry machine's country
+     * @param matchType winning condition type
+     * @param limit time or goal limit
+     * @param resolution stadium size
+     * @param machineLeft true if the machine plays on the left side
+     * @param strategy profile of the machine: &quot;Torpe&quot;, &quot;Ofensiva&quot;, &quot;Defensiva&quot; or &quot;Experta&quot;
+     * @throws DopoSoccerException if the configuration is invalid
+     */
+    public void startMachineMatch(String playerName, String playerCountry, String machineCountry, String matchType, int limit, String resolution, boolean machineLeft, String strategy) throws DopoSoccerException {
+
+<span class="fc" id="L95">        Stadium stadium = new Stadium(resolution);</span>
+<span class="fc" id="L96">        WinCondition condition = createWinCondition(matchType, limit);</span>
+
+        MachineStrategy machineStrategy;
+
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if (strategy == null) {</span>
+<span class="fc" id="L101">            throw new DopoSoccerException(DopoSoccerException.INVALID_STRATEGY + &quot;ninguna&quot;);</span>
+        }
+<span class="fc bfc" id="L103" title="All 5 branches covered.">        switch (strategy) {</span>
+            case &quot;Torpe&quot;:
+<span class="fc" id="L105">                machineStrategy = new ClumsyStrategy();</span>
+<span class="fc" id="L106">                break;</span>
+
+            case &quot;Ofensiva&quot;:
+<span class="fc" id="L109">                machineStrategy = new OffensiveStrategy();</span>
+<span class="fc" id="L110">                break;</span>
+
+            case &quot;Defensiva&quot;:
+<span class="fc" id="L113">                machineStrategy = new DefensiveStrategy();</span>
+<span class="fc" id="L114">                break;</span>
+
+            case &quot;Experta&quot;:
+<span class="fc" id="L117">                machineStrategy = new ExpertStrategy();</span>
+<span class="fc" id="L118">                break;</span>
+
+            default:
+<span class="fc" id="L121">                throw new DopoSoccerException(</span>
+                    DopoSoccerException.INVALID_STRATEGY + strategy
+                );
+        }
+
+<span class="fc" id="L126">        Player human = new Player(</span>
+<span class="fc" id="L127">            defaultName(playerName, &quot;Jugador&quot;),</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">            createCharacter(playerCountry),</span>
+            !machineLeft
+        );
+<span class="fc" id="L131">        applyProgress(human);</span>
+
+<span class="fc" id="L133">        Machine machine = new Machine(</span>
+            &quot;Máquina &quot; + strategy,
+<span class="fc" id="L135">            createCharacter(machineCountry),</span>
+            machineLeft,
+            machineStrategy
+        );
+
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if (machineLeft) {</span>
+<span class="fc" id="L141">            currentMatch = new Match(</span>
+                machine, human, stadium, condition
+            );
+        } else {
+<span class="fc" id="L145">            currentMatch = new Match(</span>
+                human, machine, stadium, condition
+            );
+        }
+<span class="fc" id="L149">        progressSaved = false;</span>
+<span class="fc" id="L150">    }</span>
+
+
+    /**
+     * Pauses the currently active match.
+     */
+    public void pauseMatch() {
+<span class="fc" id="L157">        currentMatch.pause();</span>
+<span class="fc" id="L158">    }</span>
+
+    /**
+     * Resumes the currently paused match.
+     */
+    public void resumeMatch() {
+<span class="fc" id="L164">        currentMatch.resume();</span>
+<span class="fc" id="L165">    }</span>
+
+    /**
+     * Finishes the currently active match.
+     */
+    public void finishMatch() {
+<span class="nc" id="L171">        currentMatch.finish();</span>
+<span class="nc" id="L172">        saveProgressIfFinished();</span>
+<span class="nc" id="L173">    }</span>
+
+    /**
+     * Saves the current match in a file so it can be opened later.
+     * @param filePath the path of the file
+     * @return true if the match was saved
+     * @throws DopoSoccerException if the file cannot be written
+     */
+    public boolean saveGame(String filePath) throws DopoSoccerException {
+<span class="fc" id="L182">        FileOutputStream fileOutput = null;</span>
+<span class="fc" id="L183">        ObjectOutputStream output = null;</span>
+
+        try {
+<span class="fc" id="L186">            fileOutput = new FileOutputStream(filePath);</span>
+<span class="fc" id="L187">            output = new ObjectOutputStream(fileOutput);</span>
+<span class="fc" id="L188">            output.writeObject(currentMatch);</span>
+<span class="fc" id="L189">            return true;</span>
+
+<span class="nc" id="L191">        } catch (IOException e) {</span>
+<span class="nc" id="L192">            throw new DopoSoccerException(DopoSoccerException.SAVE_ERROR);</span>
+
+        } finally {
+            // si el ObjectOutputStream no se alcanzó a crear, igual hay que cerrar el archivo
+<span class="pc bpc" id="L196" title="1 of 2 branches missed.">            if (output != null) {</span>
+<span class="fc" id="L197">                close(output);</span>
+            } else {
+<span class="nc" id="L199">                close(fileOutput);</span>
+            }
+        }
+    }
+
+    /**
+     * Opens a match saved in a file and makes it the current match.
+     * If the file is not valid, the current match does not change.
+     * @param filePath the path of the file
+     * @throws DopoSoccerException if the file does not exist or is not a saved match
+     */
+    public void loadGame(String filePath) throws DopoSoccerException {
+<span class="fc" id="L211">        FileInputStream fileInput = null;</span>
+<span class="fc" id="L212">        ObjectInputStream input = null;</span>
+
+        try {
+<span class="fc" id="L215">            fileInput = new FileInputStream(filePath);</span>
+<span class="fc" id="L216">            input = new ObjectInputStream(fileInput);</span>
+
+<span class="fc" id="L218">            Object data = input.readObject();</span>
+
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">            if (!(data instanceof Match)) {</span>
+<span class="nc" id="L221">                throw new DopoSoccerException(DopoSoccerException.INVALID_LOAD_FILE);</span>
+            }
+
+<span class="fc" id="L224">            currentMatch = (Match) data;</span>
+<span class="fc" id="L225">            progressSaved = false;</span>
+
+<span class="fc" id="L227">        } catch (IOException | ClassNotFoundException e) {</span>
+<span class="fc" id="L228">            throw new DopoSoccerException(DopoSoccerException.LOAD_ERROR_MESSAGE + e.getMessage());</span>
+
+        } finally {
+            // si el ObjectInputStream no se alcanzó a crear, igual hay que cerrar el archivo
+<span class="fc bfc" id="L232" title="All 2 branches covered.">            if (input != null) {</span>
+<span class="fc" id="L233">                close(input);</span>
+            } else {
+<span class="fc" id="L235">                close(fileInput);</span>
+            }
+        }
+<span class="fc" id="L238">    }</span>
+
+
+
+    /**
+     * Gets the currently active match. 
+     * @return the current Match instance (there is always one)
+     */
+    public Match getCurrentMatch() {
+<span class="fc" id="L247">        return currentMatch;</span>
+    }
+
+    /**
+     * Updates the simulation frame for the current match.
+     */
+    public void update() {
+<span class="fc" id="L254">        currentMatch.update();</span>
+<span class="fc" id="L255">        saveProgressIfFinished();</span>
+<span class="fc" id="L256">    }</span>
+    
+    /**
+     * Moves the specified human player to the left.
+     * @param player the identifier of the player
+     */
+    public void moveLeft(int player) {
+<span class="fc" id="L263">        Player p = getPlayer(player);</span>
+
+<span class="pc bpc" id="L265" title="2 of 6 branches missed.">        if (p != null &amp;&amp; !(p instanceof Machine) &amp;&amp; canPlay()) {</span>
+<span class="fc" id="L266">            currentMatch.moveLeft(p);</span>
+        }
+<span class="fc" id="L268">    }</span>
+
+    /**
+     * Moves the specified human player to the right.
+     * @param player the identifier of the player
+     */
+    public void moveRight(int player) {
+<span class="fc" id="L275">        Player p = getPlayer(player);</span>
+
+<span class="pc bpc" id="L277" title="2 of 6 branches missed.">        if (p != null &amp;&amp; !(p instanceof Machine) &amp;&amp; canPlay()) {</span>
+<span class="fc" id="L278">            currentMatch.moveRight(p);</span>
+        }
+<span class="fc" id="L280">    }</span>
+
+    /**
+     * Makes the specified human player jump.
+     * @param player the identifier of the player
+     */
+    public void jump(int player) {
+<span class="fc" id="L287">        Player p = getPlayer(player);</span>
+
+<span class="pc bpc" id="L289" title="2 of 6 branches missed.">        if (p != null &amp;&amp; !(p instanceof Machine) &amp;&amp; canPlay()) {</span>
+<span class="fc" id="L290">            p.jump();</span>
+        }
+<span class="fc" id="L292">    }</span>
+
+    /**
+     * Makes the specified human player kick.
+     * @param player the identifier of the player
+     */
+    public void kick(int player) {
+<span class="fc" id="L299">        Player p = getPlayer(player);</span>
+
+<span class="pc bpc" id="L301" title="2 of 6 branches missed.">        if (p != null &amp;&amp; !(p instanceof Machine) &amp;&amp; canPlay()) {</span>
+<span class="fc" id="L302">            p.kick(currentMatch.getRival(p), currentMatch.getBall());</span>
+        }
+<span class="fc" id="L304">    }</span>
+
+    /**
+     * Activates the special power for the specified player.
+     * @param player the identifier of the player (1 for left, 2 for right)
+     */
+    public void activatePower(int player) {
+<span class="fc" id="L311">        Player p = getPlayer(player);</span>
+<span class="pc bpc" id="L312" title="2 of 6 branches missed.">        if (p != null &amp;&amp; !(p instanceof Machine) &amp;&amp; canPlay()) {</span>
+<span class="fc" id="L313">            p.activatePower();</span>
+        }
+<span class="fc" id="L315">    }</span>
+
+    /**
+     * Gets the saved progress of a player. If the player has never played, a new
+     * profile is created with 0 points and all the stats in 1.
+     * @param name the name of the player
+     * @return the player with the saved points and stats
+     * @throws DopoSoccerException if the name is empty
+     */
+    public Player getProfile(String name) throws DopoSoccerException {
+<span class="pc bpc" id="L325" title="1 of 4 branches missed.">        if (name == null || name.trim().isEmpty()) {</span>
+<span class="fc" id="L326">            throw new DopoSoccerException(DopoSoccerException.INVALID_NAME);</span>
+        }
+<span class="fc" id="L328">        String key = name.trim();</span>
+<span class="pc bpc" id="L329" title="1 of 2 branches missed.">        if (!profiles.containsKey(key)) {</span>
+            // el perfil solo guarda puntos y estadísticas, por eso no necesita personaje
+<span class="fc" id="L331">            profiles.put(key, new Player(key, null, true));</span>
+        }
+<span class="fc" id="L333">        return profiles.get(key);</span>
+    }
+
+    /**
+     * Gets the names of the players that have saved progress, in alphabetical order.
+     * @return the names of the saved players (empty if nobody has played yet)
+     */
+    public String[] getSavedPlayers() {
+<span class="nc" id="L341">        String[] names = profiles.keySet().toArray(new String[0]);</span>
+<span class="nc" id="L342">        Arrays.sort(names);</span>
+<span class="nc" id="L343">        return names;</span>
+    }
+
+    /**
+     * Upgrades one stat of a player using his saved points, and saves the progress.
+     * @param name the name of the player
+     * @param stat the stat to upgrade (&quot;speed&quot;, &quot;jump&quot;, &quot;kick&quot; or &quot;survival&quot;)
+     * @throws DopoSoccerException if the name or the stat are invalid, or there are not enough points
+     */
+    public void upgradeStat(String name, String stat) throws DopoSoccerException {
+<span class="fc" id="L353">        Player profile = getProfile(name);</span>
+<span class="nc" id="L354">        profile.upgradeStat(stat);</span>
+<span class="nc" id="L355">        saveProgress();</span>
+<span class="nc" id="L356">    }</span>
+
+    /**
+     * Saves the progress of all the players in the progress file.
+     * @throws DopoSoccerException if the file cannot be written
+     */
+    public void saveProgress() throws DopoSoccerException {
+<span class="nc" id="L363">        FileOutputStream fileOutput = null;</span>
+<span class="nc" id="L364">        ObjectOutputStream output = null;</span>
+        try {
+<span class="nc" id="L366">            fileOutput = new FileOutputStream(PROGRESS_FILE);</span>
+<span class="nc" id="L367">            output = new ObjectOutputStream(fileOutput);</span>
+<span class="nc" id="L368">            output.writeObject(profiles);</span>
+<span class="nc" id="L369">        } catch (IOException e) {</span>
+<span class="nc" id="L370">            throw new DopoSoccerException(DopoSoccerException.PROGRESS_ERROR);</span>
+        } finally {
+            // si el ObjectOutputStream no se alcanzó a crear, igual hay que cerrar el archivo
+<span class="nc bnc" id="L373" title="All 2 branches missed.">            if (output != null) {</span>
+<span class="nc" id="L374">                close(output);</span>
+            } else {
+<span class="nc" id="L376">                close(fileOutput);</span>
+            }
+        }
+<span class="nc" id="L379">    }</span>
+
+    /**
+     * Loads the progress of the players. If the file does not exist yet
+     * (first time playing), the game starts with no saved progress.
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private void loadProgress() {
+<span class="fc" id="L387">        File file = new File(PROGRESS_FILE);</span>
+<span class="pc bpc" id="L388" title="1 of 2 branches missed.">        if (!file.exists()) return;</span>
+
+<span class="fc" id="L390">        FileInputStream fileInput = null;</span>
+<span class="fc" id="L391">        ObjectInputStream input = null;</span>
+        try {
+<span class="fc" id="L393">            fileInput = new FileInputStream(file);</span>
+<span class="fc" id="L394">            input = new ObjectInputStream(fileInput);</span>
+<span class="fc" id="L395">            profiles = (HashMap&lt;String, Player&gt;) input.readObject();</span>
+<span class="nc" id="L396">        } catch (IOException | ClassNotFoundException | ClassCastException e) {</span>
+<span class="nc" id="L397">            Log.record(e);</span>
+<span class="nc" id="L398">            profiles = new HashMap&lt;&gt;();</span>
+        } finally {
+            // si el ObjectInputStream no se alcanzó a crear, igual hay que cerrar el archivo
+<span class="pc bpc" id="L401" title="1 of 2 branches missed.">            if (input != null) {</span>
+<span class="fc" id="L402">                close(input);</span>
+            } else {
+<span class="nc" id="L404">                close(fileInput);</span>
+            }
+        }
+<span class="fc" id="L407">    }</span>
+
+    /**
+     * Closes a file without stopping the program if closing fails.
+     * @param stream the file to close (it can be null if it was never opened)
+     */
+    private void close(Closeable stream) {
+<span class="fc bfc" id="L414" title="All 2 branches covered.">        if (stream == null) return;</span>
+        try {
+<span class="fc" id="L416">            stream.close();</span>
+<span class="nc" id="L417">        } catch (IOException e) {</span>
+<span class="nc" id="L418">            System.err.println(&quot;Error al cerrar el archivo: &quot; + e.getMessage());</span>
+<span class="fc" id="L419">        }</span>
+<span class="fc" id="L420">    }</span>
+
+    /**
+     * Puts the saved points and stats into a player that is going to play.
+     * @param player the player that is going to play
+     */
+    private void applyProgress(Player player) {
+<span class="fc bfc" id="L427" title="All 2 branches covered.">        if (profiles.containsKey(player.getName())) {</span>
+<span class="fc" id="L428">            player.copyProgress(profiles.get(player.getName()));</span>
+        }
+<span class="fc" id="L430">    }</span>
+
+    /**
+     * When the match ends, saves the points and stats of the human players (only once).
+     */
+    private void saveProgressIfFinished() {
+<span class="pc bpc" id="L436" title="3 of 4 branches missed.">        if (!currentMatch.isGameOver() || progressSaved) return;</span>
+<span class="nc" id="L437">        progressSaved = true;</span>
+
+<span class="nc" id="L439">        updateProfile(currentMatch.getLeftPlayer());</span>
+<span class="nc" id="L440">        updateProfile(currentMatch.getRightPlayer());</span>
+
+        try {
+<span class="nc" id="L443">            saveProgress();</span>
+<span class="nc" id="L444">        } catch (DopoSoccerException e) {</span>
+<span class="nc" id="L445">            Log.record(e);</span>
+<span class="nc" id="L446">        }</span>
+<span class="nc" id="L447">    }</span>
+
+    /**
+     * Saves in the profile of a human player the points he earned in the match that just ended.
+     * Only the earned points are added (not the whole player), so a match loaded from an old file
+     * cannot erase the points and upgrades obtained after it was saved.
+     * @param player the player that has just finished the match
+     */
+    private void updateProfile(Player player) {
+<span class="nc bnc" id="L456" title="All 2 branches missed.">        if (player instanceof Machine) return;</span>
+<span class="nc bnc" id="L457" title="All 2 branches missed.">        if (profiles.containsKey(player.getName())) {</span>
+<span class="nc" id="L458">            profiles.get(player.getName()).addPoints(player.getMatchPoints());</span>
+        } else {
+<span class="nc" id="L460">            profiles.put(player.getName(), player);</span>
+        }
+<span class="nc" id="L462">    }</span>
+
+    /**
+     * Checks if the players can act: there must be a match that is not paused or finished.
+     * @return true if the players can move, jump, kick or use the power
+     */
+    private boolean canPlay() {
+<span class="pc bpc" id="L469" title="1 of 4 branches missed.">        return !currentMatch.isPaused() &amp;&amp; !currentMatch.isGameOver();</span>
+    }
+
+    /**
+     * Toggles the game sound settings on or off.
+     */
+    public void toggleSound() {
+<span class="fc bfc" id="L476" title="All 2 branches covered.">        sound = !sound;</span>
+<span class="fc" id="L477">    }</span>
+
+    /**
+     * Checks whether the game sound is enabled.
+     * @return true if sound is enabled, false otherwise
+     */
+    public boolean isSound() {
+<span class="fc" id="L484">        return sound;</span>
+    }
+
+    /**
+     * Creates a character instance based on the specified country.
+     * @param country the name of the country representing the character
+     * @return the corresponding Character instance
+     * @throws DopoSoccerException if the country name is invalid or null
+     */
+    private Character createCharacter(String country) throws DopoSoccerException {
+<span class="pc bpc" id="L494" title="1 of 2 branches missed.">        if (country == null){</span>
+<span class="nc" id="L495">            throw new DopoSoccerException(DopoSoccerException.INVALID_CHARACTER);</span>
+        }
+<span class="fc bfc" id="L497" title="All 5 branches covered.">        switch (country.toLowerCase()) {</span>
+<span class="fc" id="L498">            case &quot;southkorea&quot;: return new SouthKorea();</span>
+<span class="fc" id="L499">            case &quot;cameroon&quot;: return new Cameroon();</span>
+<span class="fc" id="L500">            case &quot;nigeria&quot;: return new Nigeria();</span>
+<span class="fc" id="L501">            case &quot;usa&quot;: return new USA();</span>
+<span class="fc" id="L502">            default: throw new DopoSoccerException(DopoSoccerException.INVALID_CHARACTER);</span>
+        }
+    }
+
+    /**
+     * Creates the winning condition rule according to the match type and limit.
+     * @param matchType the rule type, either TIME or GOALS
+     * @param limit the numerical limit for time or goals
+     * @return the corresponding WinCondition instance
+     * @throws DopoSoccerException if the match type is invalid or the limit is non-positive
+     */
+    private WinCondition createWinCondition(String matchType, int limit) throws DopoSoccerException {
+<span class="pc bpc" id="L514" title="1 of 4 branches missed.">        if (matchType == null || limit &lt;= 0){ </span>
+<span class="fc" id="L515">            throw new DopoSoccerException(DopoSoccerException.INVALID_MATCH_TYPE);</span>
+        }
+<span class="fc bfc" id="L517" title="All 2 branches covered.">        if (matchType.equals(TIME)) return new TimeCondition(limit);</span>
+<span class="fc bfc" id="L518" title="All 2 branches covered.">        if (matchType.equals(GOALS)) return new GoalCondition(limit);</span>
+<span class="fc" id="L519">        throw new DopoSoccerException(DopoSoccerException.INVALID_MATCH_TYPE);</span>
+    }
+
+    /**
+     * Retrieves a specific player instance from the current match.
+     * @param player the player number (1 or 2)
+     * @return the Player object, or null if the number is not 1 or 2
+     */
+    private Player getPlayer(int player) {
+<span class="fc bfc" id="L528" title="All 2 branches covered.">        if (player == 1) return currentMatch.getLeftPlayer();</span>
+<span class="fc bfc" id="L529" title="All 2 branches covered.">        if (player == 2) return currentMatch.getRightPlayer();</span>
+<span class="fc" id="L530">        return null;</span>
+    }
+
+    /**
+     * Returns the trimmed name or a default value if the name is blank or null.
+     * @param name the original player name input
+     * @param defaultValue the fallback name to use if the input is empty
+     * @return the valid trimmed name or the default value
+     */
+    private String defaultName(String name, String defaultValue) {
+<span class="fc bfc" id="L540" title="All 4 branches covered.">        if (name == null || name.trim().isEmpty()) {</span>
+<span class="fc" id="L541">            return defaultValue;</span>
+        }
+<span class="fc" id="L543">        return name.trim();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.16.202610240946</span></div></body></html>
